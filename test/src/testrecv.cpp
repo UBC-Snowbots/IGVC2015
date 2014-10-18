@@ -7,10 +7,10 @@
  * */
 
 #include "ros/ros.h"
-#include "std_msgs/String.h"
+#include "test/Test.h"
 
-void printCallback(const std_msgs::String::ConstPtr& msg){
-	ROS_INFO("[%s] received", msg->data.c_str());
+void printCallback(const test::Test::ConstPtr& msg){
+	ROS_INFO("[%s] received", msg->test.c_str());
 }
 
 int main(int argc, char** argv){
