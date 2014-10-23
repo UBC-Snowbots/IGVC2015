@@ -1,0 +1,39 @@
+cmake_minimum_required(VERSION 2.8.3)
+project(sb_driver)
+
+## Find catkin macros and libraries
+## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
+## is used, also find other catkin packages
+find_package(catkin REQUIRED COMPONENTS
+  roscpp
+  rospy
+  std_msgs
+  sb_msgs
+)
+
+catkin_package()
+
+include_directories(${catkin_INCLUDE_DIRS})
+
+catkin_package(
+   CATKIN_DEPENDS roscpp rospy std_msgs sb_msgs
+)
+
+
+include_directories(
+  ${catkin_INCLUDE_DIRS}
+)
+
+
+ add_library(sb_serial_communication
+   src/SerialCommunication.cpp
+ )
+
+ add_executable(sb_driver_node src/arduino_driver.cpp)
+
+ target_link_libraries(
+  sb_driver_node 
+  sb_serial_communication
+  ${catkin_LIBRARIES}
+ )
+

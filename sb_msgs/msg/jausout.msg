@@ -1,0 +1,14 @@
+bool request_control
+bool request_resume
+bool request_standby
+bool request_shutdown
+bool execute_waypoints
+float64 speed
+bool set_waypoints
+bool set_local_pose
+uint16[] waypoint_id
+uint16[] waypoint_previous_id
+uint16[] waypoint_next_id
+float64[] waypoint_pose_x
+float64[] waypoint_pose_y
+float64[] pose_yaw
