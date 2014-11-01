@@ -1,0 +1,5 @@
+Run this node:
+http://wiki.ros.org/nmea_navsat_driver
+
+sudo usermod -a -G dialout jechli
+sudo chmod a+rw /dev/ttyACM0

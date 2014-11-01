@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<package>
+  <name>sb_lidar</name>
+  <version>3.0.1</version>
+  <description>The sb_lidar package</description>
+
+  <maintainer email="navid@snowbots.ca">Navid Fattahi</maintainer>
+
+  <license>BSD</license>
+
+  <url type="website">http://github.com/UBC-Snowbots/IGVC2014/sb_lidar</url>
+
+  <author email="team@snowbots.ca">UBC Snowbots</author>
+
+  <buildtool_depend>catkin</buildtool_depend>
+  <build_depend>roscpp</build_depend>
+  <build_depend>rospy</build_depend>
+  <build_depend>std_msgs</build_depend>
+  <build_depend>sb_msgs</build_depend>
+  <run_depend>roscpp</run_depend>
+  <run_depend>rospy</run_depend>
+  <run_depend>std_msgs</run_depend>
+  <run_depend>sb_msgs</run_depend>
+
+</package>
