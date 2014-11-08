@@ -8,17 +8,17 @@ ADD_DEFINITIONS(
         -Wall
 )
 
-add_executable(jaus_node src/main.cpp)
-
 include_directories(OpenJAUS/include)
 
 add_executable(jaus_node src/main.cpp)
 
 find_library(OpenJAUS NAMES openjaus PATHS OpenJAUS/lib REQUIRED)
+find_library(OpenJAUS_Core NAMES openjaus-core PATHS OpenJAUS/lib REQUIRED)
 
 if(${OpenJAUS} EQUAL "NOTFOUND")
         message(SEND_ERROR "JAUS not found")
 endif(${OpenJAUS} EQUAL "NOTFOUND")
 
 target_link_libraries(jaus_node ${OpenJAUS})
+target_link_libraries(jaus_node ${OpenJAUS_Core})
 
