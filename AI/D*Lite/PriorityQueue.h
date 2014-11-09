@@ -1,6 +1,6 @@
 #pragma once
 
-struct key  {
+struct Key  {
   int value;
   int cost;
 };
@@ -10,15 +10,20 @@ class MinHeap
 
 private:
 // keeping track of locations and keys in different arrays for searching 
-  int location[100];
-  struct key keys[100];	// array to store the frontier; statically allocated?	
+  int locations[100];
+  Key keys[100];	// array to store the frontier; statically allocated?	
+  int size;
   void Sort();	// helper fnc
 
 public:
+  MinHeap();	// constructor
+  int GetSize();
+  void IncreaseSize();
   void Remove(int location);
-  void Insert(struct key);
-  void Update(int location, struct key key);
-  void Pop(int location);
+  void Insert(Key key, int location);
+  void Update(int location, Key key);
+  int Pop();
   int Top();	  // gets the min location
-  struct key TopKey(); // Gets the min key
-}
+  Key TopKey(); // Gets the min key
+
+};
