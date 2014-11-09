@@ -14,6 +14,7 @@ private:
   Key keys[100];	// array to store the frontier; statically allocated?	
   int size;
   void Sort();	// helper fnc
+  int Find(int location); // find index for particular location
 
 public:
   MinHeap();	// constructor

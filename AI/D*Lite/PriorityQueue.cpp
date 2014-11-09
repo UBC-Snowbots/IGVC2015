@@ -9,6 +9,17 @@ MinHeap::MinHeap()
   // assign empty values in frontier?
 }
 
+// TODO
+void MinHeap::Sort()
+{
+  return;
+}
+
+// TODO
+int MinHeap::Find(int location)
+{
+  return 0;
+}
 
 int MinHeap::GetSize()
 {
@@ -21,6 +32,7 @@ void MinHeap::IncreaseSize()
   return;
 }
 
+// TODO
 void MinHeap::Remove(int location)
 {
   return;
@@ -32,16 +44,20 @@ void MinHeap::Insert(Key key, int location)
   int index = GetSize();
   locations[index] = location;
   keys[index] = key;
+  IncreaseSize();
   return;
 }
 
 
 void MinHeap::Update(int location, Key key)
 {
+  int index = Find(location);
+  locations[index] = location;
+  keys[index] = key;
   return;
 }
 
-
+// need to change to take parameters for storing TODO
 int MinHeap::Pop()
 {
   return locations[0];
@@ -51,7 +67,7 @@ int MinHeap::Pop()
 // gets the min location
 int MinHeap::Top()
 {
-  return 0;
+  return locations[0];
 }
 	  
 
