@@ -1,7 +1,8 @@
+#include <iostream>
 #include <openjaus.h>
-#include <openjaus/mobility.h>
+#include <openjaus/core/Base.h>
 
-using namespace std;
+using namespace openjaus;
 
 class JAUSComponent: public openjaus::core::Base
 {

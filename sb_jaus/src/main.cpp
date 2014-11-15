@@ -13,6 +13,7 @@ int main(void)
 {
 	// Start of user code for main:
 	openjaus::system::Application::setTerminalMode();
+
 	try
 	{
 		JAUSComponent component;
@@ -27,6 +28,32 @@ int main(void)
 				case 't':
 					std::cout << component.getSystemTree()->toString() << std::endl;
 					break;
+
+				case 'm':
+					std::cout << openjaus::transport::AddressMap::instance().toString();
+					break;
+
+				case 'c':
+					component.requestControl(openjaus::transport::Address(1, 1, 1)); // test
+					openjaus::transport::Address(1, 1, 1).isValid();
+					break;
+
+				case 'r':
+					component.releaseControl(openjaus::transport::Address(1, 1, 1)); // test
+					break;
+
+				case 'a':
+					LOG(openjaus::transport::AddressMap::instance().toString());
+					break;
+
+				case 's':
+				{
+					openjaus::core::QueryHeartbeatPulse *qhb = new openjaus::core::QueryHeartbeatPulse();
+					qhb->setDestination(openjaus::transport::Address(1,1,2));
+					qhb->setMustArrive(true);
+					component.sendMessage(qhb);
+					break;
+				}
 			}
 		}
 	}
