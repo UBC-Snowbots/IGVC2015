@@ -30,7 +30,8 @@ void JAUSComponent::run()
 	cout << "JAUS run" << std::endl;	
 }
 
-JAUSComponent::~JAUSComponent()
+
+JAUSComponent::~JAUSComponent()	
 {
-	~Base();	
+
 }

@@ -11,5 +11,4 @@ public:
 	~JAUSComponent();
 	typedef openjaus::core::Base super;
 	void run();
-	// void stop();
 };
