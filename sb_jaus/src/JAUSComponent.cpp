@@ -12,12 +12,12 @@
 	#include <termios.h>
 #endif
 
-JAUSComponent::JAUSComponent():
+/*JAUSComponent::JAUSComponent():
 	       Base()
 {
 	cout << "JAUSComponent created" << std::endl;
 	setName("JAUSComponent");
-}
+}*/
 
 /*void JAUSComponent::run()
 {
