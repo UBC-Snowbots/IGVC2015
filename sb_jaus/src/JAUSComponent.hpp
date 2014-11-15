@@ -7,6 +7,6 @@ class JAUSComponent: public openjaus::core::Base
 {
 public:
 	JAUSComponent();
-	void run();
-	void stop();
+	/*void run();
+	void stop();*/
 };

@@ -19,7 +19,7 @@ JAUSComponent::JAUSComponent():
 	setName("JAUSComponent");
 }
 
-void JAUSComponent::run()
+/*void JAUSComponent::run()
 {
 	cout << "JAUS run" << std::endl;	
 }
@@ -27,7 +27,7 @@ void JAUSComponent::run()
 void JAUSComponent::stop()
 {
 	cout << "JAUS stop" << std::endl;
-}	
+}*/	
 
 
 /*

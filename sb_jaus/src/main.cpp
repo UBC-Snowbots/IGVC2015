@@ -8,10 +8,9 @@ int main()
 {	
 	try
 	{
-		JAUSComponent component;
+		openjaus::core::Base component;
 		component.run();
 		std::cout << "Hello world!" << std::endl;
-		component.stop();
 	}
 	catch(openjaus::system::Exception expn)
 	{
