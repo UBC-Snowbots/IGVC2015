@@ -12,60 +12,25 @@
 	#include <termios.h>
 #endif
 
+using namespace openjaus;
+using namespace std;
+
 JAUSComponent::JAUSComponent():
 	       Base()
 {
+	name = "SnowBotServer";
+
 	cout << "JAUSComponent created" << std::endl;
-	setName("JAUSComponent");
+	setName("SnowBotJAUSComponent");
 }
 
 void JAUSComponent::run()
 {
+	super::run();
 	cout << "JAUS run" << std::endl;	
 }
 
-void JAUSComponent::stop()
+JAUSComponent::~JAUSComponent()
 {
-	cout << "JAUS stop" << std::endl;
-}	
-
-
-/*
-int main(void)
-{
-	openjaus::system::Application::setTerminalMode();
-	try
-	{
-		GposComponent* component = new GposComponent();
-		component->run();
-
-		std::cout << "Menu:\n";
-		std::cout << "t - Print System Tree\n";
-		std::cout << "ESC - Exit Component\n";
-
-		unsigned char choice = 0;
-		while(choice != 27) // ESC
-		{
-			choice = openjaus::system::Application::getChar();
-			switch(choice)
-			{
-				case 't':
-					std::cout << component->getSystemTree()->toString();
-					break;
-
-				case 'm':
-					std::cout << openjaus::transport::AddressMap::instance().toString();
-					break;
-			}
-		}
-
-		delete component;
-	}
-	catch(openjaus::system::Exception expn)
-	{
-		openjaus::system::Logger::log(expn);
-	}
-
-	return 0;
-	// End of user code
-}*/
+	~Base();	
+}
