@@ -45,7 +45,6 @@ void printMenu()
 	std::cout << "ESC - Exit Component" << std::endl;
 }
 
-/*
 int main(void)
 {
 	system::Application::setTerminalMode();
@@ -171,4 +170,4 @@ int main(void)
 
 	return 0;
 	// End of user code
-}*/
+}
