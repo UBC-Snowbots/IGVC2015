@@ -12,6 +12,7 @@ include_directories(OpenJAUS/include)
 
 
 add_executable(jaus_node src/main.cpp src/JAUSComponent.cpp)
+add_executable(jaus_test_client src/JausJudgeClient/JAUSJudgeClient.cpp)
 
 find_library(OpenJAUS NAMES openjaus PATHS OpenJAUS/lib REQUIRED)
 find_library(OpenJAUS_Core NAMES openjaus-core PATHS OpenJAUS/lib REQUIRED)
@@ -28,4 +29,10 @@ target_link_libraries(jaus_node ${OpenJAUS_Core})
 target_link_libraries(jaus_node ${OpenJAUS_Mobility})
 target_link_libraries(jaus_node ${OpenJAUS_Environment})
 target_link_libraries(jaus_node ${Json})
+
+target_link_libraries(jaus_test_client ${OpenJAUS})
+target_link_libraries(jaus_test_client ${OpenJAUS_Core})
+target_link_libraries(jaus_test_client ${OpenJAUS_Mobility})
+target_link_libraries(jaus_test_client ${OpenJAUS_Environment})
+target_link_libraries(jaus_test_client ${Json})
 
