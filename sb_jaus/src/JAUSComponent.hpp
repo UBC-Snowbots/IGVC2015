@@ -6,14 +6,13 @@ using namespace openjaus;
 
 class JAUSComponent: public openjaus::core::Base
 {
-private:
+/*private:
 	openjaus::system::Timer *pingTimer;
-	short pingId;
+	short pingId;*/
 public:
 	JAUSComponent();
-	~JAUSComponent();
 
-	bool processEcho(openjaus::core::ReportHeartbeatPulse &echo);
+	//bool processEcho(openjaus::core::ReportHeartbeatPulse &echo);
 	void run();
-	void discover(openjaus::system::Timer *timer);
+	//void discover(openjaus::system::Timer *timer);
 };

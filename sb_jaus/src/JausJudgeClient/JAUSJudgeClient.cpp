@@ -29,6 +29,15 @@ void processControlResponse(const model::ControlResponse& response)
 	std::cout << "Response code: " << response.getResponseType() << std::endl;
 }
 
+bool componentIdentificationResponse=false;
+
+bool processIdentificationResponse(openjaus::core::ReportIdentification& report){
+	std::cout << "Identification received: " << report.getIdentification() << std::endl;
+	std::cout << "Reponse code: " << report.getType() << std::endl;
+	componentIdentificationResponse=true;
+	return true;
+}
+
 void printMenu()
 {
 	std::cout << "Menu:" << std::endl;
@@ -50,14 +59,24 @@ int main(void)
 	system::Application::setTerminalMode();
 
 	std::vector<transport::Address> gposList;
+	transport::Address target(1,1,1);
 
 	core::Base component;
 	component.setName("JAUSJudgeClientSim");
 	component.addMessageCallback(processReportGlobalPose);
 	component.addMessageCallback(processReportGeomagneticProperty);
+	component.addMessageCallback(processIdentificationResponse);
 	component.run();
 	uint32_t subscriptionId = 0;
-
+	
+	while(!componentIdentificationResponse){
+		std::cout << "Polling identification..." << std::endl;
+		openjaus::core::QueryIdentification* idQuery = new openjaus::core::QueryIdentification();
+		idQuery->setDestination(target);
+		component.sendMessage(idQuery);
+		system::Time::sleep(5000);
+	}
+	
 	printMenu();
 
 	unsigned char choice = 0;
