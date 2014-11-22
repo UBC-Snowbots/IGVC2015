@@ -21,9 +21,7 @@ short pingId;*/
 JAUSComponent::JAUSComponent():
 	       Base()
 {
-	name = "SnowBots:Discovery";
-	
-	
+	//name = "JAUSComponent";
 	/*auto discoveryService = new openjaus::model::Service();
 	discoveryService->setName("Discovery");
 	discoveryService->setUri("urn:SnowBots:Discovery");

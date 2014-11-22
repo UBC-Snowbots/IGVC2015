@@ -16,7 +16,8 @@ int main(void)
 
 	try
 	{
-		JAUSComponent component;
+		openjaus::core::Base component;
+		component.setName("Discovery");
 		component.run();
 
 		unsigned char choice = 0;
@@ -32,20 +33,6 @@ int main(void)
 				case 'm':
 					std::cout << openjaus::transport::AddressMap::instance().toString();
 					break;
-
-				case 'c':
-					component.requestControl(openjaus::transport::Address(1, 1, 1)); // test
-					openjaus::transport::Address(1, 1, 1).isValid();
-					break;
-
-				case 'r':
-					component.releaseControl(openjaus::transport::Address(1, 1, 1)); // test
-					break;
-
-				case 'a':
-					LOG(openjaus::transport::AddressMap::instance().toString());
-					break;
-
 				case 's':
 				{
 					openjaus::core::QueryHeartbeatPulse *qhb = new openjaus::core::QueryHeartbeatPulse();
