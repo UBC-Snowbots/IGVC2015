@@ -86,6 +86,7 @@ void callback(const sensor_msgs::LaserScanConstPtr& msg_ptr)
 			}
 		}		
 	}
+
 	if(valid_rays <= 0)
 	{
 		ROS_FATAL("No valid rays found");
@@ -113,14 +114,14 @@ void callback(const sensor_msgs::LaserScanConstPtr& msg_ptr)
 	//	car_command.steering =   1 * y_total / valid_rays / 20;
 		car_command.priority = 0.5;
 	
-		if (abs(y_total) < 90)
+		if (abs(y_total) < 5) // changed to 5 from 90
 			car_command.steering = 0;
 		else if (y_total < 110)
-			if   (y_total < 0) car_command.steering = -0.1;
-			else car_command.steering = 0.1;
+			if   (y_total < 0) car_command.steering = -0.2;
+			else car_command.steering = 0.2;
 		else if (y_total > 110)
-			if   (y_total < 0) car_command.steering = -0.3;
-			else car_command.steering = 0.3;
+			if   (y_total < 0) car_command.steering = -0.2;
+			else car_command.steering = 0.2;
 	
 		if ( car_command.throttle > 3500 )
 			car_command.throttle = SLOW_SPEED;
