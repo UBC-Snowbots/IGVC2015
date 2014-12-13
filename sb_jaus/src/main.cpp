@@ -9,6 +9,11 @@
 
 #include <termios.h>
 
+bool processServiceQuery(openjaus::core::QueryServices& query){
+	std::cout << "received services query: " << query.toString() << std::endl;
+	return false;
+}
+
 int main(void)
 {
 	// Start of user code for main:
@@ -18,6 +23,14 @@ int main(void)
 	{
 		openjaus::core::Base component;
 		component.setName("Discovery");
+		//most peculiar... how do we get the services to be sent as a response? TODO
+		std::cout << "Service count: " << component.getServices().size() << " " << component.getImplements()->size() << std::endl;
+		std::cout << "Service list: ";
+		for(auto& item:component.getServices()){
+			std::cout << item.first << ", ";
+		}
+		std::cout << std::endl;
+		component.addMessageCallback(processServiceQuery);
 		component.run();
 
 		unsigned char choice = 0;
