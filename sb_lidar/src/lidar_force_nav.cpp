@@ -207,8 +207,8 @@ gazebo_msgs::ModelState modelState_maker(sb_msgs::CarCommand cc)
 	modelState.twist.linear.y = 0;
 	modelState.twist.linear.z = 0;
 	*/
-	modelState.twist.angular.x = 0;
-	modelState.twist.angular.y = 0;
+	//modelState.twist.angular.x = 0;
+	//modelState.twist.angular.y = 0;
 	modelState.twist.angular.z = 2;//cc.steering;
 
 	modelState.reference_frame = "world";
@@ -222,10 +222,10 @@ int main (int argc, char** argv)
 	// Set up ROS node, publisher and subscriber 
 	init(argc, argv,NODE_NAME);
 	NodeHandle n;
-	
+	NodeHandle g; //gazebo node handler
 	Subscriber lidar_state = n.subscribe(SUBSCRIBE_TOPIC,20,callback);
-	//Publisher car_pub = n.advertise<geometry_msgs::Twist>(PUBLISH_TOPIC,1);
-	Publisher gazebo_car_pub = n.advertise<gazebo_msgs::ModelState>(PUBLISH_TOPIC_2,1);
+	Publisher car_pub = n.advertise<geometry_msgs::Twist>(PUBLISH_TOPIC,1);
+	Publisher gazebo_car_pub = g.advertise<gazebo_msgs::ModelState>(PUBLISH_TOPIC_2,1);
 	Rate loop_rate(LOOP_FREQ);
 
 	ROS_INFO("ready to go");

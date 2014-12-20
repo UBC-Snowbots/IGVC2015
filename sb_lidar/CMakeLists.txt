@@ -6,14 +6,17 @@ find_package(catkin REQUIRED COMPONENTS
   rospy
   std_msgs
   sb_msgs
+  gazebo_ros
 )
+
+find_package(gazebo REQUIRED)
 
 catkin_package()
 
-include_directories(${catkin_INCLUDE_DIRS})
+include_directories(${catkin_INCLUDE_DIRS} ${GAZEBO_INCLUDE_DIRS} ${SDFormat_INCLUDE})
 
-catkin_package(
-   CATKIN_DEPENDS roscpp rospy std_msgs sb_msgs
+catkin_package(   
+	CATKIN_DEPENDS roscpp rospy std_msgs sb_msgs gazebo_ros  
 )
 
 include_directories(
