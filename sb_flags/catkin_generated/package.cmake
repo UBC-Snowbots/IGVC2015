@@ -1,0 +1,7 @@
+set(_CATKIN_CURRENT_PACKAGE "sb_flags")
+set(sb_flags_MAINTAINER "avalanche <avalanche@todo.todo>")
+set(sb_flags_DEPRECATED "")
+set(sb_flags_VERSION "0.0.0")
+set(sb_flags_BUILD_DEPENDS "roscpp" "rospy" "sb_msgs" "std_msgs")
+set(sb_flags_RUN_DEPENDS "roscpp" "rospy" "sb_msgs" "std_msgs")
+set(sb_flags_BUILDTOOL_DEPENDS "catkin")

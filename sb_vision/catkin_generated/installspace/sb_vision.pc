@@ -1,0 +1,8 @@
+prefix=/home/dulluhan/Desktop/Snowbots/install
+
+Name: sb_vision
+Description: Description of sb_vision
+Version: 0.0.0
+Cflags: -I/home/dulluhan/Desktop/Snowbots/install/include
+Libs: -L/home/dulluhan/Desktop/Snowbots/install/lib 
+Requires: message_runtime roscpp rospy std_msgs

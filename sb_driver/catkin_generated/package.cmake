@@ -1,0 +1,7 @@
+set(_CATKIN_CURRENT_PACKAGE "sb_driver")
+set(sb_driver_MAINTAINER "jechli <jechli@todo.todo>")
+set(sb_driver_DEPRECATED "")
+set(sb_driver_VERSION "0.0.0")
+set(sb_driver_BUILD_DEPENDS "roscpp" "rospy" "sb_msgs" "std_msgs")
+set(sb_driver_RUN_DEPENDS "roscpp" "rospy" "sb_msgs" "std_msgs")
+set(sb_driver_BUILDTOOL_DEPENDS "catkin")
