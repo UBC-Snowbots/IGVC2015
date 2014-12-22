@@ -6,14 +6,17 @@ find_package(catkin REQUIRED COMPONENTS
   rospy
   std_msgs
   sb_msgs
+  gazebo_ros
 )
+
+find_package(gazebo REQUIRED)
 
 catkin_package()
 
-include_directories(${catkin_INCLUDE_DIRS})
+include_directories(${catkin_INCLUDE_DIRS} ${GAZEBO_INCLUDE_DIRS} ${SDFormat_INCLUDE})
 
-catkin_package(
-   CATKIN_DEPENDS roscpp rospy std_msgs sb_msgs
+catkin_package(   
+	CATKIN_DEPENDS roscpp rospy std_msgs sb_msgs gazebo_ros  
 )
 
 include_directories(
@@ -22,9 +25,10 @@ include_directories(
 
 add_executable(lidar_force_nav src/lidar_force_nav.cpp)
 add_executable(imagine_lidar src/imagineday_lidar.cpp)
+add_executable(demo_lidar src/demo_code.cpp)
 
 target_link_libraries(lidar_force_nav
    ${catkin_LIBRARIES}
 )
 target_link_libraries(imagine_lidar ${catkin_LIBRARIES})
-
+target_link_libraries(demo_lidar ${catkin_LIBRARIES})
