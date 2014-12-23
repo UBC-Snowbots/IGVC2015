@@ -1,8 +1,0 @@
-prefix=/home/dulluhan/Desktop/Snowbots/install
-
-Name: sb_lanes
-Description: Description of sb_lanes
-Version: 0.0.0
-Cflags: -I/home/dulluhan/Desktop/Snowbots/install/include
-Libs: -L/home/dulluhan/Desktop/Snowbots/install/lib 
-Requires: roscpp rospy

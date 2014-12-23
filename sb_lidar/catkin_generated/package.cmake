@@ -1,7 +1,0 @@
-set(_CATKIN_CURRENT_PACKAGE "sb_lidar")
-set(sb_lidar_MAINTAINER "Navid Fattahi <navid@snowbots.ca>")
-set(sb_lidar_DEPRECATED "")
-set(sb_lidar_VERSION "3.0.1")
-set(sb_lidar_BUILD_DEPENDS "roscpp" "rospy" "std_msgs" "sb_msgs")
-set(sb_lidar_RUN_DEPENDS "roscpp" "rospy" "std_msgs" "sb_msgs")
-set(sb_lidar_BUILDTOOL_DEPENDS "catkin")

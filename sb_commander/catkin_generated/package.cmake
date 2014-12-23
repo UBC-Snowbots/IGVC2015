@@ -1,7 +1,0 @@
-set(_CATKIN_CURRENT_PACKAGE "sb_commander")
-set(sb_commander_MAINTAINER "jechli <jechli@todo.todo>")
-set(sb_commander_DEPRECATED "")
-set(sb_commander_VERSION "0.0.0")
-set(sb_commander_BUILD_DEPENDS "roscpp" "rospy" "sb_msgs" "std_msgs")
-set(sb_commander_RUN_DEPENDS "roscpp" "rospy" "sb_msgs" "std_msgs")
-set(sb_commander_BUILDTOOL_DEPENDS "catkin")

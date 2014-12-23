@@ -1,7 +1,0 @@
-set(_CATKIN_CURRENT_PACKAGE "sb_gps")
-set(sb_gps_MAINTAINER "Jennifer Ling <jenniferchingling@gmail.com>")
-set(sb_gps_DEPRECATED "")
-set(sb_gps_VERSION "0.0.0")
-set(sb_gps_BUILD_DEPENDS "roscpp" "rospy" "std_msgs" "sb_msgs")
-set(sb_gps_RUN_DEPENDS "roscpp" "rospy" "std_msgs" "sb_msgs")
-set(sb_gps_BUILDTOOL_DEPENDS "catkin")

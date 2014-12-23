@@ -1,7 +1,0 @@
-set(_CATKIN_CURRENT_PACKAGE "sb_vision")
-set(sb_vision_MAINTAINER "jannicke <jannicke@todo.todo>")
-set(sb_vision_DEPRECATED "")
-set(sb_vision_VERSION "0.0.0")
-set(sb_vision_BUILD_DEPENDS "message_generation" "roscpp" "rospy" "std_msgs")
-set(sb_vision_RUN_DEPENDS "message_runtime" "roscpp" "rospy" "std_msgs")
-set(sb_vision_BUILDTOOL_DEPENDS "catkin")

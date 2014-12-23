@@ -1,7 +1,0 @@
-set(_CATKIN_CURRENT_PACKAGE "sb_lanes")
-set(sb_lanes_MAINTAINER "jannicke <jannicke@todo.todo>")
-set(sb_lanes_DEPRECATED "")
-set(sb_lanes_VERSION "0.0.0")
-set(sb_lanes_BUILD_DEPENDS "roscpp" "rospy" "std_msgs" "sb_msgs")
-set(sb_lanes_RUN_DEPENDS "roscpp" "rospy" "std_msgs" "sb_msgs")
-set(sb_lanes_BUILDTOOL_DEPENDS "catkin")

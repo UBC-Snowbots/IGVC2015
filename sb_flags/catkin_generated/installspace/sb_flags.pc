@@ -1,8 +1,0 @@
-prefix=/home/dulluhan/Desktop/Snowbots/install
-
-Name: sb_flags
-Description: Description of sb_flags
-Version: 0.0.0
-Cflags: 
-Libs: -L/home/dulluhan/Desktop/Snowbots/install/lib 
-Requires: roscpp rospy sb_msgs std_msgs

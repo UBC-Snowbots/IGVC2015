@@ -36,7 +36,7 @@ static const string PORT_NAME = "/dev/ttyUSB";
 static const string UNO_PORT_NAME = "/dev/ttyACM";
 static const string BLUETOOTH_PORT_NAME = "/dev/rfcomm";
 
-static const string CAR_COMMAND_TOPIC = "lidar_nav";
+static const string CAR_COMMAND_TOPIC = "vision_vel";
 static const string TURRET_COMMAND_TOPIC = "turret_command";
 static const string ESTOP_TOPIC = "eStop";
 static const string ROBOT_STATE_TOPIC = "robot_state";

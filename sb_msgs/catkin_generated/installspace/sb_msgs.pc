@@ -1,8 +1,0 @@
-prefix=/home/dulluhan/Desktop/Snowbots/install
-
-Name: sb_msgs
-Description: Description of sb_msgs
-Version: 0.0.0
-Cflags: -I/home/dulluhan/Desktop/Snowbots/install/include
-Libs: -L/home/dulluhan/Desktop/Snowbots/install/lib 
-Requires: roscpp rospy std_msgs message_runtime

@@ -1,7 +1,0 @@
-set(_CATKIN_CURRENT_PACKAGE "sb_msgs")
-set(sb_msgs_MAINTAINER "Snowbots <ubc-snowbots-team@googlegroups.com>")
-set(sb_msgs_DEPRECATED "")
-set(sb_msgs_VERSION "0.0.0")
-set(sb_msgs_BUILD_DEPENDS "roscpp" "rospy" "std_msgs" "message_generation")
-set(sb_msgs_RUN_DEPENDS "roscpp" "rospy" "std_msgs" "message_runtime")
-set(sb_msgs_BUILDTOOL_DEPENDS "catkin")
