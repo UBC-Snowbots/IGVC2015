@@ -81,9 +81,62 @@ void MinHeap::IncreaseSize()
   return;
 }
 
-// TODO
+// TODO: repetition from pop()
 void MinHeap::Remove(int location)
 {
+	int current_pos = Find(location);
+
+	if (current_pos == -1) { return; }
+
+	int smallest, other;
+	size--;
+	locations[current_pos] = locations[size];
+	keys[current_pos] = keys[size];
+	
+	locations[size] = -1;		// invalidate position in heap
+	// TODO invalidate keys location (if necessary)
+	
+	smallest = (2*current_pos)+1;
+	other = smallest+1;
+	
+	// only loop if left child is valid
+	while (smallest < size) {
+	
+		//smallest_val = frontier[smallest];
+		
+		// check if right child is invalid
+		if (other >= size) {
+			if (keys[smallest].cost < keys[current_pos].cost) {
+				Swap(current_pos, smallest);
+				current_pos = smallest;
+			}
+			else { break; }
+		}
+		
+		// otherwise compare both children and switch with smallest one
+		else {
+
+			//other_val = frontier[other];
+		
+			if (keys[smallest].cost > keys[other].cost) {
+				smallest = other;
+				other = other - 1;
+			}
+			
+			if (keys[smallest].cost < keys[current_pos].cost) {
+				Swap(current_pos, smallest);
+				current_pos = smallest;
+			}
+		
+			else {
+				break;
+			}	
+		}	
+
+		smallest = (2*current_pos)+1;
+		other = smallest+1;
+	} 
+
   return;
 }
 
@@ -187,9 +240,6 @@ Key MinHeap::TopKey()
 {
   return keys[0];
 } 
-
-
-
 
 
 
