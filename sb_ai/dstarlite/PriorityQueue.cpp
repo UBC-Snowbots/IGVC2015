@@ -9,22 +9,71 @@ MinHeap::MinHeap()
   // assign empty values in frontier?
 }
 
-// TODO
-void MinHeap::Sort()
-{
-  return;
-}
+
+
+
+
+/** PRIVATE */
 
 // TODO
+void MinHeap::SortPriority(int loc)
+{
+	if (size == 1) {
+		return;
+	}
+	
+	else {
+		
+		int parent;
+		parent = (loc - 1) / 2;
+		
+		while (parent >= 0) {	// check that it's not out of range
+
+			if (keys[parent].cost > keys[loc].cost) {
+				Swap(parent, loc); // if it doesn't swap, break the loop
+			}
+			else { break; }
+
+			parent = (parent - 1) / 2;
+		}
+		
+		return;
+	}
+}
+
+
+void MinHeap::Swap(int one, int two)
+{
+	int temp_loc;
+	Key temp_key;
+	
+	temp_loc = locations[one];
+	locations[one] = locations[two];
+	locations[two] = temp_loc;
+	
+	temp_key = keys[one];
+	keys[one] = keys[two];
+	keys[two] = temp_key;
+	
+	return;
+}
+ 
+ 
+// Basically it's bfs
 int MinHeap::Find(int location)
 {
-  return 0;
+	for (int i = 0; i < size; i++) {
+		if (locations[i] == location) { return i; }
+	}
+	// if not found, return -1
+  return -1;
 }
 
-int MinHeap::GetSize()
-{
-  return size;
-}
+
+
+
+/** PUBLIC */
+
 
 void MinHeap::IncreaseSize()
 {
@@ -41,7 +90,7 @@ void MinHeap::Remove(int location)
 
 void MinHeap::Insert(Key key, int location)
 {
-  int index = GetSize();
+  int index = size;
   locations[index] = location;
   keys[index] = key;
   IncreaseSize();
@@ -76,6 +125,10 @@ Key MinHeap::TopKey()
 {
   return keys[0];
 } 
+
+
+
+
 
 
 int main() 

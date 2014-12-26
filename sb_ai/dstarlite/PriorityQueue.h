@@ -9,16 +9,19 @@ class MinHeap
 {
 
 private:
+
 // keeping track of locations and keys in different arrays for searching 
   int locations[100];
   Key keys[100];	// array to store the frontier; statically allocated?	
   int size;
-  void Sort();	// helper fnc
+  
+  void SortPriority(int loc);	// helper fnc
+  void Swap(int one, int two);
   int Find(int location); // find index for particular location
 
 public:
+
   MinHeap();	// constructor
-  int GetSize();
   void IncreaseSize();
   void Remove(int location);
   void Insert(Key key, int location);
