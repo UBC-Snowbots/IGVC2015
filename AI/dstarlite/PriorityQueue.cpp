@@ -153,6 +153,7 @@ void MinHeap::Insert(Key key, int location)
 }
 
 
+
 void MinHeap::Update(int location, Key key)
 {
   int index = Find(location);
