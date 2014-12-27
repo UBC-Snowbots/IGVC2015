@@ -1,9 +1,5 @@
 #pragma once
-
-struct Key  {
-  int value;
-  int cost;
-};
+#include "Key.h"
 
 class MinHeap
 {
