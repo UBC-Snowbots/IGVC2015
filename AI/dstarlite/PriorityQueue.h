@@ -14,11 +14,11 @@ private:
   void SortPriority(int loc);	// helper fnc
   void Swap(int one, int two);
   int Find(int location); // find index for particular location
+  void DeleteFromMinHeap(int current_pos);
 
 public:
 
   MinHeap();	// constructor
-  void IncreaseSize();
   void Remove(int location);
   void Insert(Key key, int location);
   void Update(int location, Key key);
