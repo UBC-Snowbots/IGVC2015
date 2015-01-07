@@ -47,12 +47,82 @@ void createTwist (); //Calculates Twist
 
 
 int main (void){
-	struct waypoint current = 0; 
+	*current = (*waypoint) malloc ( *sizeof(waypoint)); 
 
-	while (gpsStatus()){
+	while (gpsStatus() == TRUE){
 		nmeaParse();
-	
+		
 	} 
+
+
+int gpsStatus(void){ 
+	/*
+	Input Parameter: 
+	Output: 
+	Purpose: 
+	*/
+} 
+
+
+void getWaypoint (*FILE, *waypoint){
+	/*
+	Input Parameter: 
+	Output: 
+	Purpose: 
+	*/
+} 
+
+
+void createAngle (double *theta){
+	/*
+	Input Parameter: 
+	Output: 
+	Purpose: 
+	*/
+}
+
+
+void createDistance (double *d){
+	/*
+	Input Parameter: 
+	Output: 
+	Purpose: 
+	*/
+}
+
+
+int checkGoal (*currentWaypoint, *target){
+	/*
+	Input Parameter: 
+	Output: 
+	Purpose: 
+	*/
+}
+
+
+void longToMetre ( *waypoint){
+	/*
+	Input Parameter: 
+	Output: 
+	Purpose: 
+	*/
+ 
+	lon = 	*waypoint->lon_x; 
+	lat = *waypoint->lat_y;
+
+}
+
+
+void createTwist ( *nextTwist){
+	/*
+	Input Parameter: 
+	Output: 
+	Purpose: 
+	*/
+
+
+}
+
 
 
 
