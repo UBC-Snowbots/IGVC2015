@@ -7,11 +7,10 @@
 //Standard Headers
 #include <stlib.h> 
 #include <math.h> 
-
 #include <iostream>
 #include <sstream>  
 
-
+//Constants
 #define TRUE 1 
 #define FALSE 0 
 
@@ -31,6 +30,10 @@ int lat_y;
 
 // Variables 
 
+float double *NMEA; //To hold received suscription message 
+double botDirection; 
+
+
 
 //functions 
 int gpsStatus (); //Checking if gps has started receiving data
@@ -47,78 +50,87 @@ void createTwist (); //Calculates Twist
 
 
 int main (void){
-	*current = (*waypoint) malloc ( *sizeof(waypoint)); 
 
-	while (gpsStatus() == TRUE){
+	struct waypoint *currentWayPoint = (*waypoint) malloc ( sizeof(*waypoint)); 
+	struct waypoint *currentWayPoint = (*waypoint) malloc ( sizeof (*waypoint)); 
+	int *gpsFlag; //0 for no connection; 1 for satellite connection 
+
+
+	while (gpsflag == TRUE){
 		nmeaParse();
-		
 	} 
 
 
-int gpsStatus(void){ 
+
+
+
+void getWaypoint (*FILE, *targetWayPoint){
 	/*
 	Input Parameter: 
-	Output: 
-	Purpose: 
+		1. Pointer to txt file 
+		2. Pointer to targete 
+	Output: void (use pointers) 
+	Purpose: Get target waypoint from txt file and store it 
 	*/
 } 
 
 
-void getWaypoint (*FILE, *waypoint){
+void createAngle (double *theta, double compass){
 	/*
 	Input Parameter: 
-	Output: 
-	Purpose: 
-	*/
-} 
-
-
-void createAngle (double *theta){
-	/*
-	Input Parameter: 
-	Output: 
-	Purpose: 
+		1. pointer to hold angle
+		2. direction from compass 
+	Output: void (use pointer) 
+	Purpose: calculates angle from target waypoint 
 	*/
 }
 
 
 void createDistance (double *d){
 	/*
-	Input Parameter: 
-	Output: 
-	Purpose: 
+	Input Parameter: pointer to store distance
+	Output: void (use pointer) 
+	Purpose: calculates distance from target waypoints
 	*/
 }
 
 
-int checkGoal (*currentWaypoint, *target){
+int checkGoal (double *currentWayPoint, double *targetWayPoint){
 	/*
 	Input Parameter: 
-	Output: 
-	Purpose: 
+		1. pointer to waypoint struct of current position
+		2. pointer to waypoint struct of target
+	Output: 1 for at destination, 0 for cont. 
+	Purpose: check if we are at goal 
 	*/
 }
 
 
-void longToMetre ( *waypoint){
+void longToMetre ( double *currentWayPoint){
 	/*
-	Input Parameter: 
-	Output: 
+	Input Parameter: pointer to waypoint struct of current position
+	Output: void (use pointer) 
 	Purpose: 
+		1. Updates struct holding current waypoint 
+		2. Calculates waypoint long and lat from parsed NMEA
 	*/
  
-	lon = 	*waypoint->lon_x; 
-	lat = *waypoint->lat_y;
+	lon = 	(*currentWayPoint).lon_x; 
+	lat = (*currentWayPoint).lat_y;
 
 }
 
 
-void createTwist ( *nextTwist){
+void createTwist (double *nextTwist){
 	/*
-	Input Parameter: 
-	Output: 
+	Input Parameter: pointer to twist struct that holds released twist message
+	Output: void (use pointer) 
 	Purpose: 
+		1. Alters twist message for the next output twist message
+		2. Computes x,y,z? (Direction) dx,dy (velocity)
 	*/
+
+	
 
 
 }
