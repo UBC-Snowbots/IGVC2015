@@ -35,10 +35,11 @@ include_directories(
 
 add_executable(Line_Detector src/Line_Detector.cpp)
 add_executable(LaneDetector src/LaneDetector.cpp)
+add_executable(test_code src/test_code.cpp)
 
 target_link_libraries( Line_Detector ${catkin_LIBRARIES} ${OpenCV_LIBS})
 target_link_libraries( LaneDetector  ${catkin_LIBRARIES} ${OpenCV_LIBS})
-
+target_link_libraries( test_code ${catkin_LIBRARIES} ${OpenCV_LIBS})
 
 add_dependencies(Line_Detector sb_vision_generate_messages_cpp)
 
