@@ -80,6 +80,37 @@ bool Dijkstra::Init(int * main_map, int width, int height)		// Executes the algo
 void Dijkstra::Search(int location) 
 {
 	if (start == goal) { return; }
+	
+	Location up, down, left, right, current_loc;
+	current_loc = ConvertToLocation(location);
+	up = current_loc;
+	down = current_loc;
+	left = current_loc;
+	right = current_loc;
+	up.y --;
+	down.y ++;
+	left.x --;
+	right.x ++;
+	
+	CheckBoundaries(up, location);
+	CheckBoundaries(down, location);
+	CheckBoundaries(left, location);
+	CheckBoundaries(right, location);
+	
+	int n, s, e, w;
+	n = ConvertToIndex(up);
+	s = ConvertToIndex(down);
+	w = ConvertToIndex(left);
+	e = ConvertToIndex(right);
+
+	int possible_moves[4] = {n, s, e, w};
+	
+	for (int i = 0; i < 4; i++) {
+	
+		int neighbor
+		
+	}
+	
 	return;
 }
 
