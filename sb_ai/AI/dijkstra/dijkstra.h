@@ -11,7 +11,7 @@ class Dijkstra
 private:
 	
 	int * map;
-	int map_width, map_height;
+	int map_width, map_height, map_size;
 	int start, goal;
 	int * parent;	// predecessors
 	int * distance;	// distance from start, -1 if not travelled
@@ -28,5 +28,6 @@ public:
 	void SetStart(int s);
 	void SetGoal(int g);
 	
-	void BeginSearch(int * main_map, int width, int height);	// Executes the algorithm
+	void Init(int * main_map, int width, int height);	
+	void Search();	// Executes the algorithm
 };
