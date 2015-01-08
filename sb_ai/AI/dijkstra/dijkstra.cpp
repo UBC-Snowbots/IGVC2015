@@ -8,29 +8,36 @@ using namespace std;
 
 int Dijkstra::ConvertToIndex(Location xy)
 {
-	return 0;
+	return xy.y * map_width + xy.x;
 }
 
 Location Dijkstra::ConvertToLocation(int n)
 {
-	Location x;
-	return x; 
+	Location xy;
+	xy.x = n % map_width;
+	xy.y = n / map_width;
+	return xy; 
 }
 
-void Dijkstra::CheckBoundaries(Location xy, int n)
+void Dijkstra::CheckBoundaries(Location neighbor, int current)
 {
+	if (neighbor.x < 0 || neighbor.x >= map_width || neighbor.y < 0 || neighbor.y >= map_height) {
+		neighbor = ConvertToLocation(parent[current]);
+	}
 	return;
 }
 
-void Dijkstra::CheckNeighbors(int n)
-{
-	return;
-}
 
 void Dijkstra::ReconstructPath()
 {
 	return;
 }
+
+
+	
+
+// PUBLIC	
+
 
 void Dijkstra::SetStart(int s)
 {
@@ -43,17 +50,13 @@ void Dijkstra::SetGoal(int g)
 	goal = g;
 	return;
 }
-	
-// PUBLIC	
 
-void Dijkstra::Init(int * main_map, int width, int height)		// Executes the algorithm
-{
-	map_size = width * height;
-	
+bool Dijkstra::Init(int * main_map, int width, int height)		// Executes the algorithm
+{	
 	// do a check to see if map, width, height, start, and goal are valid
 	if (!map || width <= 0 || height <= 0 || start < 0 || goal < 0 
 			|| start >= map_size || goal >= map_size)
-		{ return; }
+		{ return false; }
 	
 	map = main_map;
 	map_width = width;
@@ -70,13 +73,16 @@ void Dijkstra::Init(int * main_map, int width, int height)		// Executes the algo
 	parent[start] = start;
 	distance[start] = 0;
 	
-	return;
+	return true;
 }	
 
-void Dijkstra::Search() 
+
+void Dijkstra::Search(int location) 
 {
+	if (start == goal) { return; }
 	return;
 }
+
 
 int main()
 {

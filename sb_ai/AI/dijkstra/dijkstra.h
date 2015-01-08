@@ -12,15 +12,15 @@ private:
 	
 	int * map;
 	int map_width, map_height, map_size;
-	int start, goal;
+	int start = -1;
+	int goal = -1;
 	int * parent;	// predecessors
 	int * distance;	// distance from start, -1 if not travelled
 	int destination;
 
 	int ConvertToIndex(Location xy);
 	Location ConvertToLocation(int n);
-	void CheckBoundaries(Location xy, int n);
-	void CheckNeighbors(int n);
+	void CheckBoundaries(Location neighbor, int current);
 	void ReconstructPath();
 
 public:
@@ -28,6 +28,6 @@ public:
 	void SetStart(int s);
 	void SetGoal(int g);
 	
-	void Init(int * main_map, int width, int height);	
-	void Search();	// Executes the algorithm
+	bool Init(int * main_map, int width, int height);	
+	void Search(int location);	// Executes the algorithm
 };
