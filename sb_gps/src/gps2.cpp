@@ -13,6 +13,7 @@
 //Constants
 #define TRUE 1 
 #define FALSE 0 
+#define EARTH_RADIUS 6378.137 //In KM 
 
 using namepsace std; 
 
@@ -33,7 +34,10 @@ int lat_y;
 float double *NMEA; //To hold received suscription message 
 double botDirection; 
 
-
+static const string GPS_NODE_NAME = "gps_node"; 
+static const string GPS_OUTPUT_TOPIC = "gps_nav"; 
+static const string GPS_TEST_TOPIC = "vision_vel"; // test sub
+static const string GPS_INPUT_TOPIC = "gps_state"; // gps_state
 
 //functions 
 int gpsStatus (); //Checking if gps has started receiving data
@@ -49,13 +53,13 @@ void createTwist (); //Calculates Twist
 */ 
 
 
-int main (void){
+int main (int argc, char **argv){
 
 	struct waypoint *currentWayPoint = (*waypoint) malloc ( sizeof(*waypoint)); 
-	struct waypoint *currentWayPoint = (*waypoint) malloc ( sizeof (*waypoint)); 
+	struct waypoint *targetWayPoint = (*waypoint) malloc ( sizeof (*waypoint)); 
 	int *gpsFlag; //0 for no connection; 1 for satellite connection 
 
-
+	ros::init(argc, argv, GPS_NODE_NAME); //initialize access point to communicate 
 	while (gpsflag == TRUE){
 		nmeaParse();
 	} 
@@ -71,7 +75,7 @@ void getWaypoint (*FILE, *targetWayPoint){
 		2. Pointer to targete 
 	Output: void (use pointers) 
 	Purpose: Get target waypoint from txt file and store it 
-	*/
+	*/	
 } 
 
 
@@ -92,6 +96,8 @@ void createDistance (double *d){
 	Output: void (use pointer) 
 	Purpose: calculates distance from target waypoints
 	*/
+
+	double dlong,dlat
 }
 
 
