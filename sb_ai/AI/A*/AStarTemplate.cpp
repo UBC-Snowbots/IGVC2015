@@ -15,8 +15,8 @@ int frontier[10*10];			// priority queue that stores the set of locations we are
 int frontier_size = 0;			// number of locations stored in the frontier array
 int came_from[10*10];			// stores the parent locations of the locations on the map for easy backtracking when printing out the path
 int cost_from_start[10*10];		// the accumulated cost from the start location to a location on the map
-int estimated_cost[10*10];		// the estimated cost from a location to the goal location
-
+int estimated_cost[10*10];		// the estimated cost is the cost_from_start[location] + Heuristic(location)
+static int INF = 200;
 
 // Initialization function for preparing the variables for A*
 void Init()
@@ -32,7 +32,11 @@ void Init()
 	
 	for (int i = 0; i < 100; i++) {
 		came_from[i] = -1;
+		frontier[i] = -1;
+		cost_from_start[i] = INF;
+		estimate_cost[i] = INF;
 	}
+	
 }
 
 
@@ -59,11 +63,11 @@ void FrontierPriority(int frontier_position)
 	
 	else {
 		
-		int parent;
-		parent = (frontier_position - 1) / 2;
+		int parent = (frontier_position - 1) / 2;
 		
 		while (parent >= 0) {	// check that it's not out of range
 
+			// The frontier is prioritizes the locations using their estimated costs
 			if (estimated_cost[frontier[parent]] > estimated_cost[frontier[frontier_position]]) {
 				Swap(parent, frontier_position); 
 			}
@@ -117,14 +121,14 @@ int GetIndex(int x, int y)
 
 
 // TODO: Convert the location index to an X location value
-int GetX()
+int GetX(int index)
 {
 	return 0;
 }
 
 
 // TODO: Convert the location index to a Y location value
-int GetY(int x) 
+int GetY(int index) 
 {
 	return 0;
 }
@@ -150,9 +154,8 @@ bool NotInFrontier(int location)
 void AddNeighborsToFrontier(int current_location, int goal)
 {
 	int neighbors[4];
-	int x, y, i;
-	x = current_location % map_width;
-	y = (current_location - x) / map_width;
+	int x = GetX(current_location);
+	int y = GetY(current_location);
 	
 	if (y-1 >= 0) { neighbors[0] = GetIndex(x, y-1); }	// Up
 	else { neighbors[0] = -1; }
@@ -166,7 +169,7 @@ void AddNeighborsToFrontier(int current_location, int goal)
 	if (x+1 < 10) { neighbors[3] = GetIndex(x+1, y); }	// Right
 	else { neighbors[3] = -1; }
 	
-	for (i = 0; i < 4; i++) {
+	for (int i = 0; i < 4; i++) {
 		if (neighbors[i] != -1) {
 			if (NotAlreadyTravelled(neighbors[i], current_location) && NotInFrontier(neighbors[i])) {
 				came_from[neighbors[i]] = current_location;
@@ -235,7 +238,8 @@ void RemoveRoot()
 }
 
 
-// This is the A* implementation. It is very similar to the one shown in Wiki
+// This is the A* implementation. It is very similar to the one shown in Wiki.
+// http://en.wikipedia.org/wiki/A*_search_algorithm
 void AStarSearch(int start, int goal) 
 {
 	// TODO: check that the start and goal are valid integers 
@@ -255,7 +259,7 @@ void AStarSearch(int start, int goal)
 		// TODO: What function do you use to remove the current location from the frontier ?
 		// TODO: There is a function that takes care of choosing the neighbors and adding them to the frontier
 		
-		frontier_size = 0;	// this is here just to make the initial template run. Remove this when you no longer need it.
+		frontier_size = 0;	// this is here just to make the initial template runs. Remove this when you no longer need it.
 	}
 	
 	cout << "No path found" << endl;
