@@ -7,8 +7,10 @@
 //Standard Headers
 #include <stlib.h> 
 #include <math.h> 
-#include <iostream>
+#include <iostream> //for cout, rather that using stdio
 #include <sstream>  
+#include "ros/ros.h" //for ros system
+#include "std_msgs/string.h" 
 
 //Constants
 #define TRUE 1 
@@ -18,15 +20,15 @@
 using namepsace std; 
 
 struct twist{
-int x; 
-int y; 
-int dx; 
-int dy;
+double x; 
+double y; 
+double dx; 
+double dy;
 } 
 
 struct waypoint {
-int lon_x; 
-int lat_y;
+double lon_x; 
+double lat_y;
 } 
 
 // Variables 
@@ -55,14 +57,38 @@ void createTwist (); //Calculates Twist
 
 int main (int argc, char **argv){
 
-	struct waypoint *currentWayPoint = (*waypoint) malloc ( sizeof(*waypoint)); 
-	struct waypoint *targetWayPoint = (*waypoint) malloc ( sizeof (*waypoint)); 
-	int *gpsFlag; //0 for no connection; 1 for satellite connection 
+	struct waypoint currentWayPoint = (struct waypoint*) malloc ( sizeof(struct waypoint)); //Create struct for current way point
+	struct waypoint targetWayPoint = (struct waypoint*) malloc ( sizeof (struct waypoint)); //Create struct for target way point 
+	struct twist nextTwist = (struct twist*) malloc (sizeof(struct twist)); //create struct for the next output twist message
+	if (currentWayPoint == NULL || targetWaypoint == NULL || nextTwist == NULL){
+		cout << "Error, not enough memory for program" << endl; 
+		cout << "Memory Error in main function, struct initiation" << endl; 
+		} //Memory allocation error message 
+	else {
+		targetWaypoint = {0.0,0.0}; //intialize to 0
+		currentWayPoint = {0.0,0.0}; //intialize to 0 
+		nextTwist = {0.0,
+		}
 
+	int *gpsFlag; //0 for no connection; 1 for satellite connection 
+	
 	ros::init(argc, argv, GPS_NODE_NAME); //initialize access point to communicate 
-	while (gpsflag == TRUE){
+	ros::NodeHandle nh; //create handle to this process node, NodeHandle is main access point to communication with ROS system. First one intializes node 
+	
+
+	ros::Publisher gps_test_pub = nh.advertise<gemoertry_msgs::Twist>(GPS_TEST_TOPIC, 20); 
+	ros::Publisher gps_data_pub = nh.advertise<sb_msgs::CarCommand>(GPS_OUTPUT_TOPIC, 20); 
+	ros::Suscriber gps_Sub = nh.suscribe(GPS_INPUT_TOPIC, 20, gpsCallback); 
+	
+	ros::Rate loop_Rate(5); //10hz loop rate
+	
+	geometry_msgs::Twist nextTwist; 
+	while (ros::ok()){
+		while (gpsflag == TRUE){
 		nmeaParse();
-	} 
+		} 
+		createTwist (nextTwist); //Make new twist message
+		geometry_msgs::Twist nextTwist; 
 
 
 
