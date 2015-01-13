@@ -26,6 +26,8 @@ target_link_libraries(sb_pub ${catkin_LIBRARIES})
 
 add_executable(Tutorialcode src/Tutorialcode.cpp)
 target_link_libraries(Tutorialcode ${catkin_LIBRARIES})
+add_executable(testingGPSCode src/testingGPSCode.cpp)
+target_link_libraries(testingGPSCode ${catkin_LIBRARIES})
 
 ## To add package paths:
 ## source ~/catkin_ws/devel/setup.bash
