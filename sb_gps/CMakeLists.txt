@@ -16,10 +16,16 @@ CATKIN_DEPENDS roscpp rospy std_msgs sb_msgs
 include_directories(${catkin_INCLUDE_DIRS})
 
 add_executable(sb_gps src/gps.cpp)
+add_executable( testcode src/testcode.cpp)
 target_link_libraries(sb_gps ${catkin_LIBRARIES})
+target_link_libraries(  testcode ${catkin_LIBRARIES})
+
 
 add_executable(sb_pub src/test_pub.cpp)
 target_link_libraries(sb_pub ${catkin_LIBRARIES})
+
+add_executable(Tutorialcode src/Tutorialcode.cpp)
+target_link_libraries(Tutorialcode ${catkin_LIBRARIES})
 
 ## To add package paths:
 ## source ~/catkin_ws/devel/setup.bash
