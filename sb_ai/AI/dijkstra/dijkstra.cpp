@@ -28,10 +28,7 @@ void Dijkstra::CheckBoundaries(Location neighbor, int current)
 }
 
 
-void Dijkstra::ReconstructPath()
-{
-	return;
-}
+
 
 
 	
@@ -51,10 +48,20 @@ void Dijkstra::SetGoal(int g)
 	return;
 }
 
+int Dijkstra::GetStart() 
+{
+	return start;
+}
+
+int Dijkstra::GetGoal()
+{
+	return goal;
+}
+
 bool Dijkstra::Init(int * main_map, int width, int height)		// Executes the algorithm
 {	
 	// do a check to see if map, width, height, start, and goal are valid
-	if (!map || width <= 0 || height <= 0 || start < 0 || goal < 0 
+	if (!main_map || width <= 0 || height <= 0 || start < 0 || goal < 0 
 			|| start >= map_size || goal >= map_size)
 		{ return false; }
 	
@@ -104,12 +111,47 @@ void Dijkstra::Search(int location)
 	e = ConvertToIndex(right);
 
 	int possible_moves[4] = {n, s, e, w};
+	int neighbor, temp_dist;
 	
 	for (int i = 0; i < 4; i++) {
 	
-		int neighbor
+		neighbor = possible_moves[i];
+		
+		if (neighbor != -1 && neighbor != parent[current_loc] && map[neighbor] != 1) {
+			
+			temp_dist = distance[current_loc]++;
+			
+			// if neighbor is the goal
+			if (neighbor == goal) {
+				destination = goal;
+				if(temp_dist < distance[goal]) {
+					parent[goal] = current_loc;
+					distance[goal] = temp_dist;
+				}
+			}
+			
+			// neighbor distance == -1
+			else {
+				if (distance[neighbor] == -1 || distance[neighbor] < temp_dist) {
+					parent[neighbor] = current_loc;
+					distance[neighbor] = temp_dist;
+					Search(neighbor);
+				}
+			}
+			
+		}
 		
 	}
+	
+	return;
+}
+
+void Dijkstra::ReconstructPath()
+{
+	if (destination == -1) {
+		cout << "No path to goal location" << endl;
+	}
+	
 	
 	return;
 }
@@ -117,5 +159,12 @@ void Dijkstra::Search(int location)
 
 int main()
 {
+	int * map;	// TODO
+	Dijkstra dijkstras;
+	dijkstras.SetStart(45);
+	dijkstras.SetGoal(21);
+	dijkstras.Init(map, 10, 10);
+	dijkstras.Search(dijkstras.GetStart());
+	dijkstras.ReconstructPath();
 	return 0;
 }

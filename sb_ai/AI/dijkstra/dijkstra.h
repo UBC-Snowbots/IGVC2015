@@ -21,13 +21,18 @@ private:
 	int ConvertToIndex(Location xy);
 	Location ConvertToLocation(int n);
 	void CheckBoundaries(Location neighbor, int current);
-	void ReconstructPath();
+	
 
 public:
 
+	// set these before starting
 	void SetStart(int s);
 	void SetGoal(int g);
 	
+	int GetStart();
+	int GetGoal();
+	
 	bool Init(int * main_map, int width, int height);	
 	void Search(int location);	// Executes the algorithm
+	void ReconstructPath();
 };
