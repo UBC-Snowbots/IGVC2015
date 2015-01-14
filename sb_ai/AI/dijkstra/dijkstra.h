@@ -12,8 +12,7 @@ private:
 	
 	int * map;
 	int map_width, map_height, map_size;
-	int start = -1;
-	int goal = -1;
+	int start, goal;
 	int * parent;	// predecessors
 	int * distance;	// distance from start, -1 if not travelled
 	int destination;
@@ -32,7 +31,7 @@ public:
 	int GetStart();
 	int GetGoal();
 	
-	bool Init(int * main_map, int width, int height);	
+	bool Init(int * main_map, int width, int height, int start_loc, int goal_loc);	
 	void Search(int location);	// Executes the algorithm
-	void ReconstructPath();
+	void ReconstructPath(int location);
 };
