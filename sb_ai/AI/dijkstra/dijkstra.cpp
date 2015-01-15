@@ -7,10 +7,9 @@ using namespace std;
 // PRIVATE
 
 
-int Dijkstra::ConvertToIndex(Location xy)
+int Dijkstra::ConvertToIndex(Location * xy)
 {
-	assert((xy.y * map_width) + xy.x >= 0 && (xy.y * map_width) + xy.x < map_size);
-	return (xy.y * map_width) + xy.x;
+	return (xy->y * map_width) + xy->x;
 }
 
 Location Dijkstra::ConvertToLocation(int n)
@@ -26,7 +25,6 @@ void Dijkstra::CheckBoundaries(Location * neighbor, int current)
 	if (neighbor->x < 0 || neighbor->x >= map_width || neighbor->y < 0 || neighbor->y >= map_height) {
 		*neighbor = ConvertToLocation(parent[current]);
 	}
-	assert(parent[current] >= 0 && parent[current] < map_size);
 	return;
 }
 
@@ -109,10 +107,10 @@ void Dijkstra::Search(int location)
 	CheckBoundaries(&right, location);
 
 	int n, s, e, w;
-	n = ConvertToIndex(up);
-	s = ConvertToIndex(down);
-	w = ConvertToIndex(left);
-	e = ConvertToIndex(right);
+	n = ConvertToIndex(&up);
+	s = ConvertToIndex(&down);
+	w = ConvertToIndex(&left);
+	e = ConvertToIndex(&right);
 		
 	int possible_moves[4] = {n, s, e, w};
 	int neighbor, temp_dist;

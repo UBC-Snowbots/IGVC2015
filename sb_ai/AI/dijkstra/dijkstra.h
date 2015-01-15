@@ -17,7 +17,7 @@ private:
 	int * distance;	// distance from start, -1 if not travelled
 	int destination;
 
-	int ConvertToIndex(Location xy);
+	int ConvertToIndex(Location * xy);
 	Location ConvertToLocation(int n);
 	void CheckBoundaries(Location * neighbor, int current);
 	
