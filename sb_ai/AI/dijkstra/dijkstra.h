@@ -19,7 +19,7 @@ private:
 
 	int ConvertToIndex(Location xy);
 	Location ConvertToLocation(int n);
-	void CheckBoundaries(Location neighbor, int current);
+	void CheckBoundaries(Location * neighbor, int current);
 	
 
 public:

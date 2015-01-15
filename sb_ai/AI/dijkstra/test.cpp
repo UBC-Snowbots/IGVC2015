@@ -16,7 +16,7 @@ int main()
 {
 	Dijkstra dijkstras;
 	dijkstras.Init(RandomMap(), 10, 10, 14, 98);
-	dijkstras.Search(dijkstras.GetStart());
+	dijkstras.Search(dijkstras.GetStart());	
 	dijkstras.ReconstructPath(dijkstras.GetGoal());
 	return 0;
 }

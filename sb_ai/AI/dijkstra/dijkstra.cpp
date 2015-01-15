@@ -9,6 +9,7 @@ using namespace std;
 
 int Dijkstra::ConvertToIndex(Location xy)
 {
+	assert((xy.y * map_width) + xy.x >= 0 && (xy.y * map_width) + xy.x < map_size);
 	return (xy.y * map_width) + xy.x;
 }
 
@@ -20,11 +21,12 @@ Location Dijkstra::ConvertToLocation(int n)
 	return xy; 
 }
 
-void Dijkstra::CheckBoundaries(Location neighbor, int current)
+void Dijkstra::CheckBoundaries(Location * neighbor, int current)
 {
-	if (neighbor.x < 0 || neighbor.x >= map_width || neighbor.y < 0 || neighbor.y >= map_height) {
-		neighbor = ConvertToLocation(parent[current]);
+	if (neighbor->x < 0 || neighbor->x >= map_width || neighbor->y < 0 || neighbor->y >= map_height) {
+		*neighbor = ConvertToLocation(parent[current]);
 	}
+	assert(parent[current] >= 0 && parent[current] < map_size);
 	return;
 }
 
@@ -101,29 +103,29 @@ void Dijkstra::Search(int location)
 	left.x -= 1;
 	right.x += 1;
 	
-	CheckBoundaries(up, location);
-	CheckBoundaries(down, location);
-	CheckBoundaries(left, location);
-	CheckBoundaries(right, location);
-	
+	CheckBoundaries(&up, location);
+	CheckBoundaries(&down, location);
+	CheckBoundaries(&left, location);
+	CheckBoundaries(&right, location);
+
 	int n, s, e, w;
 	n = ConvertToIndex(up);
 	s = ConvertToIndex(down);
 	w = ConvertToIndex(left);
 	e = ConvertToIndex(right);
-
+		
 	int possible_moves[4] = {n, s, e, w};
 	int neighbor, temp_dist;
 	
 	for (int i = 0; i < 4; i++) {
 	
 		neighbor = possible_moves[i];
-
 		
-		if (neighbor != parent[location] && map[neighbor] != 1) {
+		
+		if (neighbor != parent[location] && map[neighbor] != 1 ) {
 			
 			temp_dist = distance[location] + 1;
-	
+			
 			// if neighbor is the goal
 			if (neighbor == goal) {
 				destination = goal;
@@ -131,6 +133,7 @@ void Dijkstra::Search(int location)
 					parent[goal] = location;
 					distance[goal] = temp_dist;
 				}
+				Search(neighbor);
 			}
 			
 			// neighbor distance == -1
@@ -150,15 +153,20 @@ void Dijkstra::Search(int location)
 
 void Dijkstra::ReconstructPath(int location)
 {
-	if (location == -1) {
+	if (destination == -1) {
 		cout << "No path to goal location" << endl;
 		return;
 	}
 	
 	else {
 		assert(parent[location] >= 0 && parent[location] < map_size);
-		ReconstructPath(parent[location]);
-		cout << location << endl;
+		if (location == start) {
+			cout << location << endl;
+		}
+		else {
+			ReconstructPath(parent[location]);
+			cout << location << endl;
+		}
 	}
 
 	return;
