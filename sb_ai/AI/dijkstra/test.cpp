@@ -9,6 +9,12 @@ int * RandomMap()
 	for (int i = 0; i < 100; i++) {
 		map[i] = 0;
 	}
+	for (int i = 0; i < 10; i++) {
+		map[i+20] = 1;
+		map[i+40] = 1;
+	}
+	map[22] = 0;
+	map[48] = 0;
 	return map;
 }
 
