@@ -8,31 +8,18 @@ ADD_DEFINITIONS(
         -Wall
 )
 
-include_directories(OpenJAUS/include)
+include_directories(JAUS++/src)
 
+add_executable(jaus_server src/server.cpp)
+add_executable(jaus_judge src/judge.cpp)
 
-add_executable(jaus_node src/main.cpp src/JAUSComponent.cpp)
-add_executable(jaus_test_client src/JausJudgeClient/JAUSJudgeClient.cpp)
+find_library(jaus_pp_core NAMES JAUSCore PATHS JAUS++/lib REQUIRED)
+find_library(jaus_pp_environment NAMES JAUSEnvironment PATHS JAUS++/lib REQUIRED)
+find_library(jaus_pp_mobility NAMES JAUSMobility PATHS JAUS++/lib REQUIRED)
+find_library(jaus_pp_cxutils NAMES CxUtils PATHS JAUS++/lib REQUIRED)
 
-find_library(OpenJAUS NAMES openjaus PATHS OpenJAUS/lib REQUIRED)
-find_library(OpenJAUS_Core NAMES openjaus-core PATHS OpenJAUS/lib REQUIRED)
-find_library(OpenJAUS_Mobility NAMES openjaus-mobility PATHS OpenJAUS/lib REQUIRED)
-find_library(OpenJAUS_Environment NAMES openjaus-environment PATHS OpenJAUS/lib REQUIRED)
-find_library(Json NAMES json PATHS OpenJAUS/lib REQUIRED)
+find_package(Boost REQUIRED COMPONENTS system)
 
-if(${OpenJAUS} EQUAL "NOTFOUND")
-        message(SEND_ERROR "JAUS not found")
-endif(${OpenJAUS} EQUAL "NOTFOUND")
-
-target_link_libraries(jaus_node ${OpenJAUS})
-target_link_libraries(jaus_node ${OpenJAUS_Core})
-target_link_libraries(jaus_node ${OpenJAUS_Mobility})
-target_link_libraries(jaus_node ${OpenJAUS_Environment})
-target_link_libraries(jaus_node ${Json})
-
-target_link_libraries(jaus_test_client ${OpenJAUS})
-target_link_libraries(jaus_test_client ${OpenJAUS_Core})
-target_link_libraries(jaus_test_client ${OpenJAUS_Mobility})
-target_link_libraries(jaus_test_client ${OpenJAUS_Environment})
-target_link_libraries(jaus_test_client ${Json})
+target_link_libraries(jaus_server ${jaus_pp_core} ${jaus_pp_environment} ${jaus_pp_mobility} ${jaus_pp_cxutils} ${Boost_LIBRARIES})
+target_link_libraries(jaus_judge ${jaus_pp_core} ${jaus_pp_environment} ${jaus_pp_mobility} ${jaus_pp_cxutils} ${Boost_LIBRARIES})
 
