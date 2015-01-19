@@ -17,7 +17,7 @@
 #include <geometry_msgs/Twist.h>
 #include <sb_msgs/CarCommand.h>
 #include "gazebo/common/common.hh"
-#include "gazebo.hh"
+#include "gazebo-2.2/gazebo/gazebo.hh"
 #include "gazebo_msgs/ModelState.h"
 
 using namespace ros;
