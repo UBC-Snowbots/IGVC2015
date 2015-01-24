@@ -1,6 +1,6 @@
 #include <iostream>
 #include <math.h>
-
+//test
 using namespace std;
 
 // Edited by Albert Lagman:albertlagman@gmail.com
@@ -67,7 +67,7 @@ void FrontierPriority(int frontier_position)
 		
 		while (parent >= 0) {	// check that it's not out of range
 
-			// The frontier is prioritizes the locations using their estimated costs
+			// The frontier prioritizes the locations using their estimated costs
 			if (estimated_cost[frontier[parent]] > estimated_cost[frontier[frontier_position]]) {
 				Swap(parent, frontier_position); 
 			}
