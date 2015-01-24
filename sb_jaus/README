@@ -1,0 +1,3 @@
+
+This build depends on OpenJAUS. Have the library built in a subfolder named OpenJAUS - cmake will do the rest.
+
