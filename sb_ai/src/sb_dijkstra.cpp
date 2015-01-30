@@ -65,12 +65,13 @@ int main(int argc, char **argv)
 	ros::Rate loop_rate(10);
 
 
-	
+	cout << "here" << endl;
 	while (ros::ok()) {
 		
-		dijkstras.Init(map_ptr, width, height, start, goal);
-		dijkstras.Search(dijkstras.GetStart());
-		dijkstras.ReconstructPath(dijkstras.GetGoal());
+		if (dijkstras.Init(map_ptr, width, height, start, goal)) {
+			dijkstras.Search(dijkstras.GetStart());
+			dijkstras.ReconstructPath(dijkstras.GetGoal());
+		}
 
 		twist_msg.linear.x = 0;
 		twist_msg.linear.y = 0;
