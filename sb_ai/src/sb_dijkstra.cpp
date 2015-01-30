@@ -7,27 +7,34 @@
 #include "AI/dijkstra/dijkstra.h"
 #include "AI/dijkstra/dijkstra.cpp"	// need to create makefile
 #include <geometry_msgs/Twist.h>
-#include <vector>
+#include "sb_msgs/GPSWaypoint.h"
 
 using namespace std;
 
 int * map_ptr;
-std::vector<int> map;
 int width, height;
-int START = 10;
-int GOAL = 98;
+int start = 10;
+int goal = 98;
 geometry_msgs::Twist twist_msg;
 Dijkstra dijkstras;
+
+
+void gps_waypoint_callback(const sb_msgs::GPSWaypoint::ConstPtr& msg) 
+{
+	int x_loc = msg->x;
+	int y_loc = msg->y;
+}
 
 // callback to receive data from subscription
 // this is where you do what you need to do with the map data
 void map_callback(const sb_msgs::AISimMap::ConstPtr& msg)
 {
-	//map_ptr = msg->map_grid;
+	free(map_ptr);	// free memory allocated by map previously
 	width = msg->width;
 	height = msg->height;
 	map_ptr = new int[width*height];
 
+	// copy map contents
 	for (int i = 0; i < width*height; i++) {
 		map_ptr[i] = msg->map_grid[i];
 	}
@@ -61,7 +68,7 @@ int main(int argc, char **argv)
 	
 	while (ros::ok()) {
 		
-		dijkstras.Init(map_ptr, width, height, START, GOAL);
+		dijkstras.Init(map_ptr, width, height, start, goal);
 		dijkstras.Search(dijkstras.GetStart());
 		dijkstras.ReconstructPath(dijkstras.GetGoal());
 

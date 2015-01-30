@@ -13,7 +13,7 @@ find_package(catkin REQUIRED COMPONENTS
    FILES
    AISimMap.msg
    CarCommand.msg
-   gps.msg
+   GPSWaypoint.msg
    IMU.msg
    jausin.msg
    jausout.msg
