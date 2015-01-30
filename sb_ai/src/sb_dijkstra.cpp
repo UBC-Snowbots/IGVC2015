@@ -12,7 +12,8 @@
 using namespace std;
 
 int * map_ptr;
-int width, height;
+int width = 0; 
+int height = 0;
 int start = 10;
 int goal = 98;
 geometry_msgs::Twist twist_msg;
@@ -21,8 +22,7 @@ Dijkstra dijkstras;
 
 void gps_waypoint_callback(const sb_msgs::GPSWaypoint::ConstPtr& msg) 
 {
-	int x_loc = msg->x;
-	int y_loc = msg->y;
+	start = (msg->y * width) + msg->x;
 }
 
 // callback to receive data from subscription
@@ -38,8 +38,6 @@ void map_callback(const sb_msgs::AISimMap::ConstPtr& msg)
 	for (int i = 0; i < width*height; i++) {
 		map_ptr[i] = msg->map_grid[i];
 	}
-
-	//ROS_INFO("I heard: [%s]", msg->data.c_str());
 }
 
 
@@ -64,13 +62,12 @@ int main(int argc, char **argv)
 	// eg. 10 = 10hz
 	ros::Rate loop_rate(10);
 
-
-	cout << "here" << endl;
 	while (ros::ok()) {
 		
 		if (dijkstras.Init(map_ptr, width, height, start, goal)) {
 			dijkstras.Search(dijkstras.GetStart());
 			dijkstras.ReconstructPath(dijkstras.GetGoal());
+			// need to get path direction for next step
 		}
 
 		twist_msg.linear.x = 0;
