@@ -5,18 +5,12 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   rospy
   std_msgs
-  message_generation
+  sb_msgs
 )
 
 
 catkin_package(
-  CATKIN_DEPENDS message_runtime
-)
-
-
-add_message_files(
-  FILES
-  AISimMap.msg
+  CATKIN_DEPENDS roscpp rospy std_msgs sb_msgs
 )
 
 include_directories(
@@ -25,3 +19,6 @@ include_directories(
 
 add_executable(dstarlite src/sb_dstarlite.cpp)
 target_link_libraries(dstarlite ${catkin_LIBRARIES})
+
+add_executable(dijkstra src/sb_dijkstra.cpp)
+target_link_libraries(dijkstra ${catkin_LIBRARIES})
