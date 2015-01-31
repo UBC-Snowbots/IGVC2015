@@ -12,6 +12,7 @@ find_package(catkin REQUIRED COMPONENTS
  add_message_files(
    FILES
    AISimMap.msg
+   AISimGPS.msg
    CarCommand.msg
    GPSWaypoint.msg
    IMU.msg

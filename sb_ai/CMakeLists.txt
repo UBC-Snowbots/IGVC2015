@@ -26,5 +26,8 @@ target_link_libraries(dijkstra ${catkin_LIBRARIES})
 add_executable(sim_map src/map_sim.cpp)
 target_link_libraries(sim_map ${catkin_LIBRARIES})
 
+add_executable(sim_gps src/gps_sim.cpp)
+target_link_libraries(sim_gps ${catkin_LIBRARIES})
+
 add_executable(test_output src/test_output.cpp)
 target_link_libraries(test_output ${catkin_LIBRARIES})
