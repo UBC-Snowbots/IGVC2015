@@ -5,20 +5,21 @@
 */ 
 
 //Standard Headers
-#include <stlib.h> 
+#include <stdlib.h> 
 #include <math.h> 
 #include <iostream> //for cout, rather that using stdio
 #include <fstream> //read from file
 #include <sstream>  
 #include "ros/ros.h" //for ros system
-#include "std_msgs/string.h" 
+#include "std_msgs/String.h"
+#include <string.h> 
 
 //Constants
 #define TRUE 1 
 #define FALSE 0 
 #define EARTH_RADIUS 6378.137 //In KM 
 
-using namepsace std; 
+using namespace std; 
 
 struct twist{
 double x; 
@@ -27,16 +28,16 @@ double z;
 double dx; 
 double dy;
 double dz;
-} 
+};
 
 struct waypoint {
 double lon_x; 
 double lat_y;
-} 
+};
 
 // Variables 
 
-float double *NMEA; //To hold received suscription message 
+double *NMEA; //To hold received suscription message 
 double botDirection; 
 
 static const string GPS_NODE_NAME = "gps_node"; 
@@ -94,7 +95,7 @@ int main (int argc, char **argv){
 		cout << "Everything is going to be ok" << endl;
 				
 		createTwist (nextTwist); //Make new twist message
-		checkGoal (
+		checkGoal (currentWayPoint, targetWayPoint);
 
 		// Set-Up Your Velocities (these will be between 0 and 1, 0 min and 1 max)
 		twist.linear.x = twist.x; // velocity in x [-1,1] 1 is right full throttle
@@ -165,13 +166,9 @@ int checkGoal (double *currentWayPoint, double *targetWayPoint){
 	Purpose: check if we are at goal 
 	Status: Finished 
 	*/
-	if (currentWayPoint.x == targetWayPoint.x){
-		if (currentWayPoint.y == targeWayPoint.y){
-			if (currentWayPoint.z == targeWayPoint.z){
-				return 1; 
-			else 
-				return 0; 
-			}
+	if (currentWayPoint.long_x == targetWayPoint.long_x){
+		if (currentWayPoint.long_y == targeWayPoint.long_y){
+			return 1; 
 		}
 		else 
 			return 0; 
