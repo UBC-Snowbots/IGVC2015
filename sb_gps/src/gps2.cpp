@@ -22,8 +22,10 @@ using namepsace std;
 struct twist{
 double x; 
 double y; 
+double z;
 double dx; 
 double dy;
+double dz;
 } 
 
 struct waypoint {
@@ -40,6 +42,9 @@ static const string GPS_NODE_NAME = "gps_node";
 static const string GPS_OUTPUT_TOPIC = "gps_nav"; 
 static const string GPS_TEST_TOPIC = "vision_vel"; // test sub
 static const string GPS_INPUT_TOPIC = "gps_state"; // gps_state
+static const string NODE_NAME = "sb_gps";
+static const string PUBLISH_TOPIC = "gps_twist"; 
+static int LOOP_FREQ = 30; 
 
 //functions 
 int gpsStatus (); //Checking if gps has started receiving data
@@ -54,7 +59,7 @@ void createTwist (); //Calculates Twist
 
 */ 
 
-
+geometry_msgs::Vector3 directions
 int main (int argc, char **argv){
 
 	struct waypoint currentWayPoint = (struct waypoint*) malloc ( sizeof(struct waypoint)); //Create struct for current way point
@@ -83,16 +88,37 @@ int main (int argc, char **argv){
 	ros::Rate loop_Rate(5); //10hz loop rate
 	
 	geometry_msgs::Twist nextTwist; 
+
 	while (ros::ok()){
 		while (gpsflag == TRUE){
 		nmeaParse();
-		} 
+		cout << "Everything is going to be ok" << endl;
+				
 		createTwist (nextTwist); //Make new twist message
-		geometry_msgs::Twist nextTwist; 
+
+		// Set-Up Your Velocities (these will be between 0 and 1, 0 min and 1 max)
+		twist.linear.x = twist.x; // velocity in x [-1,1] 1 is right full throttle
+		twist.linear.y = twist.y; // velocity in y [-1,1] 1 is forwards full-throttle
+		twist.linear.z = twist.z; // always 0
+
+		twist.angular.x = twist.dx; // always 0
+		twist.angular.y = twist.dy; // always 0
+		twist.angular.z = twist.dz;// [-1,1] -1 is turning right, -1 is turning left full throttle
+
+	
+		ROS_INFO("Twist lin.y and ang.z is %f , %f", twistMsg.linear.y, twistMsg.angular.z);
+		publisher_name.publish(twist); //TODO: change name of publisher_name
+		ros::spinOnce();
+	   	loop_rate.sleep();
+
+		
+		} 
 
 
 
-
+	
+	
+}
 
 void getWaypoint (*FILE, *targetWayPoint){
 	/*
@@ -161,7 +187,8 @@ void createTwist (double *nextTwist){
 		1. Alters twist message for the next output twist message
 		2. Computes x,y,z? (Direction) dx,dy (velocity)
 	*/
-
+	
+	
 	
 
 
