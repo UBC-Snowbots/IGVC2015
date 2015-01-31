@@ -188,7 +188,12 @@ void createTwist (double *nextTwist){
 		2. Computes x,y,z? (Direction) dx,dy (velocity)
 	*/
 	
-	
+	nextTwist.x = 
+	nextTwist.y = 
+	nextTwist.z = 
+	nextTwist.dx = 
+	nextTwist.dy = 
+	nextTwist.dz
 	
 
 
