@@ -60,6 +60,23 @@ void Dijkstra::SetMap(int * curr_map)
 	map = curr_map; 
 }
 
+// ret -1,1 for horizontal, -2,2 for vertical, 0 for don't move
+int Dijkstra::GetNextStep()
+{
+	if (first != -1) {
+		Location first_loc = ConvertToLocation(first);
+		Location curr_loc = ConvertToLocation(start);
+		int x, y;
+		x = first_loc.x - curr_loc.x;
+		y = first_loc.y - curr_loc.y;
+		if (x != 0) { return x; }
+		else if (y != 0) { return 2*y; }
+		else { return 0; }
+	}
+		
+	return 0;	
+}
+
 bool Dijkstra::Init(int * main_map, int width, int height, int start_loc, int goal_loc)		// Executes the algorithm
 {	
 	map_size = width * height;
@@ -67,7 +84,7 @@ bool Dijkstra::Init(int * main_map, int width, int height, int start_loc, int go
 	// do a check to see if map, width, height, start, and goal are valid
 	if (!main_map || width <= 0 || height <= 0 || start_loc < 0 || goal_loc < 0 
 			|| start_loc >= map_size || goal_loc >= map_size)
-		{ return false; }
+		{ cout << "No map" << endl; return false; }
 	
 	map = main_map;
 	map_width = width;
@@ -86,6 +103,10 @@ bool Dijkstra::Init(int * main_map, int width, int height, int start_loc, int go
 	}
 	parent[start] = start;
 	distance[start] = 0;
+
+	first = -1;
+	second = -1;
+	third = -1;
 	
 	return true;
 }	
@@ -162,15 +183,43 @@ void Dijkstra::ReconstructPath(int location)
 	}
 	
 	else {
+		// make sure the parent of location is valid
 		assert(parent[location] >= 0 && parent[location] < map_size);
+
 		if (location == start) {
 			cout << location << endl;
 		}
+
 		else {
+			// get next 3 locations after start
+			third = second;
+			second = first;
+			first = location;
+
 			ReconstructPath(parent[location]);
 			cout << location << endl;
 		}
 	}
 
 	return;
+}
+
+
+// later on for turning
+Location Dijkstra::GetDisplacement()
+{
+	Location displacement;
+
+	if (destination != -1) {
+		Location third_loc = ConvertToLocation(third);
+		Location curr_loc = ConvertToLocation(start);
+		displacement.x = third_loc.x - curr_loc.x;
+		displacement.y = third_loc.y - curr_loc.y;
+	}
+	else {
+		displacement.x = 0;
+		displacement.y = 0;
+	}
+
+	return displacement;
 }

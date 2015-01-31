@@ -16,6 +16,7 @@ private:
 	int * parent;	// predecessors
 	int * distance;	// distance from start, -1 if not travelled
 	int destination;
+	int first, second, third;
 
 	int ConvertToIndex(Location * xy);
 	Location ConvertToLocation(int n);
@@ -31,8 +32,12 @@ public:
 	
 	int GetStart();
 	int GetGoal();
+
+	int GetNextStep();	// for testing horizontal and vertical only
 	
 	bool Init(int * main_map, int width, int height, int start_loc, int goal_loc);	
 	void Search(int location);	// Executes the algorithm
-	void ReconstructPath(int location);
+	void ReconstructPath(int location);	// change to bool
+	Location GetDisplacement();
+	
 };

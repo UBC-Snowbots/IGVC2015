@@ -18,6 +18,7 @@ int start = 10;
 int goal = 98;
 geometry_msgs::Twist twist_msg;
 Dijkstra dijkstras;
+int next_movement = 0;
 
 
 void gps_waypoint_callback(const sb_msgs::GPSWaypoint::ConstPtr& msg) 
@@ -40,6 +41,25 @@ void map_callback(const sb_msgs::AISimMap::ConstPtr& msg)
 	}
 }
 
+
+// calculate twist message for next move
+geometry_msgs::Twist GetTwistMsg(int next_move) 
+{
+	geometry_msgs::Twist twist;
+
+	twist.linear.x = 0;
+	twist.linear.y = 0;
+	twist.linear.z = 0;
+		
+	twist.angular.x = 0;
+	twist.angular.y = 0;
+	twist.angular.z = 0;
+
+	if (next_move == -1 || next_move == 1) { twist.linear.x = next_move; }
+	if (next_move == -2 || next_move == 2) { twist.linear.y = next_move; }
+	cout << "Next move: " << next_move << endl;
+	return twist;
+}
 
 // main function that runs this node
 int main(int argc, char **argv)
@@ -67,16 +87,10 @@ int main(int argc, char **argv)
 		if (dijkstras.Init(map_ptr, width, height, start, goal)) {
 			dijkstras.Search(dijkstras.GetStart());
 			dijkstras.ReconstructPath(dijkstras.GetGoal());
-			// need to get path direction for next step
+			next_movement = dijkstras.GetNextStep();
 		}
 
-		twist_msg.linear.x = 0;
-		twist_msg.linear.y = 0;
-		twist_msg.linear.z = 0;
-		
-		twist_msg.angular.x = 0;
-		twist_msg.angular.y = 0;
-		twist_msg.angular.z = 0;
+		twist_msg = GetTwistMsg(next_movement);
 
 		car_pub.publish(twist_msg);	// this is where we publish our map analysis
 		

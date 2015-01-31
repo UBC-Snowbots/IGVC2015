@@ -22,3 +22,6 @@ target_link_libraries(dstarlite ${catkin_LIBRARIES})
 
 add_executable(dijkstra src/sb_dijkstra.cpp)
 target_link_libraries(dijkstra ${catkin_LIBRARIES})
+
+add_executable(sim_map src/map_sim.cpp)
+target_link_libraries(sim_map ${catkin_LIBRARIES})
