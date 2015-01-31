@@ -3,13 +3,11 @@
 #include <time.h>
 #include <stdio.h>
 
-#include <opencv2/core.hpp>
-#include <opencv2/core/utility.hpp>
-#include <opencv2/imgproc.hpp>
-#include <opencv2/calib3d.hpp>
-#include <opencv2/imgcodecs.hpp>
-#include <opencv2/videoio.hpp>
-#include <opencv2/highgui.hpp>
+#include <opencv2/opencv.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
+#include <opencv2/objdetect/objdetect.hpp>
+#include <opencv2/calib3d/calib3d.hpp>
+#include <opencv2/video/video.hpp>
 
 #ifndef _CRT_SECURE_NO_WARNINGS
 #define _CRT_SECURE_NO_WARNINGS
@@ -216,7 +214,8 @@ int main(int argc, char* argv[])
 {
 	help();
 	Settings s;
-	const string inputSettingsFile = argc > 1 ? argv[1] : "default.xml";
+	const string inputSettingsFile = argc > 1 ? argv[1] : "/home/vagrant/snowbots_ws/src/IGVC2015/sb_vision/src"
+		"/Perspective_Transform/Camera_Cal/SampleXML.xml"; // Read XML Settings
 	FileStorage fs(inputSettingsFile, FileStorage::READ); // Read the settings
 	if (!fs.isOpened())
 	{
