@@ -37,6 +37,8 @@ int main(int argc, char **argv)
 			twist.angular.y = 0;
 			twist.angular.z = 0;
 		}
+		cout << "Lin x: " << twist.linear.x << endl;
+		cout << "Lin y: " << twist.linear.y << endl;
 		car_pub.publish(twist);
 		loop_rate.sleep();
 	}
