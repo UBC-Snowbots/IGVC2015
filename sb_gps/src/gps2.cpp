@@ -147,9 +147,12 @@ void createDistance (double *d){
 	Input Parameter: pointer to store distance
 	Output: void (use pointer) 
 	Purpose: calculates distance from target waypoints
+	Link:http://stackoverflow.com/questions/19412462/getting-distance-between-two-points-based-on-latitude-longitude-python
 	*/
 
 	double dlong,dlat
+       *d = 
+	return 0;
 }
 
 
@@ -179,7 +182,7 @@ void longToMetre ( double *currentWayPoint){
 }
 
 
-void createTwist (double *nextTwist){
+void createTwist (double *nextTwist, double *theta, double ){
 	/*
 	Input Parameter: pointer to twist struct that holds released twist message
 	Output: void (use pointer) 
@@ -193,7 +196,7 @@ void createTwist (double *nextTwist){
 	nextTwist.z = 
 	nextTwist.dx = 
 	nextTwist.dy = 
-	nextTwist.dz
+	nextTwist.dz = 
 	
 
 
