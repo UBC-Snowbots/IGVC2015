@@ -151,7 +151,15 @@ void createDistance (double *d){
 	*/
 
 	double dlong,dlat
-       *d = 
+
+	dlong = (*targetWayPoint).lon_x - (*currentWayPoint).lon_x;
+	dlat = (*targetWayPoint).lat_y - (*currentWayPoint).lat_y;
+
+	double a = (sin(dlat/2))**2 + cos((*currentWayPoint).lat_y) * 		cos((*targetWayPoint).lat_y) * (sin(dlong/2))**2;
+	double c = 2 * atan2(sqrt(a), sqrt(1-a));
+
+	*d = R * c;
+       
 	return 0;
 }
 
