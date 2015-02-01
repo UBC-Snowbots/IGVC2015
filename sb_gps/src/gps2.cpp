@@ -5,19 +5,21 @@
 */ 
 
 //Standard Headers
-#include <stlib.h> 
+#include <stdlib.h> 
 #include <math.h> 
 #include <iostream> //for cout, rather that using stdio
+#include <fstream> //read from file
 #include <sstream>  
 #include "ros/ros.h" //for ros system
-#include "std_msgs/string.h" 
+#include "std_msgs/String.h"
+#include <string.h> 
 
 //Constants
 #define TRUE 1 
 #define FALSE 0 
 #define EARTH_RADIUS 6378.137 //In KM 
 
-using namepsace std; 
+using namespace std; 
 
 struct twist{
 double x; 
@@ -26,16 +28,16 @@ double z;
 double dx; 
 double dy;
 double dz;
-} 
+};
 
 struct waypoint {
 double lon_x; 
 double lat_y;
-} 
+};
 
 // Variables 
 
-float double *NMEA; //To hold received suscription message 
+double *NMEA; //To hold received suscription message 
 double botDirection; 
 
 static const string GPS_NODE_NAME = "gps_node"; 
@@ -47,14 +49,14 @@ static const string PUBLISH_TOPIC = "gps_twist";
 static int LOOP_FREQ = 30; 
 
 //functions 
-int gpsStatus (); //Checking if gps has started receiving data
-void nmeaParse (); //Parse intake data, from USB/buffer.txt/suscribe? Need to write driver
-void getWaypoint (); //collects waypoint from txt file 
-void createAngle (double *theta); //Calculates Angle  
-void createDistance (double *d); //Calculates Distance
-int checkGoal (); //Check to see if we are at destination 
-void longToMetre (); //Calculates long/lat for distance in meters
-void createTwist (); //Calculates Twist
+int gpsStatus (); //Checking if gps has started receiving data (((STATUS = 0)))
+void nmeaParse (); //Parse intake data, from USB/buffer.txt/suscribe? Need to write driver (((STATUS = 0)))
+void getWaypoint (); //collects waypoint from txt file (((STATUS = 0)))
+void createAngle (double *theta); //Calculates Angle  (((STATUS = 0)))
+void createDistance (double *d); //Calculates Distance (((STATUS = 0)))
+int checkGoal (); //Check to see if we are at destination (((STATUS = 1))) 
+void longToMetre (); //Calculates long/lat for distance in meters (((STATUS = 0)))
+void createTwist (); //Calculates Twist (((STATUS = 0)))
 /* The 3 create functions should be suscribed to
 
 */ 
@@ -78,9 +80,7 @@ int main (int argc, char **argv){
 	int *gpsFlag; //0 for no connection; 1 for satellite connection 
 	
 	ros::init(argc, argv, GPS_NODE_NAME); //initialize access point to communicate 
-	ros::NodeHandle nh; //create handle to this process node, NodeHandle is main access point to communication with ROS system. First one intializes node 
-	
-
+	ros::NodeHandle nh; //create handle to this process node, NodeHandle is main access point to communication with ROS system. First one intializes node
 	ros::Publisher gps_test_pub = nh.advertise<gemoertry_msgs::Twist>(GPS_TEST_TOPIC, 20); 
 	ros::Publisher gps_data_pub = nh.advertise<sb_msgs::CarCommand>(GPS_OUTPUT_TOPIC, 20); 
 	ros::Suscriber gps_Sub = nh.suscribe(GPS_INPUT_TOPIC, 20, gpsCallback); 
@@ -95,6 +95,7 @@ int main (int argc, char **argv){
 		cout << "Everything is going to be ok" << endl;
 				
 		createTwist (nextTwist); //Make new twist message
+		checkGoal (currentWayPoint, targetWayPoint);
 
 		// Set-Up Your Velocities (these will be between 0 and 1, 0 min and 1 max)
 		twist.linear.x = twist.x; // velocity in x [-1,1] 1 is right full throttle
@@ -171,7 +172,16 @@ int checkGoal (double *currentWayPoint, double *targetWayPoint){
 		2. pointer to waypoint struct of target
 	Output: 1 for at destination, 0 for cont. 
 	Purpose: check if we are at goal 
+	Status: Finished 
 	*/
+	if (currentWayPoint.long_x == targetWayPoint.long_x){
+		if (currentWayPoint.long_y == targeWayPoint.long_y){
+			return 1; 
+		}
+		else 
+			return 0; 
+	}
+	else return 0; 
 }
 
 
@@ -190,7 +200,7 @@ void longToMetre ( double *currentWayPoint){
 }
 
 
-void createTwist (double *nextTwist, double *theta, double ){
+void createTwist (double *nextTwist, double *theta, double *d){
 	/*
 	Input Parameter: pointer to twist struct that holds released twist message
 	Output: void (use pointer) 
