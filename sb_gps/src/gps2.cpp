@@ -39,6 +39,7 @@ double lat_y;
 
 double *NMEA; //To hold received suscription message 
 double botDirection; 
+bool goal; 
 
 static const string GPS_NODE_NAME = "gps_node"; 
 static const string GPS_OUTPUT_TOPIC = "gps_nav"; 
@@ -91,34 +92,42 @@ int main (int argc, char **argv){
 
 	while (ros::ok()){
 		while (gpsflag == TRUE){
-		nmeaParse();
-		cout << "Everything is going to be ok" << endl;
-				
-		createTwist (nextTwist); //Make new twist message
-		checkGoal (currentWayPoint, targetWayPoint);
-
-		// Set-Up Your Velocities (these will be between 0 and 1, 0 min and 1 max)
-		twist.linear.x = twist.x; // velocity in x [-1,1] 1 is right full throttle
-		twist.linear.y = twist.y; // velocity in y [-1,1] 1 is forwards full-throttle
-		twist.linear.z = twist.z; // always 0
-
-		twist.angular.x = twist.dx; // always 0
-		twist.angular.y = twist.dy; // always 0
-		twist.angular.z = twist.dz;// [-1,1] -1 is turning right, -1 is turning left full throttle
-
-	
-		ROS_INFO("Twist lin.y and ang.z is %f , %f", twistMsg.linear.y, twistMsg.angular.z);
-		publisher_name.publish(twist); //TODO: change name of publisher_name
-		ros::spinOnce();
-	   	loop_rate.sleep();
-
+			nmeaParse();
+			cout << "Everything is going to be ok" << endl;
 		
+			if(checkGoal (currentWayPoint, targetWayPoint)){
+				createTwist (nextTwist); //Make new twist message
+
+				// Set-Up Your Velocities (these will be between 0 and 1, 0 min and 1 max)
+				twist.linear.x = twist.x; // velocity in x [-1,1] 1 is right full throttle
+				twist.linear.y = twist.y; // velocity in y [-1,1] 1 is forwards full-throttle
+				twist.linear.z = twist.z; // always 0
+
+				twist.angular.x = twist.dx; // always 0
+				twist.angular.y = twist.dy; // always 0
+				twist.angular.z = twist.dz;// [-1,1] -1 is turning right, -1 is turning left full throttle
+
+	
+				ROS_INFO("Twist lin.y and ang.z is %f , %f", twistMsg.linear.y, twistMsg.angular.z);
+				publisher_name.publish(twist); //TODO: change name of publisher_name
+				ros::spinOnce();
+			   	loop_rate.sleep();
+
+				}
+			else{
+				twist.linear.x = 0; 
+				twist.linear.y = 0; 
+				twist.linear.z = 0; 
+				
+				twist.angular.x = 0; 
+				twist.angular.y = 0; 
+				twist.angular.z = 0; 
+	
+				ROS_INFO("Arrived at destination");
+				publisher_name.publish(twist); //TODO: change name of publisher_name
+				ros::spinOnce();
+			   	loop_rate.sleep();
 		} 
-
-
-
-	
-	
 }
 
 void getWaypoint (*FILE, *targetWayPoint){
