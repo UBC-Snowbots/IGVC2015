@@ -56,7 +56,7 @@
         <!-- Default name of your node. -->
         <NodeIdentification>Node</NodeIdentification>
         <!-- Default name of your subsystem. -->
-        <SubsystemIdentification type="10001">Knightro</SubsystemIdentification>
+        <SubsystemIdentification type="10001">Snowbots</SubsystemIdentification>
     </Discovery>
 
     <AccessControl on="1">

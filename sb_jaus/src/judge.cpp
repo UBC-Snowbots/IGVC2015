@@ -2,7 +2,8 @@
 #include <jaus/core/transport/Transport.h>
 #include <iostream>
 
-int main(){
+int main()
+{
         JAUS::Component component;
         JAUS::Discovery* discoveryService = nullptr;
         JAUS::Transport* transportService = nullptr;
@@ -13,7 +14,7 @@ int main(){
         discoveryService->SetNodeIdentification("Main");
         discoveryService->SetComponentIdentification("Baseline");
         
-        JAUS::Address componentID(9000,1,1);
+        JAUS::Address componentID(8000,1,1);
         if(component.Initialize(componentID)==false){
                 std::cout << "Failed to initialize [" << componentID.ToString() << std::endl;
                 return 0;
@@ -28,7 +29,7 @@ int main(){
                 transportService->Initialize(comp_address_id);
         }
         
-        JAUS::QueryIdentification id_query(JAUS::Address(7000,1,1),component.GetComponentID());
+        JAUS::QueryIdentification id_query(JAUS::Address(6000,1,1),component.GetComponentID());
         JAUS::ReportIdentification id_response;
         while(!component.Send(&id_query,&id_response,5000));
         std::cout << "ID: " << id_response.GetIdentification() << std::endl;
