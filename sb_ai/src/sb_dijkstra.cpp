@@ -21,9 +21,11 @@ Dijkstra dijkstras;
 int next_movement = 0;
 
 
-void gps_waypoint_callback(const sb_msgs::GPSWaypoint::ConstPtr& msg) 
+// TODO: Need to find a way to translate latitude and longitude relative to our map indexes
+
+void gps_waypoint_callback(const sb_msgs::AISimGPS::ConstPtr& msg) 
 {
-	start = (msg->y * width) + msg->x;
+	start = (msg->latitude * width) + msg->longitude;
 }
 
 // callback to receive data from subscription
