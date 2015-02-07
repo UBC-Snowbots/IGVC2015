@@ -116,14 +116,14 @@ int GetIndex(int x, int y)
 // TODO: Convert the location index to an X location value
 int GetX(int index)
 {
-	return index%map_width;
+	return (index%map_width);
 }
 
 
 // TODO: Convert the location index to a Y location value
 int GetY(int index) 
 {
-	return index/map_width;
+	return (index/map_width);
 }
 
 
@@ -154,11 +154,11 @@ bool NotInFrontier(int location)
 	{
 		if (frontier[counter] == location)
 		{
-			return true;
+			return false;
 		}
 		counter++;
 	}
-	return false;
+	return true;
 }
 
 
@@ -264,15 +264,19 @@ void AStarSearch(int start, int goal)
 	
 	// keep searching for a path while there are still traversable locations
 	while (frontier_size != 0) {
-					
 		// TODO: int current_location = ?
-		
+		int current_location = frontier[0];
 		// TODO: if the current_location == goal then ?
-
+		if (current_location == goal)
+		{
+		ReconstructPath(start, goal);
+		return;
+		}
 		// TODO: What function do you use to remove the current location from the frontier ?
+		RemoveRoot();		
 		// TODO: There is a function that takes care of choosing the neighbors and adding them to the frontier
-		
-		frontier_size = 0;	// this is here just to make the initial template runs. Remove this when you no longer need it.
+		AddNeighborsToFrontier(current_location,goal);
+//		frontier_size = 0;	// this is here just to make the initial template runs. Remove this when you no longer need it.
 	}
 	
 	cout << "No path found" << endl;
