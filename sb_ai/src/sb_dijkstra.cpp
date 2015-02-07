@@ -4,10 +4,10 @@
 #include <iostream>
 #include "sb_ai.h"
 #include "sb_msgs/AISimMap.h"
+#include "sb_msgs/AISimGPS.h"
 #include "AI/dijkstra/dijkstra.h"
-#include "AI/dijkstra/dijkstra.cpp"	// need to create makefile
+#include "AI/dijkstra/dijkstra.cpp"	// TODO need to create makefile
 #include <geometry_msgs/Twist.h>
-#include "sb_msgs/GPSWaypoint.h"
 
 using namespace std;
 
@@ -22,11 +22,11 @@ int next_movement = 0;
 
 
 // TODO: Need to find a way to translate latitude and longitude relative to our map indexes
-/*
+
 void gps_waypoint_callback(const sb_msgs::AISimGPS::ConstPtr& msg) 
 {
 	start = (msg->latitude * width) + msg->longitude;
-}*/
+}
 
 // callback to receive data from subscription
 // this is where you do what you need to do with the map data
