@@ -80,6 +80,7 @@ gazebo_msgs::ModelState modelState_maker(sb_msgs::CarCommand cc)
 	return modelState;	
 }
 
+
 int main (int argc, char** argv)
 {
 	// Set up ROS node, publisher and subscriber 
@@ -115,6 +116,7 @@ int main (int argc, char** argv)
 		gazebo_car_pub.publish(modelStateMsg);
 
 		ros::spinOnce();
+
     		loop_rate.sleep();	
   	}
   	ROS_INFO("shutting down node");
