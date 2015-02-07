@@ -34,7 +34,7 @@ void Init()
 		came_from[i] = -1;
 		frontier[i] = -1;
 		cost_from_start[i] = INF;
-		estimate_cost[i] = INF;
+		estimated_cost[i] = INF;
 	}
 	
 }
@@ -91,13 +91,6 @@ void Insert(int location)
 }
 
 
-// TODO: Heuristic function estimates the cost to travel from start_location to goal_location
-// Admissible: Heuristic(start, goal) <= ActualCost(start, goal)
-int Heuristic(int start_location, int goal_location)
-{
-	return 0;
-}
-
 
 // This prints out the path if a path is found
 void ReconstructPath(int start_location, int goal_location)
@@ -116,21 +109,21 @@ void ReconstructPath(int start_location, int goal_location)
 // TODO: Convert coordinates (x,y) to an index that would be used to access the map array
 int GetIndex(int x, int y) 
 {
-	return 0; 
+	return ((y*map_width)+x); 
 }
 
 
 // TODO: Convert the location index to an X location value
 int GetX(int index)
 {
-	return 0;
+	return (index%map_width);
 }
 
 
 // TODO: Convert the location index to a Y location value
 int GetY(int index) 
 {
-	return 0;
+	return (index/map_width);
 }
 
 
@@ -142,10 +135,29 @@ bool NotAlreadyTravelled(int location, int curr_loc)
 	else { return false; }
 }
 
+// TODO: Heuristic function estimates the cost to travel from start_location to goal_location
+// Admissible: Heuristic(start, goal) <= ActualCost(start, goal)
+int Heuristic(int start_location, int goal_location)
+{
+	int deltax,deltay;
+	deltax=GetX(goal_location)-GetX(start_location);
+	deltay=GetY(goal_location)-GetY(start_location);
+	return (sqrt(pow(deltax,2)+pow(deltay,2)));
+}
+
 
 // TODO: a search to check that the location is not found in the frontier array
 bool NotInFrontier(int location)
 {
+	int counter=0;
+	while(counter < frontier_size)
+	{
+		if (frontier[counter] == location)
+		{
+			return false;
+		}
+		counter++;
+	}
 	return true;
 }
 
@@ -243,23 +255,28 @@ void RemoveRoot()
 void AStarSearch(int start, int goal) 
 {
 	// TODO: check that the start and goal are valid integers 
+	if ((start < 0 || start > 99)||(goal < 0 || goal > 99))
+		cout << "Error: Invalid start/end position";	
+	cost_from_start[start] = 0;
+	estimated_cost[start] = cost_from_start[start] + Heuristic(start,goal);
 
-	// TODO: cost_from_start[start] = ?
-	// TODO: estimated_cost[start] = ?
-	
 	Insert(start);
 	
 	// keep searching for a path while there are still traversable locations
 	while (frontier_size != 0) {
-					
 		// TODO: int current_location = ?
-		
+		int current_location = frontier[0];
 		// TODO: if the current_location == goal then ?
-
+		if (current_location == goal)
+		{
+		ReconstructPath(start, goal);
+		return;
+		}
 		// TODO: What function do you use to remove the current location from the frontier ?
+		RemoveRoot();		
 		// TODO: There is a function that takes care of choosing the neighbors and adding them to the frontier
-		
-		frontier_size = 0;	// this is here just to make the initial template runs. Remove this when you no longer need it.
+		AddNeighborsToFrontier(current_location,goal);
+//		frontier_size = 0;	// this is here just to make the initial template runs. Remove this when you no longer need it.
 	}
 	
 	cout << "No path found" << endl;
