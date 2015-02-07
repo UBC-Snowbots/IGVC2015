@@ -18,6 +18,7 @@
 #define TRUE 1 
 #define FALSE 0 
 #define EARTH_RADIUS 6378.137 //In KM 
+#define WAYPOINT_FILE "practice1.txt" //using practice1.txt for testing
 
 using namespace std; 
 
@@ -130,7 +131,7 @@ int main (int argc, char **argv){
 		} 
 }
 
-void getWaypoint (*FILE, *targetWayPoint){
+void getWaypoint (*FILE,){
 	/*
 	Input Parameter: 
 		1. Pointer to txt file 
@@ -138,6 +139,23 @@ void getWaypoint (*FILE, *targetWayPoint){
 	Output: void (use pointers) 
 	Purpose: Get target waypoint from txt file and store it 
 	*/	
+	double totalWeight = 0.0;
+	double buffer;
+	inputFile = fopen( WAYPOINT_FILE, "r" );
+
+	if( inputFile != NULL ){
+	
+		while( fscanf( inputFile, "%lf", &buffer ) == 1 ){
+		totalWeight += itemWeight;
+		}
+
+	printf( "Total cargo weight: %.3f\n", totalWeight );
+	fclose( inputFile );
+	}
+
+	else {
+		printf( "Error opening file %s.\n", WAYPOINT_FILE );
+	} 
 } 
 
 
