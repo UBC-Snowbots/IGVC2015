@@ -22,11 +22,11 @@ int next_movement = 0;
 
 
 // TODO: Need to find a way to translate latitude and longitude relative to our map indexes
-
+/*
 void gps_waypoint_callback(const sb_msgs::AISimGPS::ConstPtr& msg) 
 {
 	start = (msg->latitude * width) + msg->longitude;
-}
+}*/
 
 // callback to receive data from subscription
 // this is where you do what you need to do with the map data
