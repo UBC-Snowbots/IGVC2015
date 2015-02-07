@@ -1,0 +1,74 @@
+<?xml version="1.0" standalone="yes"?>
+<JAUS>
+<!-- CORE SERVICES -->
+    <Transport>
+    <!-- type indicates preferred transport method, default is JUDP. -->
+        <DefaultTransport type="JUDP"/>
+        <!-- Sets the default port for the node. -->
+        <DefaultPort>3794</DefaultPort>
+        <!-- If 1, then Broadcasting is used over Multicast. -->
+        <UseBroadcasting>1</UseBroadcasting>
+        <!-- Multicast Group IP. -->
+        <MulticastIP>239.255.0.1</MulticastIP>
+        <!-- Multicast/Broadcast Time-To-Live. -->
+        <TTL>16</TTL>
+        <!-- The NetAddress field indicates what network
+        interface or IP address to use for receiving. If you leave
+        this field blank, any available interfaces is used. If you have
+        more than one interface, set the IP address. -->
+        <NetAddress>10.171.190.27</NetAddress>
+        <!-- Value should match network interface MTU. -->
+        <MaxPacketSizeBytes>1500</MaxPacketSizeBytes>
+        <!-- The Disconnect Time is used to close connections
+        from components that have not transmitted data within a
+        period of time. For example, if this value is 10000, then
+        if we haven't received data from a component within 10 seconds
+        the connection will be closed. Set to 0 to disable feature. -->
+        <DisconnectTimeMs>10000</DisconnectTimeMs>
+        <!-- Sets number of threads per connection handler, default is 4. You
+        may want to change this to a larger value if you have a lot
+        of threads in your application. -->
+        <ConnectionsPerHandler>1</ConnectionsPerHandler>
+        <!-- Parameters for connections include:
+        ip -> IP address if network connection
+        id -> JAUS ID att connection
+        dest_port -> Port number (com or IP port) to send to
+        src_port -> Port number to receive on (IP port or com port)
+        type -> Type of connection (JUDP, JTCP, JSerial)
+        -->
+        <!-- Method to add permanent connections to fixed component. (JAUS I-Challenge OCP)
+        <Connection ip="192.168.1.42" id="42.1.1" type="JUDP" dest_port="DEFAULT" src_port="DEFAULT"/> -->
+        <!-- Testing/Example connection.
+        <Connection ip="127.0.0.1" id="42.1.1" type="JUDP" dest_port="20000" src_port="DEFAULT"/> -->
+    </Transport>
+
+    <Events on="1"></Events>
+    
+    <Discovery on="1">
+    <!-- If 0, only discovers data within subsystem. -->
+        <DiscoverSubsystems>1</DiscoverSubsystems>
+        <!-- How often to send discovery queries in Hz.
+        <Frequency>0.5</Frequency> -->
+        <!-- How often to send discovery queries in ms. -->
+        <IntervalMs>5000</IntervalMs>
+        <!-- Default name of your component. -->
+        <ComponentIdentification>Component</ComponentIdentification>
+        <!-- Default name of your node. -->
+        <NodeIdentification>Node</NodeIdentification>
+        <!-- Default name of your subsystem. -->
+        <SubsystemIdentification type="10001">Knightro</SubsystemIdentification>
+    </Discovery>
+
+    <AccessControl on="1">
+        <AuthorityLevel>0</AuthorityLevel>
+        <!-- Is control of this service available?-->
+        <Controllable>1</Controllable>
+        <!-- Control Timeout Period (seconds). Controlling
+        components must try an maintain control within this
+        period, otherwise control times out (is released). Set
+        to zero to disable timeout of control. The threshold
+        is a percentage of the timeout to subtract for
+        re-aquiring control (so that we do it before the timeout). -->
+        <TimeoutSeconds threshold="10">5</TimeoutSeconds>
+    </AccessControl>
+</JAUS>
