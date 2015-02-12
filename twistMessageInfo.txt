@@ -42,7 +42,8 @@ int main ()
 	ROS_INFO("Twist lin.y and ang.z is %f , %f", twistMsg.linear.y, twistMsg.angular.z);
 	publisher_name.publish(twist); //TODO: change name of publisher_name
 	ros::spinOnce();
-   	loop_rate.sleep();
+
+   	loop_rate.sleep();	
 
 	}
 
