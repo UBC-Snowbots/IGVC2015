@@ -10,7 +10,7 @@ int main(){
         discoveryService->SetNodeIdentification("Main");
         discoveryService->SetComponentIdentification("Baseline");
         
-        JAUS::Address componentID(1000,1,1);
+        JAUS::Address componentID(100,1,1);
         if(component.Initialize(componentID)==false){
                 std::cout << "Failed to initialize [" << componentID.ToString() << std::endl;
                 return 0;
@@ -35,4 +35,3 @@ int main(){
         component.Shutdown();
         return 0;
 }
-
