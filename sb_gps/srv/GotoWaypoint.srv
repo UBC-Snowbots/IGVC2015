@@ -1,0 +1,4 @@
+sb_msgs/Waypoint location
+---
+bool at_location
+
