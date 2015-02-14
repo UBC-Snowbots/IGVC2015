@@ -1,4 +1,5 @@
 #include <jaus/core/Component.h>
+#include <jaus/core/transport/Transport.h>
 #include <iostream>
 #include <thread>
 
@@ -47,7 +48,10 @@ class DiscoveryCallback: public JAUS::Discovery::Callback{
 };
 
 int main(){
+        JAUS::Component component;
         JAUS::Discovery* discoveryService = nullptr;
+        JAUS::Transport* transportService = nullptr;
+
         discoveryService = (JAUS::Discovery*)component.GetService(JAUS::Discovery::Name);
         
         discoveryService->EnableDebugMessages(true);
@@ -56,37 +60,30 @@ int main(){
         discoveryService->SetNodeIdentification("Main");
         discoveryService->SetComponentIdentification("Baseline");
         
-        if(!discoveryService->SetDiscoveryFrequency(0.2)){
-            std::cout << "Could not set discovery frequency" << std::endl;
-            return -1;
-        }
-        discoveryService->RegisterCallback(new DiscoveryCallback());
-        discoveryService->DiscoverSubsystems(true);
-        
-        
-        JAUS::Address componentID(200,1,1);
+        JAUS::Address componentID(8000,1,1);
         if(component.Initialize(componentID)==false){
                 std::cout << "Failed to initialize [" << componentID.ToString() << "]" << std::endl;
                 return 0;
         }
-        if(discoveryService->is)
-        std::cout << "Initialisation successful!" << std::endl;
-        
-        JAUS::QueryIdentification query_id(JAUS::Address(JAUS::Address::GlobalBroadcast), componentID);
-        
-        if(!component.Send(&query_id, 2)){
-            std::cout << "could not send discovery message..." << std::endl;
-            return -1;
+        if(discoveryService->IsEnabled()){
+        	std::cout << "Initialisation successful!" << std::endl;
+        }else{
+        	std::cerr << "Discovery disabled. Abort." << std::endl;
+        	return 1;
+        }
+
+        transportService = (JAUS::Transport*) component.GetService(JAUS::Transport::Name);
+        transportService->LoadSettings("services.xml");
+        if(!transportService->IsInitialized())
+        {
+                const JAUS::Address comp_address_id = component.GetComponentID();
+                transportService->Initialize(comp_address_id);
         }
         
-        while(true){
-                JAUS::Management* managementService = nullptr;
-                managementService = (JAUS::Management*)component.GetService(JAUS::Management::Name);
-                if(managementService->GetStatus() == JAUS::Management::Status::Shutdown){
-                        break;
-                }
-                CxUtils::SleepMs(1);
-        }
+        JAUS::QueryIdentification id_query(JAUS::Address(6000,1,1),component.GetComponentID());
+        JAUS::ReportIdentification id_response;
+        while(!component.Send(&id_query,&id_response,5000));
+        std::cout << "ID: " << id_response.GetIdentification() << std::endl;
         
         component.Shutdown();
         return 0;
