@@ -1,3 +1,3 @@
-string WAYPOINT_LIST = "waypoint_list" # name of the subscriber to publish to
+string WAYPOINT_LIST = waypoint_list
 sb_msgs/Waypoint[] waypoints
 
