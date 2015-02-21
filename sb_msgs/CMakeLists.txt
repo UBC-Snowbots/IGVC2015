@@ -24,6 +24,7 @@ find_package(catkin REQUIRED COMPONENTS
    Velocity.msg
    VisionNav.msg
    Waypoint.msg
+   WaypointList.msg
  )
 
 ## Generate added messages and services with any dependencies listed here
