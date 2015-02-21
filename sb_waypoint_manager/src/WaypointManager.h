@@ -2,20 +2,24 @@
 
 #include "ros/ros.h"
 #include "sb_msgs/Waypoint.h"
-#include <queue>
+#include "sb_msgs/WaypointList.h"
+#include <vector>
 
 namespace sb_waypoint_manager{
 
 class WaypointManager{
 private:
-	ros::ServiceClient client;
-	std::queue<sb_msgs::Waypoint> waypointList;
+	ros::ServiceClient gps_client;
+	ros::Subscriber waypoint_list_subscriber;
+	
+	std::vector<sb_msgs::Waypoint> waypointList;
+	
+	void process_waypoint_list(const sb_msgs::WaypointList& list);
 public:
 	WaypointManager(ros::NodeHandle);
 	~WaypointManager();
 	
-	void loadFromFile(const char* fname);
-	
+	void stop();
 	void updateGPS();
 	
 };

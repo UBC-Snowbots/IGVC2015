@@ -6,14 +6,6 @@ find_package(catkin REQUIRED COMPONENTS
 	rospy
 	std_msgs
 	sb_msgs
-	message_generation
-)
-
-generate_messages(
-	DEPENDENCIES
-	std_msgs
-	sb_msgs
-	sb_gps
 )
 
 catkin_package(
