@@ -31,6 +31,7 @@ catkin_package(
 include_directories(
  ${catkin_INCLUDE_DIRS}
  ${OpenCV_INCLUDE_DIRS}
+ ${PROJECT_BINARY_DIR}
 )
 
 add_executable(Line_Detector src/Line_Detector.cpp)
@@ -42,7 +43,9 @@ add_executable( test1 src/test1.cpp)
 add_executable(image_stitching src/image_stitching.cpp)
 add_executable(jan11 src/jan11.cpp)
 add_executable(CameraCal src/Perspective_Transform/Camera_Cal/sample_camera_calibration.cpp)
-
+add_executable( ipm src/Perspective_Transform/ipm_code/main.cpp 
+			src/Perspective_Transform/ipm_code/IPM.cpp 
+			src/Perspective_Transform/ipm_code/IPM.h)
 
 target_link_libraries( Line_Detector ${catkin_LIBRARIES} ${OpenCV_LIBS})
 target_link_libraries( LaneDetector  ${catkin_LIBRARIES} ${OpenCV_LIBS})
@@ -53,7 +56,7 @@ target_link_libraries(  test1 ${catkin_LIBRARIES})
 target_link_libraries( image_stitching ${catkin_LIBRARIES} ${OpenCV_LIBS})
 target_link_libraries( jan11 ${catkin_LIBRARIES})
 target_link_libraries( CameraCal ${catkin_LIBRARIES} ${OpenCV_LIBS})
-
+target_link_libraries( ipm ${catkin_LIBRARIES} ${OpenCV_LIBS})
 
 add_dependencies(Line_Detector sb_vision_generate_messages_cpp)
 
