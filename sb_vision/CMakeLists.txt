@@ -42,7 +42,7 @@ add_executable( test1 src/test1.cpp)
 add_executable(image_stitching src/image_stitching.cpp)
 add_executable(jan11 src/jan11.cpp)
 add_executable(CameraCal src/Perspective_Transform/Camera_Cal/sample_camera_calibration.cpp)
-
+add_executable(ObjectDetect src/ObjectDetect.cpp)
 
 target_link_libraries( Line_Detector ${catkin_LIBRARIES} ${OpenCV_LIBS})
 target_link_libraries( LaneDetector  ${catkin_LIBRARIES} ${OpenCV_LIBS})
@@ -53,6 +53,7 @@ target_link_libraries(  test1 ${catkin_LIBRARIES})
 target_link_libraries( image_stitching ${catkin_LIBRARIES} ${OpenCV_LIBS})
 target_link_libraries( jan11 ${catkin_LIBRARIES})
 target_link_libraries( CameraCal ${catkin_LIBRARIES} ${OpenCV_LIBS})
+target_link_libraries( ObjectDetect ${catkin_LIBRARIES} ${OpenCV_LIBS})
 
 
 add_dependencies(Line_Detector sb_vision_generate_messages_cpp)
