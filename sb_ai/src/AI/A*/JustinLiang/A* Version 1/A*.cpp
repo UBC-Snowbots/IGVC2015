@@ -3,7 +3,7 @@
 
 using namespace std;
 
-// TODO: Author Name
+// Author: Justin Liang
 
 /** VARIABLES **/
 
