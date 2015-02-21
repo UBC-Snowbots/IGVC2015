@@ -25,6 +25,46 @@ using namespace std;
 
 int main( int _argc, char** _argv )
 {
+
+    VideoCapture cap(0); // open the video camera no. 0
+
+    if (!cap.isOpened())  // if not success, exit program
+    {
+cout << "Cannot open the video cam" << endl;
+        return -1;
+    }
+
+   double dWidth = cap.get(CV_CAP_PROP_FRAME_WIDTH); //get the width of frames of the video
+   double dHeight = cap.get(CV_CAP_PROP_FRAME_HEIGHT); //get the height of frames of the video
+
+    cout << "Frame size : " << dWidth << " x " << dHeight << endl;
+
+    namedWindow("MyVideo",CV_WINDOW_AUTOSIZE); //create a window called "MyVideo"
+
+    while (1)
+    {
+        Mat frame;
+
+        bool bSuccess = cap.read(frame); // read a new frame from video
+
+if (!bSuccess) //if not success, break loop
+{
+cout << "Cannot read a frame from video stream" << endl;
+break;
+}
+
+        imshow("MyVideo", frame); //show the frame in "MyVideo" window
+
+        if (waitKey(30) == 27) //wait for 'esc' key press for 30ms. If 'esc' key is pressed, break loop
+{
+cout << "esc key is pressed by user" << endl;
+break; 
+}
+    }
+    return 0;
+
+}
+/*
 	// Images
 	Mat inputImg, inputImgGray;
 	Mat outputImg;
@@ -54,10 +94,10 @@ int main( int _argc, char** _argv )
 	
 	// The 4-points at the input image	
 	vector<Point2f> origPoints;
-	origPoints.push_back( Point2f(0, height) );
-	origPoints.push_back( Point2f(width, height) );
-	origPoints.push_back( Point2f(width/2+30, 140) );
-	origPoints.push_back( Point2f(width/2-50, 140) );
+	origPoints.push_back( Point2f(0, height-40) );
+	origPoints.push_back( Point2f(width-100, height-40) );
+	origPoints.push_back( Point2f(width/2-20, 200) );
+	origPoints.push_back( Point2f(width/2-110, 200) );
 
 	// The 4-points correspondences in the destination image
 	vector<Point2f> dstPoints;
@@ -104,3 +144,4 @@ int main( int _argc, char** _argv )
 
 	return 0;	
 }		
+*/
