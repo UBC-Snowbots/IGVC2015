@@ -20,16 +20,16 @@ geometry_msgs::Twist twist_msg;
 Dijkstra dijkstras;
 int next_movement = 0;
 
+/** Callback functions that receive data from subscriptions and process them */
 
-// TODO: Need to find a way to translate latitude and longitude relative to our map indexes
-
-void gps_waypoint_callback(const sb_msgs::AISimGPS::ConstPtr& msg) 
+// The gps waypoint data is processed here
+void gps_callback(const sb_msgs::AISimGPS::ConstPtr& msg) 
 {
 	start = (msg->latitude * width) + msg->longitude;
 }
 
-// callback to receive data from subscription
-// this is where you do what you need to do with the map data
+
+// The map data is processed here
 void map_callback(const sb_msgs::AISimMap::ConstPtr& msg)
 {
 	free(map_ptr);	// free memory allocated by map previously
@@ -57,9 +57,8 @@ geometry_msgs::Twist GetTwistMsg(int next_move)
 	twist.angular.y = 0;
 	twist.angular.z = 0;
 
-	if (next_move == -1 || next_move == 1) { twist.linear.x = next_move; }
-	if (next_move == -2 || next_move == 2) { twist.linear.y = next_move; }
-	cout << "Next move: " << next_move << endl;
+	if (next_move == -1 || next_move == 1) { twist.linear.x = next_move*0.2; }
+	if (next_move == -2 || next_move == 2) { twist.linear.y = next_move*0.1; }
 	return twist;
 }
 
@@ -77,12 +76,13 @@ int main(int argc, char **argv)
 	
 	// Initialize publisher to PUB_TOPIC.
 	// Second argument for advertise is the buffer size.
-	ros::Publisher car_pub = nh.advertise<geometry_msgs::Twist>(PUB_TOPIC, 100);	
-	ros::Subscriber map_sub = nh.subscribe(MAP_SUB_TOPIC, 100, map_callback);
+	ros::Publisher car_pub = nh.advertise<geometry_msgs::Twist>(PUB_TOPIC, 1);	
+	ros::Subscriber map_sub = nh.subscribe(MAP_SUB_TOPIC, 1, map_callback);
+	ros::Subscriber gps_sub = nh.subscribe(GPS_SUB_TOPIC, 1, gps_callback);
 	
 	// Frequency of the loop. 
 	// eg. 10 = 10hz
-	ros::Rate loop_rate(10);
+	ros::Rate loop_rate(2);
 
 	while (ros::ok()) {
 		
@@ -96,6 +96,11 @@ int main(int argc, char **argv)
 
 		car_pub.publish(twist_msg);	// this is where we publish our map analysis
 		
+		cout << "Next movement: " << next_movement << endl;
+		cout << "Linear x: " << twist_msg.linear.x << endl;
+		cout << "Linear y: " << twist_msg.linear.y << endl;
+		cout << "Current position: " << start << endl;
+
 		ros::spinOnce();	// required for subscriptions
 		
 		loop_rate.sleep();	// sleep for the time remaining to hit frequency loop rate

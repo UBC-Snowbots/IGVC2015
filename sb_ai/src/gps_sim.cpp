@@ -16,13 +16,12 @@ int main(int argc, char **argv)
 	ros::Publisher gps_pub = n.advertise<sb_msgs::AISimGPS>(GPS_PUB_TOPIC, 100);
 	ros::Rate loop_rate(10);
 	
-	sim_gps.latitude = 10;
-	sim_gps.longitude = 10;
+	sim_gps.latitude = 8;
+	sim_gps.longitude = 7;
 
 	while (ros::ok()) {
+		cout << "Running.." << endl;
 		gps_pub.publish(sim_gps);
-		cout << "Latitude: " << sim_gps.latitude << endl;
-		cout << "Longitude: " << sim_gps.longitude << endl;
 		loop_rate.sleep();
 	}
 }

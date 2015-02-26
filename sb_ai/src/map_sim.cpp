@@ -11,12 +11,12 @@ static const string NODE_NAME = "test_map";
 static const string MAP_PUB_TOPIC = "ai_map";
 
 sb_msgs::AISimMap sim_map;
-int x;
+//int x;
 
 vector<int8_t> RandomMap()
 {
 	vector<int8_t> map (100, 0);
-	x = map.at(10);
+	//x = map.at(10);
 	return map;
 }
 
@@ -33,7 +33,7 @@ int main(int argc, char **argv)
 	
 	while (ros::ok()) {
 		map_pub.publish(sim_map);
-		cout << "map_grid[10]: " << x << endl;
+		cout << "Running.." << endl;
 		loop_rate.sleep();
 	} 
 
