@@ -20,6 +20,7 @@
 
 //Constants
 #define EARTH_RADIUS 6378.137 //In KM
+#define PI 3.14159265
 #define WAYPOINT_FILE "practice1.txt" //using practice1.txt for testing
 
 using namespace std;
@@ -35,7 +36,8 @@ struct waypoint {
 // Variables
 
 double *NMEA; //To hold received suscription message
-double botDirection;
+double angleCompass;
+bool moveStatus;
 bool goal;
 bool gpsFlag = true; //indicates connection from gps chip
 waypoint CurrentWaypoint,TargetWaypoint,LastWaypoint;
@@ -56,6 +58,8 @@ bool goto_waypoint(sb_gps::GotoWaypoint::Request &req, sb_gps::GotoWaypoint::Res
 void gpsSubHandle(const std_msgs::String::ConstPtr& msg);
 geometry_msgs::Twist createNextTwist(geometry_msgs::Twist nextTwist);
 bool checkGoal (waypoint CurrentWayPoint, waypoint TargetWayPoint);
+void createAngle (double *theta, double angleCompass);
+
 
 geometry_msgs::Vector3 directions;
 
@@ -72,11 +76,13 @@ int main (int argc, char **argv){
 
   ros::Rate loop_rate(5); //10hz loop rate
 
+  double theta = 0;
+
 	while (ros::ok()){
 		while (gpsFlag == true){
 			ROS_INFO("Everything is going to be ok");
 
-  			if(checkGoal (CurrentWaypoint, TargetWaypoint) || req.move){
+  			if(checkGoal (CurrentWaypoint, TargetWaypoint) || moveStatus){
             nextTwist.linear.x = 0;
             nextTwist.linear.y = 0;
             nextTwist.linear.z = 0;
@@ -85,15 +91,17 @@ int main (int argc, char **argv){
             nextTwist.angular.y = 0;
             nextTwist.angular.z = 0;
 
-            if (req.mov)
+            if (moveStatus)
             ROS_INFO("Command stop");
             else
             ROS_INFO("Arrived at destination");
   				}
   			else{
+            createAngle (&theta, angleCompass);
             nextTwist = createNextTwist (nextTwist); //Make new twist message
             ROS_INFO("Twist lin.x = %f, Twist lin.y = %f, Twist lin.z = %f", nextTwist.linear.x, nextTwist.linear.y, nextTwist.linear.z);
             ROS_INFO("Twist ang.x = %f, Twist ang.y = %f, Twist ang.z = %f", nextTwist.angular.x, nextTwist.angular.y, nextTwist.angular.z);
+            cout << "Angle to destination" << theta << endl;
   		    }
 
         gps_test_pub.publish(nextTwist); /*tdo: change name of publisher_name*/
@@ -107,11 +115,15 @@ int main (int argc, char **argv){
 bool goto_waypoint(sb_gps::GotoWaypoint::Request &req, sb_gps::GotoWaypoint::Response &res){
   res.at_location = false;
   ROS_INFO("request: latitude= %i, longitude = %i", req.location.lat, req.location.lon);//Waypointmanager request
-  if (req.move)
+  if (req.move){
     ROS_INFO("request: move = true");
-  else
+    moveStatus = true;
+  }
+  else{
     ROS_INFO("request: move = false");
+    moveStatus = false;
     //ROS_INFO("sending back response: []", res);
+  }
   return true;
 }
 
@@ -179,4 +191,63 @@ bool checkGoal (waypoint CurrentWaypoint, waypoint TargetWaypoint){
   }
   else
     return false;
+}
+
+void createAngle (double *theta, double angleCompass){
+	/*
+	Input Parameter:
+		1. pointer to hold angle
+		2. direction from compass
+	Output: void (use pointer)
+	Purpose: calculates angle from target waypoint
+	*/
+
+//I'm not too familiar with pointers as parameters, I think this should be correct.
+//I have tested the function and it does create the right angle. -Nick
+  double x,y;
+	// x is the x cordinate, y is the y cordinate
+	double phi; //variable needed to calculate theta
+	double r = sqrt(x*x + y*y); //distance from the robot to waypoint
+	double angleRobot = 180 * (acos(y / r) / PI); //angle of robot to the y-axis
+
+	//while direction of goal angle is in quadrant 1
+	while (x > 0 && y >= 0) {
+		phi = angleRobot;
+		if (angleCompass <= (phi + 180)) {
+			*theta = (phi - angleCompass);
+		}
+		else if (angleCompass > (phi + 180)) {
+			*theta = (360 - angleCompass + phi);
+		}
+	}
+	//while direction of goal angle is in quadrant 4
+	while (x >= 0 && y < 0) {
+		phi = (180 - angleRobot);
+		if (angleCompass <= (phi + 180)) {
+			*theta = (phi - angleCompass);
+		}
+		else if (angleCompass >(phi + 180)) {
+			*theta = (360 - angleCompass + phi);
+		}
+	}
+	//while direction of goal angle is in quadrant 3
+	while (x < 0 && y <= 0) {
+		phi = (180 + angleRobot);
+		if (angleCompass < (phi - 180)) {
+			*theta = (phi - angleCompass);
+		}
+		else if (angleCompass >(phi - 180)) {
+			*theta = (360 - angleCompass + phi);
+		}
+	}
+	//while direction of goal angle is in quadrant 2
+	while (x < 0 && y > 0) {
+		phi = (360 - angleRobot);
+		if (angleCompass < (phi - 180)) {
+			*theta = (phi - angleCompass);
+		}
+		else if (angleCompass >(phi - 180)) {
+			*theta = (360 - angleCompass + phi);
+		}
+	}
 }
