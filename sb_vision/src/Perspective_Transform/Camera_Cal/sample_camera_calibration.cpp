@@ -214,7 +214,8 @@ int main(int argc, char* argv[])
 {
 	help();
 	Settings s;
-	const string inputSettingsFile = argc > 1 ? argv[1] : "SampleXML.xml"; // Read XML Settings
+	const string inputSettingsFile = argc > 1 ? argv[1] : "/home/vagrant/snowbots_ws/src/IGVC2015/sb_vision/src"
+		"/Perspective_Transform/Camera_Cal/SampleXML.xml"; // Read XML Settings
 	FileStorage fs(inputSettingsFile, FileStorage::READ); // Read the settings
 	if (!fs.isOpened())
 	{

@@ -53,6 +53,8 @@ target_link_libraries( image_stitching ${catkin_LIBRARIES} ${OpenCV_LIBS})
 target_link_libraries( jan11 ${catkin_LIBRARIES})
 target_link_libraries( CameraCal ${catkin_LIBRARIES} ${OpenCV_LIBS})
 
+add_dependencies(LaneDetector sb_msgs_generate_messages_cpp)
+
 add_dependencies(Line_Detector sb_vision_generate_messages_cpp)
 
 

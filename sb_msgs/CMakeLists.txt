@@ -23,6 +23,8 @@ find_package(catkin REQUIRED COMPONENTS
    TurretCommand.msg
    Velocity.msg
    VisionNav.msg
+   Waypoint.msg
+   WaypointList.msg
  )
 
 ## Generate added messages and services with any dependencies listed here

@@ -2,15 +2,14 @@
 #include <jaus/core/transport/Transport.h>
 #include <iostream>
 
-#include <stdio.h>
-
 using namespace std;
 
 int main(int argc, char* argv[])
 {
         if (argc < 3)
         {
-                printf("Error: Arguement must include IP and Address \n");
+                std::cout << "Error: Arguments must include IP and Address" << std::endl;
+                return 1;
         }
 
         char* ip_address = argv[1];
@@ -28,6 +27,8 @@ int main(int argc, char* argv[])
         discoveryService->SetComponentIdentification("Baseline");
         int comp_id = 1000;
         JAUS::Address componentID(comp_id,1,1);
+
+        discoveryService->EnableDebugMessages(true);
         while(component.Initialize(componentID)==false){
                 std::cout << "Failed to initialize [" << componentID.ToString() << "]" << std::endl;
                 comp_id++;
@@ -46,9 +47,9 @@ int main(int argc, char* argv[])
         }
         
         // Create connection to OCP for the JAUS Interoperability Challenge using JUDP.
-        transportService->AddNetworkConnection(JAUS::Address(8000, 1, 1), 
+        /*transportService->AddNetworkConnection(JAUS::Address(8000, 1, 1), 
                             std::string(ip_address),
-                            3794);
+                            3794);*/
 
         JAUS::Management* managementService = nullptr;
         managementService = (JAUS::Management*)component.GetService(JAUS::Management::Name);
@@ -77,4 +78,3 @@ int main(int argc, char* argv[])
         component.Shutdown();
         return 0;
 }
-
