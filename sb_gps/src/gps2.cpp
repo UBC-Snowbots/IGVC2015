@@ -169,7 +169,7 @@ void gpsSubHandle(const std_msgs::String::ConstPtr& msg){
 	//cout << current_direction << endl;
 }
 
-void createAngle (double *theta, double compass){
+void createAngle (double *theta, double angleCompass){
 	/*
 	Input Parameter:
 		1. pointer to hold angle
@@ -177,6 +177,55 @@ void createAngle (double *theta, double compass){
 	Output: void (use pointer)
 	Purpose: calculates angle from target waypoint
 	*/
+
+//I'm not too familiar with pointers as parameters, I think this should be correct.
+//I have tested the function and it does create the right angle. -Nick
+
+	// x is the x cordinate, y is the y cordinate
+	double phi; //variable needed to calculate theta
+	double r = sqrt(x*x + y*y); //distance from the robot to waypoint
+	double angleRobot = 180 * (acos(y / r) / PI); //angle of robot to the y-axis
+	
+	//while direction of goal angle is in quadrant 1
+	while (x > 0 && y >= 0) {
+		phi = angleRobot;
+		if (angleCompass <= (phi + 180)) {
+			*theta = (phi - angleCompass);
+		}
+		else if (angleCompass > (phi + 180)) {
+			*theta = (360 - angleCompass + phi);
+		}
+	}
+	//while direction of goal angle is in quadrant 4
+	while (x >= 0 && y < 0) {
+		phi = (180 - angleRobot);
+		if (angleCompass <= (phi + 180)) {
+			*theta = (phi - angleCompass);
+		}
+		else if (angleCompass >(phi + 180)) {
+			*theta = (360 - angleCompass + phi);
+		}
+	}
+	//while direction of goal angle is in quadrant 3
+	while (x < 0 && y <= 0) {
+		phi = (180 + angleRobot);
+		if (angleCompass < (phi - 180)) {
+			*theta = (phi - angleCompass);
+		}
+		else if (angleCompass >(phi - 180)) {
+			*theta = (360 - angleCompass + phi);
+		}
+	}
+	//while direction of goal angle is in quadrant 2
+	while (x < 0 && y > 0) {
+		phi = (360 - angleRobot);
+		if (angleCompass < (phi - 180)) {
+			*theta = (phi - angleCompass);
+		}
+		else if (angleCompass >(phi - 180)) {
+			*theta = (360 - angleCompass + phi);
+		}
+	}
 }
 
 
