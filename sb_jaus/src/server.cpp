@@ -26,12 +26,12 @@ int main(int argc, char* argv[])
         discoveryService->SetSubsystemIdentification(JAUS::Subsystem::Vehicle,"Snowbots");
         discoveryService->SetNodeIdentification("Main");
         discoveryService->SetComponentIdentification("Baseline");
-
-        JAUS::Address componentID(6000,1,1);
-        if(component.Initialize(componentID)==false)
-        {
+        int comp_id = 1000;
+        JAUS::Address componentID(comp_id,1,1);
+        while(component.Initialize(componentID)==false){
                 std::cout << "Failed to initialize [" << componentID.ToString() << "]" << std::endl;
-                return 0;
+                comp_id++;
+                componentID(comp_id,1,1);
         }
         std::cout << "Success!" << std::endl;
 
@@ -64,6 +64,8 @@ int main(int argc, char* argv[])
                 {
                         std::cout << "==================" << std::endl;
                         managementService->PrintStatus();
+                        discoveryService->PrintStatus(); //std::cout << std::endl;
+                        transportService->PrintStatus();
                         std::cout << std::endl;
                         displayStatusTimeMs = JAUS::Time::GetUtcTimeMs();
                 }

@@ -13,11 +13,12 @@ int main()
         discoveryService->SetSubsystemIdentification(JAUS::Subsystem::Vehicle,"SnowBots_JudgeSim");
         discoveryService->SetNodeIdentification("Main");
         discoveryService->SetComponentIdentification("Baseline");
-        
-        JAUS::Address componentID(8000,1,1);
-        if(component.Initialize(componentID)==false){
-                std::cout << "Failed to initialize [" << componentID.ToString() << std::endl;
-                return 0;
+        int comp_id = 1000;
+        JAUS::Address componentID(comp_id,1,1);
+        while(component.Initialize(componentID)==false){
+                std::cout << "Failed to initialize [" << componentID.ToString() << "]" << std::endl;
+                comp_id++;
+                componentID(comp_id,1,1);
         }
         std::cout << "Success!" << std::endl;
 
@@ -29,9 +30,9 @@ int main()
                 transportService->Initialize(comp_address_id);
         }
         
-        JAUS::QueryIdentification id_query(JAUS::Address(6000,1,1),component.GetComponentID());
+	JAUS::QueryIdentification id_query(JAUS::Address(5000,1,1),component.GetComponentID());
         JAUS::ReportIdentification id_response;
-        while(!component.Send(&id_query,&id_response,5000));
+	while(!component.Send(&id_query,&id_response,5000));
         std::cout << "ID: " << id_response.GetIdentification() << std::endl;
         
         component.Shutdown();
