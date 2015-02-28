@@ -10,7 +10,11 @@ WaypointManager::WaypointManager(ros::NodeHandle node){
 WaypointManager::~WaypointManager() {}
 
 void WaypointManager::process_waypoint_list(const sb_msgs::WaypointList& list){
-	waypointList = list.waypoints;
+	if(list.waypoints.empty()){
+		stop();
+	}else{
+		waypointList = list.waypoints;
+	}
 }
 
 void WaypointManager::stop(){

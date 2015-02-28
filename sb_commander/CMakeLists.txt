@@ -22,7 +22,9 @@ include_directories(
 
 
 add_executable(sb_commander_node src/sb_commander_node.cpp)
+add_dependencies(sb_commander_node sb_msgs_generate_messages_cpp)
 add_executable(imagine_commander src/sb_imagineday_commander.cpp)
+add_dependencies(imagine_commander sb_msgs_generate_messages_cpp)
 
  target_link_libraries(sb_commander_node
    ${catkin_LIBRARIES}

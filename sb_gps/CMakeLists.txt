@@ -28,6 +28,7 @@ CATKIN_DEPENDS roscpp rospy std_msgs sb_msgs message_runtime
 include_directories(${catkin_INCLUDE_DIRS})
 
 add_executable(sb_gps src/gps.cpp)
+add_dependencies(sb_gps sb_msgs_generate_messages_cpp)
 
 target_link_libraries(sb_gps ${catkin_LIBRARIES})
 
