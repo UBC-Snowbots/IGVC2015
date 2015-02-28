@@ -30,6 +30,7 @@ include_directories(
  )
 
  add_executable(sb_driver_node src/arduino_driver.cpp)
+ add_dependencies(sb_driver_node sb_msgs_generate_messages_cpp)
 
  target_link_libraries(
   sb_driver_node 
