@@ -169,16 +169,17 @@ void gpsSubHandle(const std_msgs::String::ConstPtr& msg){
 	//cout << current_direction << endl;
 }
 
-void createAngle (double *theta, double angleCompass){
+void createAngle (double *theta, double angleCompass, double x, double y){
 	/*
 	Input Parameter:
 		1. pointer to hold angle
 		2. direction from compass
+		3. x cordinate of target waypoint
+		4. y cordinate of target waypoint
 	Output: void (use pointer)
-	Purpose: calculates angle from target waypoint
+	Purpose: calculates angle from robot to target waypoint
 	*/
 
-	// x is the x cordinate, y is the y cordinate
 	double phi; //variable needed to calculate theta
 	double r = sqrt(x*x + y*y); //distance from the robot to waypoint
 	double angleRobot = 180 * (acos(y / r) / PI); //angle of robot to the y-axis
