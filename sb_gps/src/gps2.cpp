@@ -53,7 +53,7 @@ static int LOOP_FREQ = 30;
 int gpsStatus (); //Checking if gps has started receiving data (((STATUS = 0)))
 void nmeaParse (); //Parse intake data, from USB/buffer.txt/suscribe? Need to write driver (((STATUS = 0)))
 void getWaypoint (); //collects waypoint from txt file (((STATUS = 0)))
-void createAngle (double *theta); //Calculates Angle  (((STATUS = 0)))
+void createAngle (double *theta, double angleCompass); //Calculates Angle  (((STATUS = 0)))
 void createDistance (double *d); //Calculates Distance (((STATUS = 0)))
 int checkGoal (); //Check to see if we are at destination (((STATUS = 1)))
 void createTwist (); //Calculates Twist (((STATUS = 0)))
@@ -178,16 +178,13 @@ void createAngle (double *theta, double angleCompass){
 	Purpose: calculates angle from target waypoint
 	*/
 
-//I'm not too familiar with pointers as parameters, I think this should be correct.
-//I have tested the function and it does create the right angle. -Nick
-
 	// x is the x cordinate, y is the y cordinate
 	double phi; //variable needed to calculate theta
 	double r = sqrt(x*x + y*y); //distance from the robot to waypoint
 	double angleRobot = 180 * (acos(y / r) / PI); //angle of robot to the y-axis
 	
 	//while direction of goal angle is in quadrant 1
-	while (x > 0 && y >= 0) {
+	if (x > 0 && y >= 0) {
 		phi = angleRobot;
 		if (angleCompass <= (phi + 180)) {
 			*theta = (phi - angleCompass);
@@ -197,7 +194,7 @@ void createAngle (double *theta, double angleCompass){
 		}
 	}
 	//while direction of goal angle is in quadrant 4
-	while (x >= 0 && y < 0) {
+	if (x >= 0 && y < 0) {
 		phi = (180 - angleRobot);
 		if (angleCompass <= (phi + 180)) {
 			*theta = (phi - angleCompass);
@@ -207,7 +204,7 @@ void createAngle (double *theta, double angleCompass){
 		}
 	}
 	//while direction of goal angle is in quadrant 3
-	while (x < 0 && y <= 0) {
+	if (x < 0 && y <= 0) {
 		phi = (180 + angleRobot);
 		if (angleCompass < (phi - 180)) {
 			*theta = (phi - angleCompass);
@@ -217,7 +214,7 @@ void createAngle (double *theta, double angleCompass){
 		}
 	}
 	//while direction of goal angle is in quadrant 2
-	while (x < 0 && y > 0) {
+	if (x < 0 && y > 0) {
 		phi = (360 - angleRobot);
 		if (angleCompass < (phi - 180)) {
 			*theta = (phi - angleCompass);
@@ -257,7 +254,7 @@ void createDistance (double *d){
 	lon = 	(*currentWayPoint).lon_x;
 	lat = (*currentWayPoint).lat_y;
 
-	double dlong,dlat
+	double dlong,dlat;
 
 	dlong = (*targetWayPoint).lon_x - (*currentWayPoint).lon_x;
 	dlat = (*targetWayPoint).lat_y - (*currentWayPoint).lat_y;
@@ -266,8 +263,8 @@ void createDistance (double *d){
 	double c = 2 * atan2(sqrt(a), sqrt(1-a));
 
 	*d = R * c;
-
-	return 0;
+}
+	
 
 int checkGoal (double *currentWayPoint, double *targetWayPoint){
 	/*

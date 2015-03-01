@@ -3,7 +3,7 @@
 #include <math.h>
 
 //Constants
-#define PI 3.14159265359
+#define PI acos(-1.0)
 
 int main(void){
 	//Variables
@@ -60,3 +60,5 @@ int main(void){
 	}
 	return 0;
 }
+
+
