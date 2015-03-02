@@ -169,59 +169,113 @@ void gpsSubHandle(const std_msgs::String::ConstPtr& msg){
 	//cout << current_direction << endl;
 }
 
-void createAngle (double *theta, double angleCompass, double x, double y){
+void createAngle(double *theta, double angleCompass, double x, double y){
 	/*
 	Input Parameter:
-		1. pointer to hold angle
-		2. direction from compass
-		3. x cordinate of target waypoint
-		4. y cordinate of target waypoint
+	1. pointer to hold angle
+	2. direction of robot from North (0-359 degrees)
+	3. x cordinate of target waypoint
+	4. y codinate of target waypoint
 	Output: void (use pointer)
-	Purpose: calculates angle from robot to target waypoint
+	Purpose: calculates angle of robot to target waypoint ((-180)-180 degrees)
 	*/
 
-	double phi; //variable needed to calculate theta
+	// x is the x cordinate, y is the y cordinate
+	double angleWaypoint; //Angle from North to waypoint
 	double r = sqrt(x*x + y*y); //distance from the robot to waypoint
-	double angleRobot = 180 * (acos(y / r) / PI); //angle of robot to the y-axis
-	
+	double angleGoal = 180 * (acos(abs(y) / r) / PI); //angle to target waypoint from the y-axis
+	double angleCompass180; //angleCompass +/- 180
+
+	if (angleCompass >= 180){
+		angleCompass180 = angleCompass - 180;
+	}
+	else if (angleCompass < 180){
+		angleCompass180 = angleCompass + 180;
+	}
 	//while direction of goal angle is in quadrant 1
 	if (x > 0 && y >= 0) {
-		phi = angleRobot;
-		if (angleCompass <= (phi + 180)) {
-			*theta = (phi - angleCompass);
+		angleWaypoint = angleGoal;
+		if (angleCompass <= angleCompass180) {
+			if (angleWaypoint > angleCompass180){
+				*theta = (angleWaypoint - angleCompass - 360);
+			}
+			else{
+				*theta = angleWaypoint - angleCompass;
+			}
 		}
-		else if (angleCompass > (phi + 180)) {
-			*theta = (360 - angleCompass + phi);
+		else if (angleCompass > angleCompass180) {
+			if (angleWaypoint < angleCompass180){
+				*theta = (angleCompass - angleWaypoint - 360);
+			}
+			else{
+				*theta = angleWaypoint - angleCompass;
+			}
+			if (angleWaypoint < angleCompass - 180){
+				*theta = -*theta;
+			}
 		}
 	}
 	//while direction of goal angle is in quadrant 4
 	if (x >= 0 && y < 0) {
-		phi = (180 - angleRobot);
-		if (angleCompass <= (phi + 180)) {
-			*theta = (phi - angleCompass);
+		angleWaypoint = (180 - angleGoal);
+		if (angleCompass <= angleCompass180) {
+			if (angleWaypoint > angleCompass180){
+				*theta = (angleWaypoint - angleCompass - 360);
+			}
+			else{
+				*theta = angleWaypoint - angleCompass;
+			}
 		}
-		else if (angleCompass >(phi + 180)) {
-			*theta = (360 - angleCompass + phi);
+		else if (angleCompass > angleCompass180) {
+			if (angleWaypoint < angleCompass180){
+				*theta = (angleCompass - angleWaypoint - 360);
+			}
+			else{
+				*theta = angleWaypoint - angleCompass;
+			}
+			if (angleWaypoint < angleCompass - 180){
+				*theta = -*theta;
+			}
 		}
 	}
 	//while direction of goal angle is in quadrant 3
 	if (x < 0 && y <= 0) {
-		phi = (180 + angleRobot);
-		if (angleCompass < (phi - 180)) {
-			*theta = (phi - angleCompass);
+		angleWaypoint = (180 + angleGoal);
+		if (angleCompass < angleCompass180) {
+			if (angleWaypoint > angleCompass180){
+				*theta = (angleWaypoint - angleCompass - 360);
+			}
+			else{
+				*theta = angleWaypoint - angleCompass;
+			}
 		}
-		else if (angleCompass >(phi - 180)) {
-			*theta = (360 - angleCompass + phi);
+		else if (angleCompass > angleCompass180) {
+			if (angleWaypoint < angleCompass180){
+				*theta = (angleCompass - angleWaypoint - 360);
+			}
+			else{
+				*theta = angleWaypoint - angleCompass;
+			}
 		}
 	}
 	//while direction of goal angle is in quadrant 2
 	if (x < 0 && y > 0) {
-		phi = (360 - angleRobot);
-		if (angleCompass < (phi - 180)) {
-			*theta = (phi - angleCompass);
+		angleWaypoint = (360 - angleGoal);
+		if (angleCompass < angleCompass180) {
+			if (angleWaypoint > angleCompass180){
+				*theta = (angleWaypoint - angleCompass - 360);
+			}
+			else{
+				*theta = angleWaypoint - angleCompass;
+			}
 		}
-		else if (angleCompass >(phi - 180)) {
-			*theta = (360 - angleCompass + phi);
+		else if (angleCompass > angleCompass180) {
+			if (angleWaypoint < angleCompass180){
+				*theta = (angleCompass - angleWaypoint - 360);
+			}
+			else{
+				*theta = angleWaypoint - angleCompass;
+			}
 		}
 	}
 }
