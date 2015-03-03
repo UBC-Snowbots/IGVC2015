@@ -24,6 +24,7 @@ catkin_package(
 CATKIN_DEPENDS roscpp rospy std_msgs sb_msgs message_runtime
 )
 
+catkin_add_gtest(utest test/gps_test.cpp)
 
 include_directories(${catkin_INCLUDE_DIRS})
 
