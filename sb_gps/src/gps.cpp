@@ -79,8 +79,9 @@ int main (int argc, char **argv){
   double theta = 0;
 
 	while (ros::ok()){
+    ROS_INFO("Everything is going to be ok");
+
 		while (gpsFlag == true){
-			ROS_INFO("Everything is going to be ok");
 
   			if(checkGoal (CurrentWaypoint, TargetWaypoint) || moveStatus){
             nextTwist.linear.x = 0;
