@@ -3,15 +3,15 @@
 class AStar
 {
 private:
-	int map_width = 10;
-	int map_height = 10;
-	int map[100];
-	int frontier[100];
-	int frontier_size = 0;
-	int came_from[100];
-	int cost_from_start[100];
-	int estimated_cost[100];
-	static const int INF = 200;
+	int map_width;
+	int map_height;
+	int * map;
+	int * frontier;
+	int frontier_size;
+	int * came_from;
+	int * cost_from_start;
+	int * estimated_cost;
+	static const int INF = 2000;
 	void Swap(int one, int two);
 	int GetIndex(int x, int y);
 	int GetX(int index); //intrinsic calculation
@@ -25,7 +25,7 @@ private:
 	void RemoveRoot();
 
 public:
-	bool Init();
+	bool Init(int* map, int width, int height);
 	void ReconstructPath(int start_location, int goal_location);
 	void AStarSearch(int start, int goal);
 };

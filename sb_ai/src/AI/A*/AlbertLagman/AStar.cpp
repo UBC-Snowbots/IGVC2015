@@ -7,17 +7,20 @@ using namespace std;
 // Edited by Albert Lagman:albertlagman@gmail.com
 
 // Initialization function for preparing the variables for A*
-bool AStar::Init()
+bool AStar::Init(int* map, int width, int height)
 {
-	int x, y, index;
+	map_width = width;
+	map_height = height;
+
+	int size = map_width * map_height;
+	map = new int[size];
 	
-	for (y = 0; y < map_height; y++) {
-		for (x = 0; x < map_width; x++) {
-			index = y*map_width + x;
-			map[index] = 0;
-		}
-	} 
-	
+	frontier_size = 0;
+	came_from = new int[size];
+	frontier = new int[size];
+	cost_from_start = new int[size];
+	estimated_cost = new int[size];
+
 	for (int i = 0; i < 100; i++) {
 		came_from[i] = -1;
 		frontier[i] = -1;
