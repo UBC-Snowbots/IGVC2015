@@ -21,7 +21,6 @@
 //Constants
 #define EARTH_RADIUS 6378.137 //In KM
 #define PI 3.14159265
-#define WAYPOINT_FILE "practice1.txt" //using practice1.txt for testing
 
 using namespace std;
 
