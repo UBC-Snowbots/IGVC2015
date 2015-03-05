@@ -58,7 +58,7 @@ bool goto_waypoint(sb_gps::GotoWaypoint::Request &req, sb_gps::GotoWaypoint::Res
 void gpsSubHandle(const std_msgs::String::ConstPtr& msg);
 geometry_msgs::Twist createNextTwist(geometry_msgs::Twist nextTwist);
 bool checkGoal (waypoint CurrentWayPoint, waypoint TargetWayPoint);
-void createAngle (double *theta, double angleCompass);
+void createAngle(double *theta, double angleCompass);
 
 
 geometry_msgs::Vector3 directions;
@@ -194,61 +194,120 @@ bool checkGoal (waypoint CurrentWaypoint, waypoint TargetWaypoint){
     return false;
 }
 
-void createAngle (double *theta, double angleCompass){
+void createAngle(double *theta, double angleCompass){
 	/*
 	Input Parameter:
-		1. pointer to hold angle
-		2. direction from compass
+	1. pointer to hold angle
+	2. direction of robot from North (0-359 degrees)
 	Output: void (use pointer)
-	Purpose: calculates angle from target waypoint
+	3. x and y cordinates of our goal
+	Purpose: calculates angle of robot to target waypoint ((-180)-180 degrees)
 	*/
 
-//I'm not too familiar with pointers as parameters, I think this should be correct.
-//I have tested the function and it does create the right angle. -Nick
-  double x,y;
-	// x is the x cordinate, y is the y cordinate
-	double phi; //variable needed to calculate theta
+	double x = TargetWaypoint.lon; //need to use meters not cordinates
+	double y = TargetWaypoint.lat;	//need to use meters not cordinates
+	double angleWaypoint; //Angle from North to waypoint
 	double r = sqrt(x*x + y*y); //distance from the robot to waypoint
-	double angleRobot = 180 * (acos(y / r) / PI); //angle of robot to the y-axis
+	double angleGoal = 180 * (acos(abs(y) / r) / PI); //angle of goal to the y-axis
+	double angleCompass180; //Angle +/- 180
 
+	if (angleCompass >= 180){
+		angleCompass180 = angleCompass - 180;
+	}
+	else if (angleCompass < 180){
+		angleCompass180 = angleCompass + 180;
+	}
 	//while direction of goal angle is in quadrant 1
-	while (x > 0 && y >= 0) {
-		phi = angleRobot;
-		if (angleCompass <= (phi + 180)) {
-			*theta = (phi - angleCompass);
+	if (x > 0 && y >= 0) {
+		angleWaypoint = angleGoal;
+		if (angleCompass <= angleCompass180) {
+			if (angleWaypoint > angleCompass180){
+				*theta = (angleWaypoint - angleCompass - 360);
+			}
+			else{
+				*theta = angleWaypoint - angleCompass;
+			}
 		}
-		else if (angleCompass > (phi + 180)) {
-			*theta = (360 - angleCompass + phi);
+		else if (angleCompass > angleCompass180) {
+			if (angleWaypoint < angleCompass180){
+				*theta = (angleCompass - angleWaypoint - 360);
+			}
+			else{
+				*theta = angleWaypoint - angleCompass;
+			}
+			if (angleWaypoint < angleCompass180){
+				*theta = -*theta;
+			}
 		}
 	}
 	//while direction of goal angle is in quadrant 4
-	while (x >= 0 && y < 0) {
-		phi = (180 - angleRobot);
-		if (angleCompass <= (phi + 180)) {
-			*theta = (phi - angleCompass);
+	if (x >= 0 && y < 0) {
+		angleWaypoint = (180 - angleGoal);
+		if (angleCompass <= angleCompass180) {
+			if (angleWaypoint > angleCompass180){
+				*theta = (angleWaypoint - angleCompass - 360);
+			}
+			else{
+				*theta = angleWaypoint - angleCompass;
+			}
 		}
-		else if (angleCompass >(phi + 180)) {
-			*theta = (360 - angleCompass + phi);
+		else if (angleCompass > angleCompass180) {
+			if (angleWaypoint < angleCompass180){
+				*theta = (angleCompass - angleWaypoint - 360);
+			}
+			else{
+				*theta = angleWaypoint - angleCompass;
+			}
+			if (angleWaypoint < angleCompass180){
+				*theta = -*theta;
+			}
 		}
 	}
 	//while direction of goal angle is in quadrant 3
-	while (x < 0 && y <= 0) {
-		phi = (180 + angleRobot);
-		if (angleCompass < (phi - 180)) {
-			*theta = (phi - angleCompass);
+	if (x < 0 && y <= 0) {
+		angleWaypoint = (180 + angleGoal);
+		if (angleCompass <= angleCompass180) {
+			if (angleWaypoint > angleCompass180){
+				*theta = (angleWaypoint - angleCompass - 360);
+			}
+			else{
+				*theta = angleWaypoint - angleCompass;
+			}
 		}
-		else if (angleCompass >(phi - 180)) {
-			*theta = (360 - angleCompass + phi);
+		else if (angleCompass > angleCompass180) {
+			if (angleWaypoint < angleCompass180){
+				*theta = (angleCompass - angleWaypoint - 360);
+			}
+			else{
+				*theta = angleWaypoint - angleCompass;
+			}
+			if (angleWaypoint > angleCompass180){
+				*theta = (angleWaypoint - angleCompass - 360);
+			}
 		}
 	}
 	//while direction of goal angle is in quadrant 2
-	while (x < 0 && y > 0) {
-		phi = (360 - angleRobot);
-		if (angleCompass < (phi - 180)) {
-			*theta = (phi - angleCompass);
+	if (x < 0 && y > 0) {
+		angleWaypoint = (360 - angleGoal);
+		if (angleCompass <= angleCompass180) {
+			if (angleWaypoint > angleCompass180){
+				*theta = (angleWaypoint - angleCompass - 360);
+			}
+			else{
+				*theta = angleWaypoint - angleCompass;
+			}
 		}
-		else if (angleCompass >(phi - 180)) {
-			*theta = (360 - angleCompass + phi);
+		else if (angleCompass > angleCompass180) {
+			if (angleWaypoint < angleCompass180){
+				*theta = (angleCompass - angleWaypoint - 360);
+			}
+			else{
+				*theta = angleWaypoint - angleCompass;
+			}
+			if (angleWaypoint > angleCompass180){
+				*theta = (angleWaypoint - angleCompass - 360);
+			}			
 		}
 	}
 }
+

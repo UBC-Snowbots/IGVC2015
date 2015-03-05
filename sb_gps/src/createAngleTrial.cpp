@@ -89,7 +89,7 @@ void createAngle(double *theta, double angleCompass){
 			else{
 				*theta = angleWaypoint - angleCompass;
 			}
-			if (angleWaypoint < angleCompass - 180){
+			if (angleWaypoint < angleCompass180){
 				*theta = -*theta;
 			}
 		}
@@ -112,7 +112,7 @@ void createAngle(double *theta, double angleCompass){
 			else{
 				*theta = angleWaypoint - angleCompass;
 			}
-			if (angleWaypoint < angleCompass - 180){
+			if (angleWaypoint < angleCompass180){
 				*theta = -*theta;
 			}
 		}
@@ -120,7 +120,7 @@ void createAngle(double *theta, double angleCompass){
 	//while direction of goal angle is in quadrant 3
 	if (x < 0 && y <= 0) {
 		angleWaypoint = (180 + angleGoal);
-		if (angleCompass < angleCompass180) {
+		if (angleCompass <= angleCompass180) {
 			if (angleWaypoint > angleCompass180){
 				*theta = (angleWaypoint - angleCompass - 360);
 			}
@@ -134,13 +134,16 @@ void createAngle(double *theta, double angleCompass){
 			}
 			else{
 				*theta = angleWaypoint - angleCompass;
+			}
+			if (angleWaypoint > angleCompass180){
+				*theta = (angleWaypoint - angleCompass - 360);
 			}
 		}
 	}
 	//while direction of goal angle is in quadrant 2
 	if (x < 0 && y > 0) {
 		angleWaypoint = (360 - angleGoal);
-		if (angleCompass < angleCompass180) {
+		if (angleCompass <= angleCompass180) {
 			if (angleWaypoint > angleCompass180){
 				*theta = (angleWaypoint - angleCompass - 360);
 			}
@@ -155,6 +158,9 @@ void createAngle(double *theta, double angleCompass){
 			else{
 				*theta = angleWaypoint - angleCompass;
 			}
+			if (angleWaypoint > angleCompass180){
+				*theta = (angleWaypoint - angleCompass - 360);
+			}			
 		}
 	}
 }
