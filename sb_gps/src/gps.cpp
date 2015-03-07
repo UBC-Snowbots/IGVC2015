@@ -217,11 +217,9 @@ void createAngle(double *theta, double angleCompass){
   double x,y;
 	// x is the x cordinate, y is the y cordinate
 	double phi; //variable needed to  calculate theta
-=======
 	double x = TargetWaypoint.lon; //need to use meters not cordinates
 	double y = TargetWaypoint.lat;	//need to use meters not cordinates
 	double angleWaypoint; //Angle from North to waypoint
->>>>>>> 101f1f4fef903ec44b68ecf46a134511fd6dc6b8
 	double r = sqrt(x*x + y*y); //distance from the robot to waypoint
 	double angleGoal = 180 * (acos(abs(y) / r) / PI); //angle of goal to the y-axis
 	double angleCompass180; //Angle +/- 180
@@ -321,12 +319,11 @@ void createAngle(double *theta, double angleCompass){
 			}
 			if (angleWaypoint > angleCompass180){
 				*theta = (angleWaypoint - angleCompass - 360);
-			}			
+			}
 		}
 	}
 }
 
-<<<<<<< HEAD
 void createDistance (double &d){
 	/*
 	Input Parameter: pointer to store distance
@@ -343,5 +340,3 @@ void createDistance (double &d){
 
 	*d = R * c;
 }
-=======
->>>>>>> 101f1f4fef903ec44b68ecf46a134511fd6dc6b8
