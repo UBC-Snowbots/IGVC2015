@@ -13,8 +13,8 @@ using namespace std;
 static const double PI		 = 3.1415265;
 static const double IGNORE_ANGLE = PI/4; //45degrees
 static const int    OFFSET_RAYS = 30;        // offset from central ray
-static const double REDZONE      = 1.0; // only rotate, do not go
-static const double ORANGEZONE   = 3.0; // turn 
+static const double REDZONE      = 3.0; // only rotate, do not go
+static const double ORANGEZONE   = 6.0; // turn 
 static const double SLOW_SPEED	 = 0.1;
 static const double SPEED_LIMIT  = 0.3;
 
