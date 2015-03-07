@@ -39,6 +39,8 @@ double angleCompass;
 bool moveStatus;
 bool goal;
 bool gpsFlag = true; //indicates connection from gps chip
+double *d = 0;
+double *theta = 0;
 waypoint CurrentWaypoint,TargetWaypoint,LastWaypoint;
 geometry_msgs::Twist nextTwist;
 
@@ -59,9 +61,7 @@ void gpsSubHandle(const std_msgs::String::ConstPtr& msg);
 geometry_msgs::Twist createNextTwist(geometry_msgs::Twist nextTwist);
 bool checkGoal (waypoint CurrentWayPoint, waypoint TargetWayPoint);
 void createAngle(double *theta, double angleCompass);
-
-
-geometry_msgs::Vector3 directions;
+void createDistance (double * d);
 
 int main (int argc, char **argv){
 
@@ -76,7 +76,6 @@ int main (int argc, char **argv){
 
   ros::Rate loop_rate(5); //10hz loop rate
 
-  double d = 0;
 
 	while (ros::ok()){
     ROS_INFO("Everything is going to be ok");
@@ -103,7 +102,7 @@ int main (int argc, char **argv){
             cout << "Arrived at destination" << endl;
   				}
   			else{
-            createAngle (&theta, angleCompass);
+            createAngle (theta, angleCompass);
             nextTwist = createNextTwist (nextTwist); //Make new twist message
             ROS_INFO("Current Position:");
             cout << "Current longitude: " << CurrentWaypoint.lon << " Current latitude: " << CurrentWaypoint.lat << endl;
@@ -211,10 +210,8 @@ void createAngle(double *theta, double angleCompass){
 	Purpose: calculates angle of robot to target waypoint ((-180)-180 degrees)
 	*/
 
-<<<<<<< HEAD
 //I'm not too familiar with pointers as parameters, I think this should be correct.
 //I have tested the function and it does create the right angle. -Nick
-  double x,y;
 	// x is the x cordinate, y is the y cordinate
 	double phi; //variable needed to  calculate theta
 	double x = TargetWaypoint.lon; //need to use meters not cordinates
@@ -324,7 +321,7 @@ void createAngle(double *theta, double angleCompass){
 	}
 }
 
-void createDistance (double &d){
+void createDistance (double * d){
 	/*
 	Input Parameter: pointer to store distance
 	Output: void (use pointer)
@@ -332,11 +329,11 @@ void createDistance (double &d){
 	Link:http://stackoverflow.com/questions/19412462/getting-distance-between-two-points-based-on-latitude-longitude-python
 	*/
 
-	double dlon = (*targetWayPoint).lon - (*currentWayPoint).lon;
-	double dlat = (*targetWayPoint).lat - (*currentWayPoint).lat;
+	double dlon = (TargetWaypoint).lon - (CurrentWaypoint).lon;
+	double dlat = (TargetWaypoint).lat - (CurrentWaypoint).lat;
 
-	double a = (sin(dlat/2))**2 + cos((*currentWayPoint).lat_y) * cos((*targetWayPoint).lat_y) * (sin(dlong/2))**2;
+	double a = (sin(dlat/2))*2 + cos((CurrentWaypoint).lat) * cos((TargetWaypoint).lat) * (sin(dlon/2))*2;
 	double c = 2 * atan2(sqrt(a), sqrt(1-a));
 
-	*d = R * c;
+	*d = EARTH_RADIUS * c;
 }
