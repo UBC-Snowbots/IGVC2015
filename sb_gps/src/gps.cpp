@@ -51,6 +51,7 @@ static const string NODE_NAME = "sb_gps";
 static const string PUBLISH_TOPIC = "gps_twist";
 static const string GPS_INPUT_DIRECTION = "waypoint";
 static const string SERVICE_NAME = "goto_waypoint";
+
 //static int LOOP_FREQ = 30;
 
 bool goto_waypoint(sb_gps::GotoWaypoint::Request &req, sb_gps::GotoWaypoint::Response &res);
@@ -75,13 +76,14 @@ int main (int argc, char **argv){
 
   ros::Rate loop_rate(5); //10hz loop rate
 
-  double theta = 0;
+  double d = 0;
 
 	while (ros::ok()){
     ROS_INFO("Everything is going to be ok");
 
 		while (gpsFlag == true){
 
+        createDistance (d);
   			if(checkGoal (CurrentWaypoint, TargetWaypoint) || moveStatus){
             nextTwist.linear.x = 0;
             nextTwist.linear.y = 0;
@@ -94,11 +96,17 @@ int main (int argc, char **argv){
             if (moveStatus)
             ROS_INFO("Command stop");
             else
-            ROS_INFO("Arrived at destination");
+            ROS_INFO("Current Position:");
+            cout << "Current longitude: " << CurrentWaypoint.lon << " Current latitude: " << CurrentWaypoint.lat << endl;
+            ROS_INFO("Target Position:");
+            cout << "Target  longitude: " << TargetWaypoint.lon  << " Target  latitude: " << TargetWaypoint.lat  << endl;
+            cout << "Arrived at destination" << endl;
   				}
   			else{
             createAngle (&theta, angleCompass);
             nextTwist = createNextTwist (nextTwist); //Make new twist message
+            ROS_INFO("Current Position:");
+            cout << "Current longitude: " << CurrentWaypoint.lon << " Current latitude: " << CurrentWaypoint.lat << endl;
             ROS_INFO("Twist lin.x = %f, Twist lin.y = %f, Twist lin.z = %f", nextTwist.linear.x, nextTwist.linear.y, nextTwist.linear.z);
             ROS_INFO("Twist ang.x = %f, Twist ang.y = %f, Twist ang.z = %f", nextTwist.angular.x, nextTwist.angular.y, nextTwist.angular.z);
             cout << "Angle to destination" << theta << endl;
@@ -206,7 +214,7 @@ void createAngle (double *theta, double angleCompass){
 //I have tested the function and it does create the right angle. -Nick
   double x,y;
 	// x is the x cordinate, y is the y cordinate
-	double phi; //variable needed to calculate theta
+	double phi; //variable needed to  calculate theta
 	double r = sqrt(x*x + y*y); //distance from the robot to waypoint
 	double angleRobot = 180 * (acos(y / r) / PI); //angle of robot to the y-axis
 
@@ -250,4 +258,21 @@ void createAngle (double *theta, double angleCompass){
 			*theta = (360 - angleCompass + phi);
 		}
 	}
+}
+
+void createDistance (double &d){
+	/*
+	Input Parameter: pointer to store distance
+	Output: void (use pointer)
+	Purpose: calculates distance from target waypoints
+	Link:http://stackoverflow.com/questions/19412462/getting-distance-between-two-points-based-on-latitude-longitude-python
+	*/
+
+	double dlon = (*targetWayPoint).lon - (*currentWayPoint).lon;
+	double dlat = (*targetWayPoint).lat - (*currentWayPoint).lat;
+
+	double a = (sin(dlat/2))**2 + cos((*currentWayPoint).lat_y) * cos((*targetWayPoint).lat_y) * (sin(dlong/2))**2;
+	double c = 2 * atan2(sqrt(a), sqrt(1-a));
+
+	*d = R * c;
 }
