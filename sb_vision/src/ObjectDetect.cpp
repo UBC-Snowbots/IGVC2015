@@ -46,10 +46,10 @@ string nestedCascadeName = "/home/ol/opencv-2.4.9/data/haarcascades/haarcascade_
 
 static const string NODE_NAME ="ObjectDetect";
 
-int main( int argn, char **argm, int argc, const char** argv )
+int main(int argc, char** argv )
 {
 
-init(argn, argm, NODE_NAME); //initializes your ROS node
+init(argc, argv, NODE_NAME); //initializes your ROS node
      while (ros::ok())
 {
     CvCapture* capture = 0;
