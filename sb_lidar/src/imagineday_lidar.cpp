@@ -14,7 +14,7 @@ static const double PI		 = 3.1415265;
 static const double IGNORE_ANGLE = PI/4; //45degrees
 static const int    OFFSET_RAYS = 30;        // offset from central ray
 static const double REDZONE      = 1.0; // only rotate, do not go
-static const double ORANGEZONE   = 1.0; // turn 
+static const double ORANGEZONE   = 3.0; // turn 
 static const double SLOW_SPEED	 = 0.1;
 static const double SPEED_LIMIT  = 0.3;
 
@@ -41,16 +41,17 @@ void lidar_callback(const sensor_msgs::LaserScanConstPtr& msg_ptr) {
 		float angle = msg_ptr->angle_min + i*(msg_ptr->angle_increment);
 		float dist = msg_ptr->ranges[i];
 
-		/*if (dist <= REDZONE)
+		if (dist <= REDZONE)
 		{
 			// stop moving forward
 			car_command.throttle = 0;
-			if (angle <= 0) { car_command.steering = 0.3; }
-			else { car_command.steering = -0.3; }		
-		}*/
-		if (dist <= ORANGEZONE)
+			if (angle <= 0) { car_command.steering = 0.35; }
+			else { car_command.steering = -0.35; }		
+		}
+
+		else if (dist <= ORANGEZONE)
 		{
-			car_command.throttle = 0.1;
+			car_command.throttle = SLOW_SPEED;
 			if (angle <= 0) { car_command.steering = 0.3; }
 			else { car_command.steering = -0.3; }	
 		}

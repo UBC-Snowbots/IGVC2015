@@ -11,8 +11,11 @@ find_package(catkin REQUIRED COMPONENTS
 ## Generate messages in the 'msg' folder
  add_message_files(
    FILES
-   CarCommand.msg
    gps.msg
+   AISimMap.msg
+   AISimGPS.msg
+   CarCommand.msg
+   GPSWaypoint.msg
    IMU.msg
    jausin.msg
    jausout.msg
@@ -23,6 +26,8 @@ find_package(catkin REQUIRED COMPONENTS
    TurretCommand.msg
    Velocity.msg
    VisionNav.msg
+   Waypoint.msg
+   WaypointList.msg
  )
 
 ## Generate added messages and services with any dependencies listed here

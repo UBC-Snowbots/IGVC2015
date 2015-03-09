@@ -1,5 +1,6 @@
 <?xml version="1.0"?>
 <opencv_storage>
+
 	<Settings>
 			<!-- Number of inner corners per a item row and column. (square, circle) -->
 		<BoardSize_Width>7</BoardSize_Width>
@@ -37,4 +38,5 @@
 			<!-- If true (non-zero) we show after calibration the undistorted images.-->
 		<Show_UndistortedImage>1</Show_UndistortedImage>
 	</Settings>
+
 </opencv_storage>
