@@ -13,8 +13,8 @@ using namespace std;
 static const double PI		 = 3.1415265;
 static const double IGNORE_ANGLE = PI/4; //45degrees
 static const int    OFFSET_RAYS = 30;        // offset from central ray
-static const double REDZONE      = 1.0; // only rotate, do not go
-static const double ORANGEZONE   = 3.0; // turn 
+static const double REDZONE      = 3.0; // only rotate, do not go
+static const double ORANGEZONE   = 6.0; // turn 
 static const double SLOW_SPEED	 = 0.1;
 static const double SPEED_LIMIT  = 0.3;
 
@@ -25,7 +25,7 @@ static const string SUBSCRIBE_TOPIC = "scan";
 static const string PUBLISH_TOPIC   = "lidar_nav";
 static int LOOP_FREQ = 30;
 
-sb_msgs::CarCommand car_command;
+geometry_msgs::Twist car_command;
 
 int danger = 0;
 
@@ -33,7 +33,6 @@ int danger = 0;
 void lidar_callback(const sensor_msgs::LaserScanConstPtr& msg_ptr) {
 
 	int num_rays = msg_ptr->ranges.size();
-	car_command.priority = 1;
 	float range_min = msg_ptr->range_min;
 
 	for(int i = 0; i < num_rays;i++)
@@ -41,24 +40,27 @@ void lidar_callback(const sensor_msgs::LaserScanConstPtr& msg_ptr) {
 		float angle = msg_ptr->angle_min + i*(msg_ptr->angle_increment);
 		float dist = msg_ptr->ranges[i];
 
+		// Stop and steer only
 		if (dist <= REDZONE)
 		{
-			// stop moving forward
-			car_command.throttle = 0;
-			if (angle <= 0) { car_command.steering = 0.35; }
-			else { car_command.steering = -0.35; }		
+			car_command.linear.y = 0;
+			if (angle <= 0) { car_command.angular.z = 0.35; }
+			else { car_command.angular.z = -0.35; }		
 		}
 
+		// Slow down and steer
 		else if (dist <= ORANGEZONE)
 		{
-			car_command.throttle = SLOW_SPEED;
-			if (angle <= 0) { car_command.steering = 0.3; }
-			else { car_command.steering = -0.3; }	
+			car_command.linear.y = SLOW_SPEED;
+			if (angle <= 0) { car_command.angular.z = 0.3; }
+			else { car_command.angular.z = -0.3; }	
 		}
+
+		// Go straight
 		else
 		{
-			car_command.throttle = SPEED_LIMIT;
-			car_command.steering = 0;
+			car_command.linear.y = SPEED_LIMIT;
+			car_command.angular.z = 0;
 		}
 	}
 }
@@ -72,7 +74,7 @@ int main (int argc, char** argv)
 
 	Subscriber lidar_state = n.subscribe(SUBSCRIBE_TOPIC,20,lidar_callback);
 	
-	Publisher car_pub = n.advertise<sb_msgs::CarCommand>(PUBLISH_TOPIC,1);
+	Publisher car_pub = n.advertise<geometry_msgs::Twist>(PUBLISH_TOPIC,1);
 	
 	Rate loop_rate(LOOP_FREQ);
 	ROS_INFO("ready to go");
@@ -81,7 +83,7 @@ int main (int argc, char** argv)
 	while(ros::ok())
 	{
 		car_pub.publish(car_command);
-		ROS_INFO("Throttle: %0.2f, Steering: %0.2f", car_command.throttle, car_command.steering);
+		ROS_INFO("Throttle: %0.2f, Steering: %0.2f", car_command.linear.y, car_command.angular.z);
 	  	ros::spinOnce();
     		loop_rate.sleep();	
 	}
