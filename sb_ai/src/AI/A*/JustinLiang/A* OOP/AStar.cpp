@@ -10,6 +10,7 @@ AStar::AStar(int map_width, int map_height) :
 			_map_width(map_width), _map_height(map_height),
 			_frontier_size(0)
 {
+	// Resize vector to contain w x h number of elements
 	_map.resize(_map_width * _map_height);
 	_frontier.resize(_map_width * _map_height);
 	_came_from.resize(_map_width * _map_height);
@@ -18,6 +19,7 @@ AStar::AStar(int map_width, int map_height) :
 
 	int index;
 
+	// Initialize map to be 0
 	for (int y = 0; y < _map_height; y++) {
 		for (int x = 0; x < _map_width; x++) {
 			index = y*_map_width + x;
@@ -66,6 +68,7 @@ void AStar::FrontierPriority(int _frontier_position)
 		while (parent >= 0) {	// check that it's not out of range
 
 			// The _frontier is prioritizes the locations using their estimated costs
+			// If the cost of the parent is larger than the child, then we swap it since we want a min heap
 			if (_estimated_cost[_frontier[parent]] > _estimated_cost[_frontier[_frontier_position]]) {
 				Swap(parent, _frontier_position);
 			}
@@ -73,7 +76,7 @@ void AStar::FrontierPriority(int _frontier_position)
 
 			parent = (parent - 1) / 2;
 		}
-
+		printf
 		return;
 	}
 }
@@ -87,9 +90,9 @@ void AStar::Insert(int location)
 	return;
 }
 
-// TODO: Heuristic function estimates the cost to travel from start_location to goal_location
+// Heuristic function estimates the cost to travel from start_location to goal_location
 // Admissible: Heuristic(start, goal) <= ActualCost(start, goal)
-// Pythagoras. Assume admissible?
+// Pythagoras. Assume admissible.
 // May need to multiply by some scaling factor to represent physical distances
 int AStar::Heuristic(int start_location, int goal_location)
 {
@@ -118,6 +121,8 @@ void AStar::ReconstructPath(int start_location, int goal_location)
 bool AStar::NotAlreadyTravelled(int location, int curr_loc)
 {
 	if (_came_from[location] == -1) { return true; }
+	// If the cost to the "location" is greater than the cost it takes to get to the same location from the curr_loc,
+	// then we want to expand from the curr_loc since it is cheaper.
 	else if (_cost_from_start[curr_loc] + 1 < _cost_from_start[location]) { return true; }
 	else { return false; }
 }
@@ -255,7 +260,6 @@ void AStar::AStarSearch(int start, int goal)
 		// TODO: There is a function that takes care of choosing the neighbors and adding them to the _frontier
 		AddNeighborsToFrontier(current_location, goal);
 
-		//_frontier_size = 0;	// this is here just to make the initial template runs. Remove this when you no longer need it.
 	}
 
 	cout << "No path found" << endl;
