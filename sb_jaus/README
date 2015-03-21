@@ -1,3 +1,8 @@
 
-This build depends on JAUS++. Have the library built in a subfolder named JAUS++ - cmake will do the rest.
+This build depends on JAUS++, which has been comitted to git. Build will be automatic *AFTER* you have met dependencies.
+
+You'll  need to sudo apt-get install the following libs
+libxtst-dev
+libwxgtk-media2.8-dev
+libwxgtk3.0-0
 
