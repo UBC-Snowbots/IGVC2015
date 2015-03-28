@@ -90,10 +90,10 @@ namespace JAUS
             std::string mName;      ///<  Name of the service.
             double mVersion;        ///<  Version number.
         };
-        static const int NoBroadcast;      // No broadcasting over IP (default)
-        static const int LocalBroadcast;   // Use local broadcast transport layer options for sending.
-        static const int GlobalBroadcast;  // Use global broadcast transport layer options for sending.
-        static const unsigned int DefaultWaitMs;
+        static const int NoBroadcast     = 0;   // No broadcasting over IP (default)
+        static const int LocalBroadcast  = 1;   // Use local broadcast transport layer options for sending.
+        static const int GlobalBroadcast = 2;   // Use global broadcast transport layer options for sending.
+        static const unsigned int DefaultWaitMs = 250;
         typedef std::map<std::string, Service*> Map;
         // Constructor, initializes ID, and any parent service we inherit from.
         Service(const ID& serviceIdentifier, const ID& parentServiceIdentifier);

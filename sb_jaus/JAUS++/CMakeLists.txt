@@ -27,7 +27,11 @@ project(${WORKSPACE_NAME})
 # in all scripts/macros
 include(build/cmake/SetupProject.cmake)
 
-option(BUILD_JAUS_ONLY "Build only JAUS++ related software." ON)
+option(BUILD_JAUS_ONLY "Build only JAUS++ related software." FALSE)
+option(BUILD_Video_LIBRARIES "Build Video Streaming Software (optional)" TRUE)
+option(BUILD_Kinect_LIBRARIES "Build Kinect Software (optional)" TRUE)
+option(BUILD_Cartographer_LIBRARIES "Build Cartographer mapping Software (optional)" TRUE)
+
 # Add any library packages to your workspace by
 # updating the LIBRAIRES_TO_SETUP variable with 
 # the name of the setup scripts. For example, to
@@ -68,6 +72,34 @@ if( NOT BUILD_JAUS_ONLY )
 			)
 	endif()
 endif()
+
+if(BUILD_Video_LIBRARIES AND NOT BUILD_JAUS_ONLY)
+	set(PROJECTS_IN_BUILD_ORDER
+		 ${PROJECTS_IN_BUILD_ORDER}
+		 Cartographer)
+endif()
+
+if(BUILD_Kinect_LIBRARIES AND NOT BUILD_JAUS_ONLY)
+	set(LIBRAIRES_TO_SETUP 
+			${LIBRAIRES_TO_SETUP}
+				SetupKinectSDK.cmake
+		)
+	set(PROJECTS_IN_BUILD_ORDER
+		 ${PROJECTS_IN_BUILD_ORDER}
+		 Kinect)
+endif()
+
+if(BUILD_Video_LIBRARIES AND NOT BUILD_JAUS_ONLY)
+	set(LIBRAIRES_TO_SETUP 
+			${LIBRAIRES_TO_SETUP}
+				SetupLive555.cmake
+				SetupLibAV.cmake
+		)
+	set(PROJECTS_IN_BUILD_ORDER
+		 ${PROJECTS_IN_BUILD_ORDER}
+		 Video)
+endif()
+	
 
 
 # Configure what source code we want to
@@ -200,15 +232,6 @@ install(DIRECTORY
 		bin
 		COMPONENT SourceCode
 		PATTERN *.svn EXCLUDE)
-if(BUILD_JAUS_ONLY)
-	install(DIRECTORY
-		bin/settings/jaus
-		DESTINATION 
-		bin/settings
-		COMPONENT SourceCode
-		PATTERN *.svn EXCLUDE)
-endif()
-
 install(DIRECTORY
 		build/cmake
 		build/wxFormBuilder

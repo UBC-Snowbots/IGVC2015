@@ -142,7 +142,7 @@ configure_library(${TARGET_NAME}
 				  LIBRARY_NAME)
 
 # Create example programs that depend on this project
-option(BUILD_EXAMPLES_${TARGET_NAME} "Build ${TARGET_NAME} Example Programs." ON)
+option(BUILD_EXAMPLES_${TARGET_NAME} "Build ${TARGET_NAME} Example Programs." FALSE)
 if(BUILD_EXAMPLES_${TARGET_NAME})
 	configure_examples(${TARGET_NAME}
 					"examples"
@@ -152,7 +152,7 @@ if(BUILD_EXAMPLES_${TARGET_NAME})
 					"JAUS++ Examples")
 endif()
 # Create example programs that depend on this project
-option(${TARGET_NAME}_BUILD_TUTORIAL "Build ${TARGET_NAME} Tutorial Programs." ON)
+option(${TARGET_NAME}_BUILD_TUTORIAL "Build ${TARGET_NAME} Tutorial Programs." FALSE)
 if(${TARGET_NAME}_BUILD_TUTORIAL OR BUILD_JAUS_ONLY)
 	configure_examples(${TARGET_NAME}
 					"tutorial"
@@ -162,7 +162,7 @@ if(${TARGET_NAME}_BUILD_TUTORIAL OR BUILD_JAUS_ONLY)
 					"JAUS++ Tutorial")
 endif()
 # Create example programs that depend on this project
-option(${TARGET_NAME}_BUILD_TESTS "Build ${TARGET_NAME} Example Programs." ON)
+option(${TARGET_NAME}_BUILD_TESTS "Build ${TARGET_NAME} Example Programs." FALSE)
 if(${TARGET_NAME}_BUILD_TESTS OR BUILD_JAUS_ONLY)
 	configure_examples(${TARGET_NAME}
 					"tests"

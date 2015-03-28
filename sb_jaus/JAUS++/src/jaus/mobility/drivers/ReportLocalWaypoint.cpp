@@ -41,6 +41,15 @@
 #include "jaus/core/ScaledInteger.h"
 #include <cxutils/math/CxMath.h>
 
+const double JAUS::ReportLocalWaypoint::Limits::MinPoint = -100000;
+const double JAUS::ReportLocalWaypoint::Limits::MaxPoint = 100000;
+const double JAUS::ReportLocalWaypoint::Limits::MinAngle = -CxUtils::CX_PI;
+const double JAUS::ReportLocalWaypoint::Limits::MaxAngle = CxUtils::CX_PI;
+const double JAUS::ReportLocalWaypoint::Limits::MinWaypointTolerance = 0.0;
+const double JAUS::ReportLocalWaypoint::Limits::MaxWaypointTolerance = 100.0;
+const double JAUS::ReportLocalWaypoint::Limits::MinPathTolerance = 0.0;
+const double JAUS::ReportLocalWaypoint::Limits::MaxPathTolerance = 100000.0;
+
 using namespace JAUS;
 
 
@@ -54,6 +63,15 @@ using namespace JAUS;
 ////////////////////////////////////////////////////////////////////////////////////
 ReportLocalWaypoint::ReportLocalWaypoint(const Address& dest, const Address& src) : Message(REPORT_LOCAL_WAYPOINT, dest, src)
 {
+    mPresenceVector = 0;
+    mX = 0;
+    mY = 0;
+    mZ = 0;
+    mRoll = 0;
+    mPitch = 0;
+    mYaw = 0;
+    mWaypointTolerance = 0;
+    mPathTolerance = 0;
 }
 
 
@@ -75,6 +93,175 @@ ReportLocalWaypoint::ReportLocalWaypoint(const ReportLocalWaypoint& message) : M
 ////////////////////////////////////////////////////////////////////////////////////
 ReportLocalWaypoint::~ReportLocalWaypoint()
 {
+}
+
+
+////////////////////////////////////////////////////////////////////////////////////
+///
+///   \brief Sets the latitude and updates the presence vector for the message.
+///
+///   \param[in] value Desired X in meters [-100000, 100000].
+///
+///   \return true on success, otherwise false.
+///
+////////////////////////////////////////////////////////////////////////////////////
+bool ReportLocalWaypoint::SetX(const double value)
+{
+    if(value >= Limits::MinPoint && value <= Limits::MaxPoint)
+    {
+        mX = value;
+        return true;
+    }
+    return false;
+}
+
+
+////////////////////////////////////////////////////////////////////////////////////
+///
+///   \brief Sets the longitude and updates the presence vector for the message.
+///
+///   \param[in] value Desired Y in meters [-100000, 100000].
+///
+///   \return true on success, otherwise false.
+///
+////////////////////////////////////////////////////////////////////////////////////
+bool ReportLocalWaypoint::SetY(const double value)
+{
+    if(value >= Limits::MinPoint && value <= Limits::MaxPoint)
+    {
+        mY = value;
+        return true;
+    }
+    return false;
+}
+
+
+////////////////////////////////////////////////////////////////////////////////////
+///
+///   \brief Sets the altitude and updates the presence vector for the
+///          message.
+///
+///   \param[in] value Desired Z in meters [-100000, 100000].
+///
+///   \return true on success, otherwise false.
+///
+////////////////////////////////////////////////////////////////////////////////////
+bool ReportLocalWaypoint::SetZ(const double value)
+{
+    if(value >= Limits::MinPoint && value <= Limits::MaxPoint)
+    {
+        mZ = value;
+        mPresenceVector |= PresenceVector::Z;
+        return true;
+    }
+    return false;
+}
+
+
+////////////////////////////////////////////////////////////////////////////////////
+///
+///   \brief Sets the roll and updates the presence vector for the message.
+///
+///   \param[in] radians Desired roll in radians[-PI, PI].
+///
+///   \return true on success, otherwise false.
+///
+////////////////////////////////////////////////////////////////////////////////////
+bool ReportLocalWaypoint::SetRoll(const double radians)
+{
+    if(radians >= Limits::MinAngle && radians <= Limits::MaxAngle)
+    {
+        mRoll = radians;
+        mPresenceVector |= PresenceVector::Roll;
+        return true;
+    }
+    return false;
+}
+
+
+////////////////////////////////////////////////////////////////////////////////////
+///
+///   \brief Sets the pitch value and updates the presence vector for the message.
+///
+///   \param[in] radians Desired pitch in radians[-PI, PI].
+///
+///   \return true on success, otherwise false.
+///
+////////////////////////////////////////////////////////////////////////////////////
+bool ReportLocalWaypoint::SetPitch(const double radians)
+{
+    if(radians >= Limits::MinAngle && radians <= Limits::MaxAngle)
+    {
+        mPitch = radians;
+        mPresenceVector |= PresenceVector::Pitch;
+        return true;
+    }
+    return false;
+}
+
+
+////////////////////////////////////////////////////////////////////////////////////
+///
+///   \brief Sets the yaw value and updates the presence vector for the message.
+///
+///   \param[in] radians Desired pitch in radians[-PI, PI].
+///
+///   \return true on success, otherwise false.
+///
+////////////////////////////////////////////////////////////////////////////////////
+bool ReportLocalWaypoint::SetYaw(const double radians)
+{
+    if(radians >= Limits::MinAngle && radians <= Limits::MaxAngle)
+    {
+        mYaw = radians;
+        mPresenceVector |= PresenceVector::Yaw;
+        return true;
+    }
+    return false;
+}
+
+
+////////////////////////////////////////////////////////////////////////////////////
+///
+///   \brief Sets the waypoint tolerance value and updates the presence vector for
+///          the message.
+///
+///   \param[in] value Desired waypoint tolerance in meters[0, 100].
+///
+///   \return true on success, otherwise false.
+///
+////////////////////////////////////////////////////////////////////////////////////
+bool ReportLocalWaypoint::SetWaypointTolerance(const double value)
+{
+    if(value >= Limits::MinWaypointTolerance && value <= Limits::MaxWaypointTolerance)
+    {
+        mWaypointTolerance= value;
+        mPresenceVector |= PresenceVector::WaypointTolerance;
+        return true;
+    }
+    return false;
+}
+
+
+////////////////////////////////////////////////////////////////////////////////////
+///
+///   \brief Sets the path tolerance value and updates the presence vector for
+///          the message.
+///
+///   \param[in] value Desired path tolerance in meters[0, 100000].
+///
+///   \return true on success, otherwise false.
+///
+////////////////////////////////////////////////////////////////////////////////////
+bool ReportLocalWaypoint::SetPathTolerance(const double value)
+{
+    if(value >= Limits::MinPathTolerance && value <= Limits::MaxPathTolerance)
+    {
+        mPathTolerance= value;
+        mPresenceVector |= PresenceVector::PathTolerance;
+        return true;
+    }
+    return false;
 }
 
 
@@ -267,18 +454,6 @@ ReportLocalWaypoint& ReportLocalWaypoint::operator=(const ReportLocalWaypoint& m
         mPathTolerance = message.mPathTolerance;
         
     }
-    return *this;
-}
-
-
-////////////////////////////////////////////////////////////////////////////////////
-///
-///   \brief Sets equal to.
-///
-////////////////////////////////////////////////////////////////////////////////////
-ReportLocalWaypoint& ReportLocalWaypoint::operator=(const LocalWaypoint& wp)
-{
-    *( (LocalWaypoint*)this) = wp;
     return *this;
 }
 

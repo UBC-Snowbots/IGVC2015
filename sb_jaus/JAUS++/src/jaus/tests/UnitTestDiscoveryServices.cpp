@@ -39,7 +39,6 @@
 ////////////////////////////////////////////////////////////////////////////////////
 #include "jaus/core/Component.h"
 #include "jaus/core/liveness/Liveness.h"
-#include "jaus/core/transport/JUDP.h"
 #include <cxutils/Keyboard.h>
 #include <cxutils/FileIO.h>
 #include <iostream>
@@ -84,8 +83,6 @@ int main(int argc, char* argv[])
     gSubsystemB = 4;
     #endif
 
-    a.DiscoveryService()->EnableGlobalBroadcasting(false);
-    b.DiscoveryService()->EnableGlobalBroadcasting(false);
     a.DiscoveryService()->SetSubsystemIdentification(JAUS::Subsystem::Vehicle, "DISCOVERY_UNIT_TEST");
     b.DiscoveryService()->SetSubsystemIdentification(JAUS::Subsystem::Vehicle, "DISCOVERY_UNIT_TEST");
 

@@ -123,12 +123,10 @@ namespace JAUS
         // Sets the identification of the subsystem.
         void SetSubsystemIdentification(const Subsystem::Type type,
                                         const std::string& identification);
-        // Sets how often to broadcast messages for discovery.
+        // Sets how often to broadast messages for discovery.
         bool SetDiscoveryFrequency(const double frequencyHz);
         // Gets the discovery frequency
         double GetDiscoveryFrequency() const { return 1000.0/mBroadcastDelayMs; }
-        // Enable/Disable Global Discovery Flag
-        void EnableGlobalBroadcasting(const bool enable = true) { mUseGlobalBroadcastFlag = enable; }
         // Sets whether or not to perform a global query for other subsystems (default is on).
         void DiscoverSubsystems(const bool enable = true) { mDiscoverSubsystemsFlag = enable; }
         // Gets the subsystem type.
@@ -207,7 +205,6 @@ namespace JAUS
         Subsystem::Type mSubsystemType;         ///<  Subsystem type information.
         Address::Set mSubsystemList;            ///<  List of components broadcasting globally for subsystem discovery.
         std::set<UShort> mSubsystemsToDiscover; ///<  Subsystems to discover.
-        bool mUseGlobalBroadcastFlag;           ///<  Use global broadcast?
     };
 }
 

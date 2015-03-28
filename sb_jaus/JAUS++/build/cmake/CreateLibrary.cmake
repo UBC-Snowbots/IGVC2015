@@ -123,11 +123,11 @@ macro(configure_library
 		if(DEBUG_${LIBRARY_NAME}_CMAKE  AND DEBUG_ACTIVE_CMAKE_SHOW_SRC_FILES)
 			message(STATUS "  Header Files:")
 			foreach(F ${LIBRARY_HEADERS})
-				message(STATUS "    - ${F}")
+				message(STATUS "    - "${F})
 			endforeach()
 			message(STATUS "  Source Files:")
 			foreach(F ${LIBRARY_SOURCES})
-				message(STATUS "    - ${F}")
+				message(STATUS "    - "${F})
 			endforeach()
 		endif()
 		
@@ -375,7 +375,7 @@ macro(configure_ext_library
 		if(DEBUG_${LIBRARY_NAME}_CMAKE AND DEBUG_ACTIVE_CMAKE_SHOW_SRC_FILES)
 			message(STATUS "  Source Files:")
 			foreach(F ${${LIBRARY_SOURCE_FILES}})
-				message(STATUS "    - ${F}")
+				message(STATUS "    - "${F})
 			endforeach()
 		endif()
 		

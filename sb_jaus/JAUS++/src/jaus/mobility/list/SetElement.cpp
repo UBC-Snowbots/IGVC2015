@@ -39,7 +39,6 @@
 ////////////////////////////////////////////////////////////////////////////////////
 #include "jaus/mobility/list/SetElement.h"
 #include "jaus/mobility/drivers/SetWrenchEffort.h"
-#include "jaus/core/Types.h"
 
 using namespace JAUS;
 
@@ -96,10 +95,6 @@ int SetElement::WriteMessageBody(Packet& packet) const
     int written = 0;
 
     written += packet.Write(mRequestID);
-    if(mElements.size() > 255)
-    {
-        throw JAUS::Exception("JAUS::SetElement - Maximum number of elements is 255");
-    }
     written += packet.WriteByte( (Byte)mElements.size() );
 
     Element::List::const_iterator element;
