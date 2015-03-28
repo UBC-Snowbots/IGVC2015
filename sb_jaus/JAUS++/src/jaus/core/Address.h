@@ -298,18 +298,6 @@ namespace JAUS
             mComponent = (Byte)((id & 0x000000FF));
             return *this;
         }
-        static inline bool IsReservedComponentID(const Byte value)
-        {
-            // The following values are reserved component
-            // IDs from JAUS RA 3.3
-            if(value >= 32 && value <= 35 ||
-               value >= 37 && value <= 38 ||
-               value >= 40 && value <= 59)
-            {
-                return true;
-            }
-            return false;
-        }
         UShort mSubsystem;  ///<  Subsystem ID.
         Byte mNode;         ///<  Node ID.
         Byte mComponent;    ///<  Component ID.

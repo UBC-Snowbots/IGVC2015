@@ -213,13 +213,71 @@ bool ListManager::Child::SetElements(const Element::List& elements)
         }
     }
     
-    // Now validate the list.
+    // Now validate the list by
+    // make sure we have not orphans...
     Element::Map::iterator e;
+    Element::Map::iterator start;
+    std::set<UShort> attached;
     
-    std::vector<UShort> attached;
+    bool success = true;
+    UShort min = JAUS_USHORT_MAX;
 
-    bool success = false;
-    bool foundLast = false;
+    for(e = mElementList.begin();
+        e != mElementList.end();
+        e++)
+    {
+        // Bad setup.
+        if(e->second.mPrevID == 0 &&
+            e->second.mNextID == 0)
+        {
+            success = false;
+            break;
+        }
+        // Find the prev and next elements.
+        Element::Map::iterator prev, next;
+        bool foundPrev = true;
+        bool foundNext = true;
+        if(e->second.mPrevID != 0)
+        {
+            prev = mElementList.find(e->second.mPrevID);
+            if(prev == mElementList.end())
+            {
+                foundPrev = false;
+            }
+            else if(prev->second.mNextID != e->second.mID)
+            {
+                foundPrev = false;
+            }
+        }
+        if(e->second.mNextID != 0)
+        {
+            next = mElementList.find(e->second.mNextID);
+            if(next == mElementList.end())
+            {
+                foundNext = false;
+            } 
+            else if(next->second.mPrevID != e->second.mID)
+            {
+                foundNext = false;
+            }
+        }
+        
+        if(foundPrev == false || foundNext == false)
+        {
+            success = false;
+            break;
+        }
+    }
+    // If invalid configuration, revert
+    // back to previous config.
+    if(success == false)
+    {
+        mElementList = backup;
+        return false;
+    }
+    
+    /* Bad logic for checking if any elements are orphaned, remove
+    commented block later - Daniel Barber
     for(e = mElementList.begin();
         e != mElementList.end();
         e++)
@@ -249,6 +307,7 @@ bool ListManager::Child::SetElements(const Element::List& elements)
             break;
         }
     }
+    
     if(mElementList.size() == 1 && foundLast == false)
     {
         if(mElementList.begin()->second.mNextID == 0)
@@ -262,7 +321,7 @@ bool ListManager::Child::SetElements(const Element::List& elements)
         mElementList = backup;
         return false;
     }
-    
+    */
     return true;
 }
 

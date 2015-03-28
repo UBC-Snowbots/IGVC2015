@@ -87,7 +87,14 @@ bool JUDP::Initialize(const Address& componentID)
         mDiscoverySocket->bind(
             udp::endpoint(ip::address::from_string(mLocalAddress),
                           mDefaultPortNumber));
-        // Join the multicast group
+        // Leave/Force Join the multicast group
+        try
+        {
+            mDiscoverySocket->set_option(ip::multicast::leave_group(multicastAddress));
+        }
+        catch (...)
+        {
+        }
         mDiscoverySocket->set_option(ip::multicast::join_group(multicastAddress));
         mDiscoverySocket->set_option(ip::multicast::enable_loopback(true));
         mDiscoverySocket->set_option(ip::multicast::hops(mTTL));
@@ -95,7 +102,7 @@ bool JUDP::Initialize(const Address& componentID)
         boost::asio::socket_base::receive_buffer_size receiveSize(JAUS_USHORT_MAX);
         mDiscoverySocket->set_option(receiveSize);
 
-        // Initialize our nromal traffic socket.
+        // Initialize our normal traffic socket.
         mSocket = 
             boost::shared_ptr<udp::socket>(new udp::socket(mSocketIO, 
                                             mMulticastEndpoint.protocol()));
@@ -148,6 +155,7 @@ void JUDP::Shutdown()
         }
         if(mDiscoverySocket != NULL)
         {
+            mDiscoverySocket->set_option(ip::multicast::leave_group(ip::address::from_string(mMulticastGroup)));
             mDiscoverySocket->shutdown(boost::asio::socket_base::shutdown_both);
             mDiscoverySocket->close();
         }
@@ -262,6 +270,9 @@ bool JUDP::SendPacket(const Packet& packet,
                       const Header& header) const
 {
     bool result = false;
+    if(mSocket == NULL)
+        return result;
+
     try
     {
         if(header.mDestinationID.IsBroadcast())

@@ -47,6 +47,11 @@
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/date_time.hpp>
 
+const int JAUS::Service::NoBroadcast = 0;
+const int JAUS::Service::LocalBroadcast = 1;
+const int JAUS::Service::GlobalBroadcast = 2;
+const unsigned int JAUS::Service::DefaultWaitMs = 250;
+
 using namespace JAUS;
 
 SharedMutex Service::mDebugMessagesMutex;

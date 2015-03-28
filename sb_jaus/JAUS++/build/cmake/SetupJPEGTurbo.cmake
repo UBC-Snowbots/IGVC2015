@@ -94,17 +94,17 @@ else(UNIX)
 					/opt/libjpeg-turbo/lib64
 					/opt/libjpeg-turbo/lib )
 
-	if(JPEGTurbo_LIBRARY_DIRS)
-		set(JPEGTurbo_LIBRARIES "${JPEGTurbo_LIBRARY_DIRS}/libjpeg.so")
-		set(JPEGTurbo_CXX_FLAGS 
-			-DJPEG_TURBO_DIR="/opt/libjpeg-turbo/include/jpeglib.h")
-		#add_definitions(${TurboJPEG_CXX_FLAGS})
-		set(JPEGTurbo_FOUND 
-				TRUE
-				CACHE BOOLEAN 
-				"JPEG-Turbo Library found if TRUE, otherwise using jpeg-6b" )
-		set(JPEGTurbo_ADDED TRUE)
-	endif()
+
+#	if(JPEGTurbo_LIBRARY_DIRS)
+#		set(JPEGTurbo_LIBRARIES "${JPEGTurbo_LIBRARY_DIRS}/libjpeg.so")
+#		set(JPEGTurbo_CXX_FLAGS
+#			-DJPEG_TURBO_DIR="/opt/libjpeg-turbo/include/jpeglib.h")
+#		set(JPEGTurbo_FOUND
+#				TRUE
+#				CACHE BOOLEAN
+#				"JPEG-Turbo Library found if TRUE, otherwise using jpeg-6b" )
+#		set(JPEGTurbo_ADDED TRUE)
+#	endif()
 	
 	# Build version of jpeg-6b that uses BGR ordering instead of RGB
 	if(NOT JPEGTurbo_ADDED)   

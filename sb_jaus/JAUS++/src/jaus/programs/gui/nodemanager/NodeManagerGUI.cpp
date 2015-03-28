@@ -339,7 +339,7 @@ RangeSensorPanelBase::~RangeSensorPanelBase()
 	
 }
 
-GlobalPoseSensorPanelBase::GlobalPoseSensorPanelBase( wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style ) : wxPanel( parent, id, pos, size, style )
+LocalPoseSensorPanelBase::LocalPoseSensorPanelBase( wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style ) : wxPanel( parent, id, pos, size, style )
 {
 	wxBoxSizer* bSizer23;
 	bSizer23 = new wxBoxSizer( wxVERTICAL );
@@ -406,36 +406,36 @@ GlobalPoseSensorPanelBase::GlobalPoseSensorPanelBase( wxWindow* parent, wxWindow
 	this->Layout();
 	
 	// Connect Events
-	this->Connect( wxEVT_SET_FOCUS, wxFocusEventHandler( GlobalPoseSensorPanelBase::OnSetFocus ) );
-	this->Connect( wxEVT_UPDATE_UI, wxUpdateUIEventHandler( GlobalPoseSensorPanelBase::OnUpdateUI ) );
-	mRefreshButton->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( GlobalPoseSensorPanelBase::OnRefreshList ), NULL, this );
-	mConnectButton->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( GlobalPoseSensorPanelBase::OnConnect ), NULL, this );
-	mZoomSlider->Connect( wxEVT_SCROLL_TOP, wxScrollEventHandler( GlobalPoseSensorPanelBase::OnZoomScroll ), NULL, this );
-	mZoomSlider->Connect( wxEVT_SCROLL_BOTTOM, wxScrollEventHandler( GlobalPoseSensorPanelBase::OnZoomScroll ), NULL, this );
-	mZoomSlider->Connect( wxEVT_SCROLL_LINEUP, wxScrollEventHandler( GlobalPoseSensorPanelBase::OnZoomScroll ), NULL, this );
-	mZoomSlider->Connect( wxEVT_SCROLL_LINEDOWN, wxScrollEventHandler( GlobalPoseSensorPanelBase::OnZoomScroll ), NULL, this );
-	mZoomSlider->Connect( wxEVT_SCROLL_PAGEUP, wxScrollEventHandler( GlobalPoseSensorPanelBase::OnZoomScroll ), NULL, this );
-	mZoomSlider->Connect( wxEVT_SCROLL_PAGEDOWN, wxScrollEventHandler( GlobalPoseSensorPanelBase::OnZoomScroll ), NULL, this );
-	mZoomSlider->Connect( wxEVT_SCROLL_THUMBTRACK, wxScrollEventHandler( GlobalPoseSensorPanelBase::OnZoomScroll ), NULL, this );
-	mZoomSlider->Connect( wxEVT_SCROLL_THUMBRELEASE, wxScrollEventHandler( GlobalPoseSensorPanelBase::OnZoomScroll ), NULL, this );
-	mZoomSlider->Connect( wxEVT_SCROLL_CHANGED, wxScrollEventHandler( GlobalPoseSensorPanelBase::OnZoomScroll ), NULL, this );
+	this->Connect( wxEVT_SET_FOCUS, wxFocusEventHandler( LocalPoseSensorPanelBase::OnSetFocus ) );
+	this->Connect( wxEVT_UPDATE_UI, wxUpdateUIEventHandler( LocalPoseSensorPanelBase::OnUpdateUI ) );
+	mRefreshButton->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( LocalPoseSensorPanelBase::OnRefreshList ), NULL, this );
+	mConnectButton->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( LocalPoseSensorPanelBase::OnConnect ), NULL, this );
+	mZoomSlider->Connect( wxEVT_SCROLL_TOP, wxScrollEventHandler( LocalPoseSensorPanelBase::OnZoomScroll ), NULL, this );
+	mZoomSlider->Connect( wxEVT_SCROLL_BOTTOM, wxScrollEventHandler( LocalPoseSensorPanelBase::OnZoomScroll ), NULL, this );
+	mZoomSlider->Connect( wxEVT_SCROLL_LINEUP, wxScrollEventHandler( LocalPoseSensorPanelBase::OnZoomScroll ), NULL, this );
+	mZoomSlider->Connect( wxEVT_SCROLL_LINEDOWN, wxScrollEventHandler( LocalPoseSensorPanelBase::OnZoomScroll ), NULL, this );
+	mZoomSlider->Connect( wxEVT_SCROLL_PAGEUP, wxScrollEventHandler( LocalPoseSensorPanelBase::OnZoomScroll ), NULL, this );
+	mZoomSlider->Connect( wxEVT_SCROLL_PAGEDOWN, wxScrollEventHandler( LocalPoseSensorPanelBase::OnZoomScroll ), NULL, this );
+	mZoomSlider->Connect( wxEVT_SCROLL_THUMBTRACK, wxScrollEventHandler( LocalPoseSensorPanelBase::OnZoomScroll ), NULL, this );
+	mZoomSlider->Connect( wxEVT_SCROLL_THUMBRELEASE, wxScrollEventHandler( LocalPoseSensorPanelBase::OnZoomScroll ), NULL, this );
+	mZoomSlider->Connect( wxEVT_SCROLL_CHANGED, wxScrollEventHandler( LocalPoseSensorPanelBase::OnZoomScroll ), NULL, this );
 }
 
-GlobalPoseSensorPanelBase::~GlobalPoseSensorPanelBase()
+LocalPoseSensorPanelBase::~LocalPoseSensorPanelBase()
 {
 	// Disconnect Events
-	this->Disconnect( wxEVT_SET_FOCUS, wxFocusEventHandler( GlobalPoseSensorPanelBase::OnSetFocus ) );
-	this->Disconnect( wxEVT_UPDATE_UI, wxUpdateUIEventHandler( GlobalPoseSensorPanelBase::OnUpdateUI ) );
-	mRefreshButton->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( GlobalPoseSensorPanelBase::OnRefreshList ), NULL, this );
-	mConnectButton->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( GlobalPoseSensorPanelBase::OnConnect ), NULL, this );
-	mZoomSlider->Disconnect( wxEVT_SCROLL_TOP, wxScrollEventHandler( GlobalPoseSensorPanelBase::OnZoomScroll ), NULL, this );
-	mZoomSlider->Disconnect( wxEVT_SCROLL_BOTTOM, wxScrollEventHandler( GlobalPoseSensorPanelBase::OnZoomScroll ), NULL, this );
-	mZoomSlider->Disconnect( wxEVT_SCROLL_LINEUP, wxScrollEventHandler( GlobalPoseSensorPanelBase::OnZoomScroll ), NULL, this );
-	mZoomSlider->Disconnect( wxEVT_SCROLL_LINEDOWN, wxScrollEventHandler( GlobalPoseSensorPanelBase::OnZoomScroll ), NULL, this );
-	mZoomSlider->Disconnect( wxEVT_SCROLL_PAGEUP, wxScrollEventHandler( GlobalPoseSensorPanelBase::OnZoomScroll ), NULL, this );
-	mZoomSlider->Disconnect( wxEVT_SCROLL_PAGEDOWN, wxScrollEventHandler( GlobalPoseSensorPanelBase::OnZoomScroll ), NULL, this );
-	mZoomSlider->Disconnect( wxEVT_SCROLL_THUMBTRACK, wxScrollEventHandler( GlobalPoseSensorPanelBase::OnZoomScroll ), NULL, this );
-	mZoomSlider->Disconnect( wxEVT_SCROLL_THUMBRELEASE, wxScrollEventHandler( GlobalPoseSensorPanelBase::OnZoomScroll ), NULL, this );
-	mZoomSlider->Disconnect( wxEVT_SCROLL_CHANGED, wxScrollEventHandler( GlobalPoseSensorPanelBase::OnZoomScroll ), NULL, this );
+	this->Disconnect( wxEVT_SET_FOCUS, wxFocusEventHandler( LocalPoseSensorPanelBase::OnSetFocus ) );
+	this->Disconnect( wxEVT_UPDATE_UI, wxUpdateUIEventHandler( LocalPoseSensorPanelBase::OnUpdateUI ) );
+	mRefreshButton->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( LocalPoseSensorPanelBase::OnRefreshList ), NULL, this );
+	mConnectButton->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( LocalPoseSensorPanelBase::OnConnect ), NULL, this );
+	mZoomSlider->Disconnect( wxEVT_SCROLL_TOP, wxScrollEventHandler( LocalPoseSensorPanelBase::OnZoomScroll ), NULL, this );
+	mZoomSlider->Disconnect( wxEVT_SCROLL_BOTTOM, wxScrollEventHandler( LocalPoseSensorPanelBase::OnZoomScroll ), NULL, this );
+	mZoomSlider->Disconnect( wxEVT_SCROLL_LINEUP, wxScrollEventHandler( LocalPoseSensorPanelBase::OnZoomScroll ), NULL, this );
+	mZoomSlider->Disconnect( wxEVT_SCROLL_LINEDOWN, wxScrollEventHandler( LocalPoseSensorPanelBase::OnZoomScroll ), NULL, this );
+	mZoomSlider->Disconnect( wxEVT_SCROLL_PAGEUP, wxScrollEventHandler( LocalPoseSensorPanelBase::OnZoomScroll ), NULL, this );
+	mZoomSlider->Disconnect( wxEVT_SCROLL_PAGEDOWN, wxScrollEventHandler( LocalPoseSensorPanelBase::OnZoomScroll ), NULL, this );
+	mZoomSlider->Disconnect( wxEVT_SCROLL_THUMBTRACK, wxScrollEventHandler( LocalPoseSensorPanelBase::OnZoomScroll ), NULL, this );
+	mZoomSlider->Disconnect( wxEVT_SCROLL_THUMBRELEASE, wxScrollEventHandler( LocalPoseSensorPanelBase::OnZoomScroll ), NULL, this );
+	mZoomSlider->Disconnect( wxEVT_SCROLL_CHANGED, wxScrollEventHandler( LocalPoseSensorPanelBase::OnZoomScroll ), NULL, this );
 	
 }

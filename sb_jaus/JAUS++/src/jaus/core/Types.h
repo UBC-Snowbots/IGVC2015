@@ -88,7 +88,7 @@ namespace JAUS
     ///   \brief Exception thrown for various reasons.
     ///
     ////////////////////////////////////////////////////////////////////////////////////
-    class Exception : public std::exception
+    class JAUS_CORE_DLL Exception : public std::exception
     {
     public:
         Exception(const std::string& whatString = "NULL Ptr Access") : mWhatString(whatString) {}

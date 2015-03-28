@@ -164,26 +164,33 @@ bool LocalPoseSensor::SetLocalPose(const JAUS::GlobalPose& globalPose)
                     ReportGlobalPose::PresenceVector::Yaw;
     if(mGlobalPoseReference.AreFieldsPresent(required) == false)
     {
-        // Try lookup global pose data if it is available.
-        GlobalPoseSensor* globalPoseSensor = (GlobalPoseSensor*)GetComponent()->GetService(GlobalPoseSensor::Name);
-        if(globalPoseSensor)
+        if(globalPose.AreFieldsPresent(required) == true)
         {
-            mGlobalPoseReference = globalPoseSensor->GetGlobalPose();
+            mGlobalPoseReference = globalPose;
         }
         else
         {
-            Address::List id = GetComponent()->DiscoveryService()->GetComponentsWithService(GlobalPoseSensor::Name);
-            for(unsigned int i = 0; i < (unsigned int)id.size(); i++)
+            // Try lookup global pose data if it is available.
+            GlobalPoseSensor* globalPoseSensor = (GlobalPoseSensor*)GetComponent()->GetService(GlobalPoseSensor::Name);
+            if(globalPoseSensor)
             {
-                if(id[i].mSubsystem == GetComponentID().mSubsystem)
+                mGlobalPoseReference = globalPoseSensor->GetGlobalPose();
+            }
+            else
+            {
+                Address::List id = GetComponent()->DiscoveryService()->GetComponentsWithService(GlobalPoseSensor::Name);
+                for(unsigned int i = 0; i < (unsigned int)id.size(); i++)
                 {
-                    QueryGlobalPose query(id.front(), GetComponentID());
-                    query.SetPresenceVector(query.GetPresenceVectorMask());
-                    ReportGlobalPose report;
-                    if(Send(&query, &report))
+                    if(id[i].mSubsystem == GetComponentID().mSubsystem)
                     {
-                        mGlobalPoseReference = report;
-                        break;
+                        QueryGlobalPose query(id.front(), GetComponentID());
+                        query.SetPresenceVector(query.GetPresenceVectorMask());
+                        ReportGlobalPose report;
+                        if(Send(&query, &report))
+                        {
+                            mGlobalPoseReference = report;
+                            break;
+                        }
                     }
                 }
             }
@@ -534,6 +541,7 @@ void LocalPoseSensor::Receive(const JAUS::Message *message)
             if(command)
             {
                 SetLocalPose(*command);
+                mGlobalPoseReference.ClearMessageBody();
                 // Try lookup global pose data if it is available.
                 GlobalPoseSensor* globalPoseSensor = (GlobalPoseSensor*)GetComponent()->GetService(GlobalPoseSensor::Name);
                 if(globalPoseSensor)

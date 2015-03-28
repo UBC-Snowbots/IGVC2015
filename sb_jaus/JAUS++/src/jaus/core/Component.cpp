@@ -268,14 +268,11 @@ bool Component::InitializeWithUniqueID(const unsigned int waitTimeMs,
                 {
                     for(int n = 254; n > 0; n--)
                     {
-                        if(Address::IsReservedComponentID((JAUS::Byte)c) == false)
+                        unique.mNode = (JAUS::Byte)n;
+                        unique.mComponent = (JAUS::Byte)c;
+                        if(Initialize(unique, serviceUpdateFrequency))
                         {
-                            unique.mNode = (JAUS::Byte)n;
-                            unique.mComponent = (JAUS::Byte)c;
-                            if(Initialize(unique, serviceUpdateFrequency))
-                            {
-                                return true;
-                            }
+                            return true;
                         }
                     }
                 }

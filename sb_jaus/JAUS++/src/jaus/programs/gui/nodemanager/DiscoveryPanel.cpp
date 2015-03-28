@@ -39,7 +39,7 @@
 ////////////////////////////////////////////////////////////////////////////////////
 #include "DiscoveryPanel.h"
 #include "RangeSensorPanel.h"
-#include "GlobalPoseSensorPanel.h"
+#include "LocalPoseSensorPanel.h"
 #include <cxutils/networking/Socket.h>
 #include <wx/msgdlg.h>
 #include <wx/filedlg.h>
@@ -93,7 +93,7 @@ DiscoveryPanel::DiscoveryPanel(wxWindow* parent) : DiscoveryPanelBase(parent)
     this->mDiscoveryNotebook->AddPage(rangePanel, wxT("Range Sensor Data"));
 
     
-    GlobalPoseSensorPanel* gpsPanel = new GlobalPoseSensorPanel(&mComponent, this->mDiscoveryNotebook);
+    LocalPoseSensorPanel* gpsPanel = new LocalPoseSensorPanel(&mComponent, this->mDiscoveryNotebook);
     gpsPanel->AddServices(&mComponent);
     this->mDiscoveryNotebook->AddPage(gpsPanel, wxT("Pose Sensor Data"));
     mJoystick = new JAUS::Joystick();

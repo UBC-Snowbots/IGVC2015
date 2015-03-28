@@ -48,8 +48,7 @@ namespace JAUS
     ////////////////////////////////////////////////////////////////////////////////////
     ///
     ///   \class ExecuteList
-    ///   \brief This message is used to delete one or more elements from a list.
-    ///          Each element is uniquely identified by the UID.
+    ///   \brief This message is used to begin list execution.
     ///
     ////////////////////////////////////////////////////////////////////////////////////
     class JAUS_MOBILITY_DLL ExecuteList : public Message

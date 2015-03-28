@@ -58,7 +58,7 @@ namespace JAUS
         QueryElement(const Address& dest = Address(), const Address& src = Address());
         QueryElement(const QueryElement& message);
         ~QueryElement();
-        UShort SetElementUID(const Byte uid)  { return mElementUID = uid; }
+        UShort SetElementUID(const UShort uid)  { return mElementUID = uid; }
         UShort GetElementUID() const { return mElementUID; } 
         virtual bool IsCommand() const { return false; }
         virtual int WriteMessageBody(Packet& packet) const;

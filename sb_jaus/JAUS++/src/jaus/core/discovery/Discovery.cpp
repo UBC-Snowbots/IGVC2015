@@ -77,6 +77,7 @@ Discovery::Discovery() : Events::Child(Service::ID(Discovery::Name), Service::ID
     mNodeIdentification = "Node";
     mSubsystemType = Subsystem::OtherSubsystem;
     mTriggerCallbacksFlag = false;
+    mUseGlobalBroadcastFlag = true;
 }
 
 
@@ -133,6 +134,11 @@ bool Discovery::LoadSettings(const std::string& filename)
     if(node && node->Value())
     {
         DiscoverSubsystems(atoi(node->Value()) > 0 ? true : false);
+    }
+    node = doc.FirstChild("JAUS").FirstChild("Discovery").FirstChild("UseGlobalBroadcast").FirstChild().ToNode();
+    if(node && node->Value())
+    {
+        EnableGlobalBroadcasting((atoi(node->Value()) > 0 ? true : false));
     }
     node = doc.FirstChild("JAUS").FirstChild("Discovery").FirstChild("ComponentIdentification").FirstChild().ToNode();
     if(node && node->Value())
@@ -793,8 +799,8 @@ void Discovery::Receive(const Message* message)
             if(s != mSystem.end())
             {
                 s->second->GetComponent(report->GetSourceID())->mStatus = report->GetStatus();
+                s->second->mUpdateTime.SetCurrentTime();
             }
-            s->second->mUpdateTime.SetCurrentTime();
         };
         break;
     case REPORT_SUBSYSTEM_LIST:
@@ -872,10 +878,11 @@ void Discovery::CheckServiceStatus(const unsigned int timeSinceLastCheckMs)
     {
         if(mDiscoverSubsystemsFlag)
         {
+            int bFlags = mUseGlobalBroadcastFlag ? JAUS::Service::GlobalBroadcast : Service::LocalBroadcast;
             QueryIdentification query(Address(Address::GlobalBroadcast, 255, 255), GetComponentID());
             query.SetQueryType(QueryIdentification::SubsystemIdentification);
             // Global broadcast for discovery.
-            Send(&query, Service::GlobalBroadcast);
+            Send(&query, bFlags);
         }
         else
         {

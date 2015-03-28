@@ -67,7 +67,7 @@ macro(configure_examples
 			set(EXAMPLE_NAME ${APP_PREFIX}${EXAMPLE_NAME})
 			# Print debug information for testing.
 			if(DEBUG_${LIBRARY_NAME}_CMAKE)
-				message(STATUS "  Example: - "${EXAMPLE_NAME})
+				message(STATUS "  Example: - ${EXAMPLE_NAME}")
 			endif(DEBUG_${LIBRARY_NAME}_CMAKE)
 
 			if(${LIBRARY_DEPENDENCIES})

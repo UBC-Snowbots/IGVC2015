@@ -42,6 +42,7 @@
 
 #include "jaus/core/Message.h"
 #include "jaus/mobility/MobilityCodes.h"
+#include "jaus/mobility/drivers/LocalWaypoint.h"
 
 namespace JAUS
 {
@@ -60,63 +61,13 @@ namespace JAUS
     ///          describe orientation at that point.
     ///
     ////////////////////////////////////////////////////////////////////////////////////
-    class JAUS_MOBILITY_DLL SetLocalWaypoint : public Message
+    class JAUS_MOBILITY_DLL SetLocalWaypoint : public Message,
+        public LocalWaypoint
     {
     public:
-        ////////////////////////////////////////////////////////////////////////////////////
-        ///
-        ///   \class PresenceVector
-        ///   \brief This class contains bit masks for bitwise operations on the
-        ///          presence vector for this message.
-        ///
-        ////////////////////////////////////////////////////////////////////////////////////
-        class JAUS_MOBILITY_DLL PresenceVector : public JAUS::PresenceVector
-        {
-        public:
-            const static Byte Z = 0x01;
-            const static Byte Roll = 0x02;
-            const static Byte Pitch = 0x04;
-            const static Byte Yaw = 0x08;
-            const static Byte WaypointTolerance = 0x10;
-            const static Byte PathTolerance = 0x20;
-        };
-        ////////////////////////////////////////////////////////////////////////////////////
-        ///
-        ///   \class Limits
-        ///   \brief Contains constants for limit values of data members of class.
-        ///
-        ////////////////////////////////////////////////////////////////////////////////////
-        class JAUS_MOBILITY_DLL Limits : public JAUS::Limits
-        {
-        public:
-            const static double MinPoint;               ///<  Minimum value of X, Y, and Z (-100000).
-            const static double MaxPoint;               ///<  Maximum value of X, Y, and Z (100000).
-            const static double MinAngle;               ///<  Minimum angle value in radians. (-PI)
-            const static double MaxAngle;               ///<  Maximum angle value in radians. (PI)
-            const static double MinWaypointTolerance;   ///<  Minimum waypoint tolerance in meters. (0)
-            const static double MaxWaypointTolerance;   ///<  Maximum waypoint tolerance in meters. (100)
-            const static double MinPathTolerance;       ///<  Minimum path tolerance in meters. (0)
-            const static double MaxPathTolerance;       ///<  Maximum path tolerance in meters. (100000)
-        };
         SetLocalWaypoint(const Address& dest = Address(), const Address& src = Address());
         SetLocalWaypoint(const SetLocalWaypoint& message);
         ~SetLocalWaypoint();
-        bool SetX(const double value);
-        bool SetY(const double value);
-        bool SetZ(const double value);
-        bool SetRoll(const double radians);
-        bool SetPitch(const double radians);
-        bool SetYaw(const double radians);
-        bool SetWaypointTolerance(const double value);
-        bool SetPathTolerance(const double value);
-        inline double GetX() const { return mX; }
-        inline double GetY() const { return mY; }
-        inline double GetZ() const { return mZ; }
-        inline double GetRoll() const { return mRoll; }
-        inline double GetPitch() const { return mPitch; }
-        inline double GetYaw() const { return mYaw; }
-        inline double GetWaypointTolerance() const { return mWaypointTolerance; }
-        inline double GetPathTolerance() const { return mPathTolerance; }
         virtual bool IsCommand() const { return true; }
         virtual int WriteMessageBody(Packet& packet) const;
         virtual int ReadMessageBody(const Packet& packet);
@@ -131,17 +82,7 @@ namespace JAUS
         virtual int RunTestCase() const;
         void PrintMessageBody() const;
         SetLocalWaypoint& operator=(const SetLocalWaypoint& message);
-    protected:
-        Byte mPresenceVector;                   ///<  Bit vector for fields present.
-        double mX;                              ///<  X in meters [-100000, 100000].
-        double mY;                              ///<  Y in meters [-100000, 100000].
-        double mZ;                              ///<  Z in meters [-100000, 100000].
-        double mRoll;                           ///<  Roll in radians [-PI, PI].
-        double mPitch;                          ///<  Pitch in radians [-PI, PI].
-        double mYaw;                            ///<  Yaw in radians [-PI, PI].
-        double mWaypointTolerance;              ///<  Waypoint tolerance in meters [0, 100].
-        double mPathTolerance;                  ///<  Path tolerance in meters [0, 10000], 0 used for infinite tolerance.
-
+        SetLocalWaypoint& operator=(const LocalWaypoint& message);
     };
 }
 

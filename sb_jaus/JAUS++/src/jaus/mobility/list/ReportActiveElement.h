@@ -49,7 +49,8 @@ namespace JAUS
     ///
     ///   \class ReportActiveElement
     ///   \brief This message is used to report the current list element being
-    ///          executed.
+    ///          executed. An element UID of 0 implies no list execution is in 
+    ///          progress.
     ///
     ////////////////////////////////////////////////////////////////////////////////////
     class JAUS_MOBILITY_DLL ReportActiveElement : public Message
@@ -74,7 +75,7 @@ namespace JAUS
         virtual int RunTestCase() const;
         ReportActiveElement& operator=(const ReportActiveElement& message);
     protected:
-        UShort  mElementUID;    ///< UID of the element to be queried.  A value of 0 represents the head.
+        UShort  mElementUID;    ///< UID of active list element. A value of 0 implies to lists are executing.
     };
 }
 

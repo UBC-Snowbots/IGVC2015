@@ -47,7 +47,7 @@
 #include <iomanip>
 #include <algorithm>
 
-#ifdef WIN32
+#ifdef VLD_ENABLED
 #include <vld.h>
 #endif
 

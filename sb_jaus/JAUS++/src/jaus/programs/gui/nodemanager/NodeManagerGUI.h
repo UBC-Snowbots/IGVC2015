@@ -155,9 +155,9 @@ class RangeSensorPanelBase : public wxPanel
 };
 
 ///////////////////////////////////////////////////////////////////////////////
-/// Class GlobalPoseSensorPanelBase
+/// Class LocalPoseSensorPanelBase
 ///////////////////////////////////////////////////////////////////////////////
-class GlobalPoseSensorPanelBase : public wxPanel 
+class LocalPoseSensorPanelBase : public wxPanel 
 {
 	private:
 	
@@ -181,8 +181,8 @@ class GlobalPoseSensorPanelBase : public wxPanel
 	
 	public:
 		
-		GlobalPoseSensorPanelBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 724,518 ), long style = wxTAB_TRAVERSAL ); 
-		~GlobalPoseSensorPanelBase();
+		LocalPoseSensorPanelBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 724,518 ), long style = wxTAB_TRAVERSAL ); 
+		~LocalPoseSensorPanelBase();
 	
 };
 

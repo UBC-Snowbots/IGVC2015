@@ -949,8 +949,8 @@ void Transport::ProcessPacket(Packet& jausPacket,
     }
     
     // Notify threads of new message data
-    boost::lock_guard<boost::mutex> lock(mProcessingMutex);
-    mMessageAvailableCondition.notify_all();
+    //boost::lock_guard<boost::mutex> lock(mProcessingMutex);
+    //mMessageAvailableCondition.notify_all();
 }
 
 
@@ -1130,13 +1130,20 @@ void Transport::ProcessMultiPacket(Packet& packet,
     a service is waiting for responses upon receipt of a new message. */
 void Transport::MessageProcessingThread()
 {
-    boost::unique_lock<boost::mutex> processingLock(mProcessingMutex);
+    //boost::unique_lock<boost::mutex> processingLock(mProcessingMutex);
     Packet jausPacket;
+    
+    int loopCounter = 0;
+
     while(mStopMessageProcessingFlag == false)
     {
+        if( (++loopCounter%2) == 0)
+        {
+            boost::this_thread::sleep(boost::posix_time::millisec(1));
+        }
         // Wait for new message.
-        mMessageAvailableCondition.timed_wait(processingLock,
-            boost::posix_time::millisec(100));
+        //mMessageAvailableCondition.timed_wait(processingLock,
+        //    boost::posix_time::millisec(100));
 
         // Check for exit condition
         if(mStopMessageProcessingFlag)

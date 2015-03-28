@@ -54,8 +54,6 @@
 
 namespace JAUS
 {
-    typedef JAUS::ReportLocalWaypoint LocalWaypoint;
-
     ////////////////////////////////////////////////////////////////////////////////////
     ///
     ///   \class LocalWaypointDriver
@@ -151,7 +149,7 @@ namespace JAUS
         virtual void CheckServiceStatus(const unsigned int timeSinceLastCheckMs);
         // Creates a ReportLocalWaypoint from QueryLocalWaypoint.
         void CreateReportFromQuery(const QueryLocalWaypoint* query, 
-                                   LocalWaypoint& report) const;
+                                   ReportLocalWaypoint& report) const;
         // Creates a ReportTravelSpeed from QueryTravelSpeed.
         void CreateReportFromQuery(const QueryTravelSpeed* query, 
                                    TravelSpeed& report) const;

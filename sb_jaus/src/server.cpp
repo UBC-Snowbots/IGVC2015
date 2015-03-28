@@ -6,7 +6,7 @@ using namespace std;
 
 int main(int argc, char* argv[])
 {
-        if (argc < 3)
+        if (argc < 2)
         {
                 std::cout << "Error: Arguments must include IP and Address" << std::endl;
                 return 1;
@@ -63,18 +63,35 @@ int main(int argc, char* argv[])
                 }
                 if(JAUS::Time::GetUtcTimeMs() - displayStatusTimeMs > 500)
                 {
-                        std::cout << "==================" << std::endl;
-                        managementService->PrintStatus();
-                        discoveryService->PrintStatus(); //std::cout << std::endl;
-                        transportService->PrintStatus();
-                        std::cout << std::endl;
-                        displayStatusTimeMs = JAUS::Time::GetUtcTimeMs();
-                }
+                    std::cout << "==================" << std::endl;
+                    managementService->PrintStatus();
+                    discoveryService->PrintStatus(); //std::cout << std::endl;
+                    transportService->PrintStatus();
 
-                CxUtils::SleepMs(1);
+                    JAUS::Subsystem::Map discoveredSubsystems;
+                    discoveryService->GetSubsystems(discoveredSubsystems);
+
+                    JAUS::Subsystem::Map::iterator subsystem;
+                    // The map is indexed by the subsystem number.
+                    for(subsystem = discoveredSubsystems.begin();
+                        subsystem != discoveredSubsystems.end();
+                        subsystem++)
+                    {
+                        std::cout << "Subsystem: " 
+                                  << subsystem->first 
+                                  << " Identification: " 
+                                  << subsystem->second->mIdentification 
+                                  << std::endl;
+                                std::cout << std::endl;
+                                displayStatusTimeMs = JAUS::Time::GetUtcTimeMs();
+                    }
+
+                    CxUtils::SleepMs(1);
+                }
         
         }
 
         component.Shutdown();
+
         return 0;
 }
