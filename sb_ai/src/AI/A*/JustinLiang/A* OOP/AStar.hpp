@@ -17,8 +17,8 @@ private:
 
 	/** VARIABLES **/
 	int _map_width;				// width of the map
-	int _map_height;		// height of the map
-	vector<int> _map;					// array that stores the main map
+	int _map_height;			// height of the map
+	vector<int> _map;			// array that stores the main map
 
 	vector<int> _frontier;			// priority queue that stores the set of locations we are currently searching through
 	int _frontier_size;			// number of locations stored in the frontier array
