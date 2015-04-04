@@ -89,6 +89,7 @@ int main(int argc, char **argv)
 		if (dijkstras.Init(map_ptr, width, height, start, goal)) {
 			dijkstras.Search(dijkstras.GetStart());
 			dijkstras.ReconstructPath(dijkstras.GetGoal());
+			cout << endl;
 			next_movement = dijkstras.GetNextStep();
 		}
 
@@ -96,7 +97,6 @@ int main(int argc, char **argv)
 
 		car_pub.publish(twist_msg);	// this is where we publish our map analysis
 		
-		cout << "Next movement: " << next_movement << endl;
 		cout << "Linear x: " << twist_msg.linear.x << endl;
 		cout << "Linear y: " << twist_msg.linear.y << endl;
 		cout << "Current position: " << start << endl;

@@ -187,7 +187,7 @@ void Dijkstra::ReconstructPath(int location)
 		assert(parent[location] >= 0 && parent[location] < map_size);
 
 		if (location == start) {
-			cout << location << endl;
+			cout << location << " ";
 		}
 
 		else {
@@ -197,7 +197,7 @@ void Dijkstra::ReconstructPath(int location)
 			first = location;
 
 			ReconstructPath(parent[location]);
-			cout << location << endl;
+			cout << location << " ";
 		}
 	}
 
