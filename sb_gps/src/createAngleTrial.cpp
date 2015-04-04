@@ -1,6 +1,6 @@
 //-------------------------------------------------
 // UBC Snowbots
-// createAngleTrial.c
+// createAngleTrial.cpp
 //   	 Purpose: Testing code to determine the angle of
 //		  the Robot to turn.
 // Author: Nicholas Wu

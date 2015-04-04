@@ -39,8 +39,8 @@ double angleCompass;
 bool moveStatus;
 bool goal;
 bool gpsFlag = true; //indicates connection from gps chip
-double *d = 0;
-double *theta = 0;
+double d = 0; //distance in metres from currentWaypoint to targetWaypoint
+double *theta = 0; //theta is the angle the robot needs to turn from currentWaypoint to targetWaypoint
 waypoint CurrentWaypoint,TargetWaypoint,LastWaypoint;
 geometry_msgs::Twist nextTwist;
 
@@ -61,7 +61,7 @@ void gpsSubHandle(const std_msgs::String::ConstPtr& msg);
 geometry_msgs::Twist createNextTwist(geometry_msgs::Twist nextTwist);
 bool checkGoal (waypoint CurrentWayPoint, waypoint TargetWayPoint);
 void createAngle(double *theta, double angleCompass);
-void createDistance (double * d);
+double createDistance (void);
 
 int main (int argc, char **argv){
 
@@ -82,7 +82,7 @@ int main (int argc, char **argv){
 
 		while (gpsFlag == true){
 
-        createDistance (d);
+        createDistance ();
   			if(checkGoal (CurrentWaypoint, TargetWaypoint) || moveStatus){
             nextTwist.linear.x = 0;
             nextTwist.linear.y = 0;
@@ -242,7 +242,7 @@ void createAngle(double *theta, double angleCompass){
 			if (angleWaypoint < angleCompass180){
 				*theta = (angleCompass - angleWaypoint - 360);
 			}
-			else{
+				else{
 				*theta = angleWaypoint - angleCompass;
 			}
 			if (angleWaypoint < angleCompass180){
@@ -321,7 +321,7 @@ void createAngle(double *theta, double angleCompass){
 	}
 }
 
-void createDistance (double * d){
+double createDistance (void){
 	/*
 	Input Parameter: pointer to store distance
 	Output: void (use pointer)
@@ -329,11 +329,16 @@ void createDistance (double * d){
 	Link:http://stackoverflow.com/questions/19412462/getting-distance-between-two-points-based-on-latitude-longitude-python
 	*/
 
-	double dlon = (TargetWaypoint).lon - (CurrentWaypoint).lon;
-	double dlat = (TargetWaypoint).lat - (CurrentWaypoint).lat;
+	//requires currentWaypoint.lat, currentWaypoint.lon, targetWaypoint.lat, targetWaypoint.lon
+	double toRad = PI / 180;
 
-	double a = (sin(dlat/2))*2 + cos((CurrentWaypoint).lat) * cos((TargetWaypoint).lat) * (sin(dlon/2))*2;
-	double c = 2 * atan2(sqrt(a), sqrt(1-a));
-
-	*d = EARTH_RADIUS * c;
+	double lat1 = currentWaypoint.lat * toRad;
+	double lon1 = currentWaypoint.lon * toRad;
+	double lat2 = targetWaypoint.lat * toRad;
+	double lon2 = targetWaypoint.lon * toRad;
+	//from http://www.movable-type.co.uk/scripts/latlong.html, Distance formula (using haversine)
+	double a = sin((lat2 - lat1) / 2)*sin((lat2 - lat1) / 2) + cos(lat1) * cos(lat2) * sin((lon2 - lon1) / 2)*sin((lon2 - lon1) / 2);
+	double c = 2 * atan2(sqrt(a), sqrt(1 - a));
+	double d = 6371000 * c;
+	return d;
 }

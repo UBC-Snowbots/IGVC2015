@@ -33,9 +33,11 @@ add_executable(sb_gps src/gps.cpp)
 add_dependencies(sb_gps sb_msgs_generate_messages_cpp)
 add_dependencies(sb_gps sb_gps_generate_messages_cpp)
 add_executable(createAngleTrial src/createAngleTrial.cpp)
+add_executable(createDistanceTrial src/getDistanceTrial.cpp)
 
 target_link_libraries(sb_gps ${catkin_LIBRARIES})
 target_link_libraries(createAngleTrial ${catkin_LIBRARIES})
+target_link_libraries(createDistanceTrial ${catkin_LIBRARIES})
 
 ## To add package paths:
 ## source ~/catkin_ws/devel/setup.bash
