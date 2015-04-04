@@ -21,7 +21,6 @@
 //Constants
 #define EARTH_RADIUS 6378.137 //In KM
 #define PI 3.14159265
-#define WAYPOINT_FILE "practice1.txt" //using practice1.txt for testing
 
 using namespace std;
 
@@ -40,6 +39,8 @@ double angleCompass;
 bool moveStatus;
 bool goal;
 bool gpsFlag = true; //indicates connection from gps chip
+double *d = 0;
+double *theta = 0;
 waypoint CurrentWaypoint,TargetWaypoint,LastWaypoint;
 geometry_msgs::Twist nextTwist;
 
@@ -52,16 +53,15 @@ static const string NODE_NAME = "sb_gps";
 static const string PUBLISH_TOPIC = "gps_twist";
 static const string GPS_INPUT_DIRECTION = "waypoint";
 static const string SERVICE_NAME = "goto_waypoint";
+
 //static int LOOP_FREQ = 30;
 
 bool goto_waypoint(sb_gps::GotoWaypoint::Request &req, sb_gps::GotoWaypoint::Response &res);
 void gpsSubHandle(const std_msgs::String::ConstPtr& msg);
 geometry_msgs::Twist createNextTwist(geometry_msgs::Twist nextTwist);
 bool checkGoal (waypoint CurrentWayPoint, waypoint TargetWayPoint);
-void createAngle (double *theta, double angleCompass);
-
-
-geometry_msgs::Vector3 directions;
+void createAngle(double *theta, double angleCompass);
+void createDistance (double * d);
 
 int main (int argc, char **argv){
 
@@ -76,12 +76,13 @@ int main (int argc, char **argv){
 
   ros::Rate loop_rate(5); //10hz loop rate
 
-  double theta = 0;
 
 	while (ros::ok()){
-		while (gpsFlag == true){
-			ROS_INFO("Everything is going to be ok");
+    ROS_INFO("Everything is going to be ok");
 
+		while (gpsFlag == true){
+
+        createDistance (d);
   			if(checkGoal (CurrentWaypoint, TargetWaypoint) || moveStatus){
             nextTwist.linear.x = 0;
             nextTwist.linear.y = 0;
@@ -94,11 +95,17 @@ int main (int argc, char **argv){
             if (moveStatus)
             ROS_INFO("Command stop");
             else
-            ROS_INFO("Arrived at destination");
+            ROS_INFO("Current Position:");
+            cout << "Current longitude: " << CurrentWaypoint.lon << " Current latitude: " << CurrentWaypoint.lat << endl;
+            ROS_INFO("Target Position:");
+            cout << "Target  longitude: " << TargetWaypoint.lon  << " Target  latitude: " << TargetWaypoint.lat  << endl;
+            cout << "Arrived at destination" << endl;
   				}
   			else{
-            createAngle (&theta, angleCompass);
+            createAngle (theta, angleCompass);
             nextTwist = createNextTwist (nextTwist); //Make new twist message
+            ROS_INFO("Current Position:");
+            cout << "Current longitude: " << CurrentWaypoint.lon << " Current latitude: " << CurrentWaypoint.lat << endl;
             ROS_INFO("Twist lin.x = %f, Twist lin.y = %f, Twist lin.z = %f", nextTwist.linear.x, nextTwist.linear.y, nextTwist.linear.z);
             ROS_INFO("Twist ang.x = %f, Twist ang.y = %f, Twist ang.z = %f", nextTwist.angular.x, nextTwist.angular.y, nextTwist.angular.z);
             cout << "Angle to destination" << theta << endl;
@@ -193,61 +200,140 @@ bool checkGoal (waypoint CurrentWaypoint, waypoint TargetWaypoint){
     return false;
 }
 
-void createAngle (double *theta, double angleCompass){
+void createAngle(double *theta, double angleCompass){
 	/*
 	Input Parameter:
-		1. pointer to hold angle
-		2. direction from compass
+	1. pointer to hold angle
+	2. direction of robot from North (0-359 degrees)
 	Output: void (use pointer)
-	Purpose: calculates angle from target waypoint
+	3. x and y cordinates of our goal
+	Purpose: calculates angle of robot to target waypoint ((-180)-180 degrees)
 	*/
 
 //I'm not too familiar with pointers as parameters, I think this should be correct.
 //I have tested the function and it does create the right angle. -Nick
-  double x,y;
 	// x is the x cordinate, y is the y cordinate
-	double phi; //variable needed to calculate theta
+	double phi; //variable needed to  calculate theta
+	double x = TargetWaypoint.lon; //need to use meters not cordinates
+	double y = TargetWaypoint.lat;	//need to use meters not cordinates
+	double angleWaypoint; //Angle from North to waypoint
 	double r = sqrt(x*x + y*y); //distance from the robot to waypoint
-	double angleRobot = 180 * (acos(y / r) / PI); //angle of robot to the y-axis
+	double angleGoal = 180 * (acos(abs(y) / r) / PI); //angle of goal to the y-axis
+	double angleCompass180; //Angle +/- 180
 
+	if (angleCompass >= 180){
+		angleCompass180 = angleCompass - 180;
+	}
+	else if (angleCompass < 180){
+		angleCompass180 = angleCompass + 180;
+	}
 	//while direction of goal angle is in quadrant 1
-	while (x > 0 && y >= 0) {
-		phi = angleRobot;
-		if (angleCompass <= (phi + 180)) {
-			*theta = (phi - angleCompass);
+	if (x > 0 && y >= 0) {
+		angleWaypoint = angleGoal;
+		if (angleCompass <= angleCompass180) {
+			if (angleWaypoint > angleCompass180){
+				*theta = (angleWaypoint - angleCompass - 360);
+			}
+			else{
+				*theta = angleWaypoint - angleCompass;
+			}
 		}
-		else if (angleCompass > (phi + 180)) {
-			*theta = (360 - angleCompass + phi);
+		else if (angleCompass > angleCompass180) {
+			if (angleWaypoint < angleCompass180){
+				*theta = (angleCompass - angleWaypoint - 360);
+			}
+			else{
+				*theta = angleWaypoint - angleCompass;
+			}
+			if (angleWaypoint < angleCompass180){
+				*theta = -*theta;
+			}
 		}
 	}
 	//while direction of goal angle is in quadrant 4
-	while (x >= 0 && y < 0) {
-		phi = (180 - angleRobot);
-		if (angleCompass <= (phi + 180)) {
-			*theta = (phi - angleCompass);
+	if (x >= 0 && y < 0) {
+		angleWaypoint = (180 - angleGoal);
+		if (angleCompass <= angleCompass180) {
+			if (angleWaypoint > angleCompass180){
+				*theta = (angleWaypoint - angleCompass - 360);
+			}
+			else{
+				*theta = angleWaypoint - angleCompass;
+			}
 		}
-		else if (angleCompass >(phi + 180)) {
-			*theta = (360 - angleCompass + phi);
+		else if (angleCompass > angleCompass180) {
+			if (angleWaypoint < angleCompass180){
+				*theta = (angleCompass - angleWaypoint - 360);
+			}
+			else{
+				*theta = angleWaypoint - angleCompass;
+			}
+			if (angleWaypoint < angleCompass180){
+				*theta = -*theta;
+			}
 		}
 	}
 	//while direction of goal angle is in quadrant 3
-	while (x < 0 && y <= 0) {
-		phi = (180 + angleRobot);
-		if (angleCompass < (phi - 180)) {
-			*theta = (phi - angleCompass);
+	if (x < 0 && y <= 0) {
+		angleWaypoint = (180 + angleGoal);
+		if (angleCompass <= angleCompass180) {
+			if (angleWaypoint > angleCompass180){
+				*theta = (angleWaypoint - angleCompass - 360);
+			}
+			else{
+				*theta = angleWaypoint - angleCompass;
+			}
 		}
-		else if (angleCompass >(phi - 180)) {
-			*theta = (360 - angleCompass + phi);
+		else if (angleCompass > angleCompass180) {
+			if (angleWaypoint < angleCompass180){
+				*theta = (angleCompass - angleWaypoint - 360);
+			}
+			else{
+				*theta = angleWaypoint - angleCompass;
+			}
+			if (angleWaypoint > angleCompass180){
+				*theta = (angleWaypoint - angleCompass - 360);
+			}
 		}
 	}
 	//while direction of goal angle is in quadrant 2
-	while (x < 0 && y > 0) {
-		phi = (360 - angleRobot);
-		if (angleCompass < (phi - 180)) {
-			*theta = (phi - angleCompass);
+	if (x < 0 && y > 0) {
+		angleWaypoint = (360 - angleGoal);
+		if (angleCompass <= angleCompass180) {
+			if (angleWaypoint > angleCompass180){
+				*theta = (angleWaypoint - angleCompass - 360);
+			}
+			else{
+				*theta = angleWaypoint - angleCompass;
+			}
 		}
-		else if (angleCompass >(phi - 180)) {
-			*theta = (360 - angleCompass + phi);
+		else if (angleCompass > angleCompass180) {
+			if (angleWaypoint < angleCompass180){
+				*theta = (angleCompass - angleWaypoint - 360);
+			}
+			else{
+				*theta = angleWaypoint - angleCompass;
+			}
+			if (angleWaypoint > angleCompass180){
+				*theta = (angleWaypoint - angleCompass - 360);
+			}
 		}
 	}
+}
+
+void createDistance (double * d){
+	/*
+	Input Parameter: pointer to store distance
+	Output: void (use pointer)
+	Purpose: calculates distance from target waypoints
+	Link:http://stackoverflow.com/questions/19412462/getting-distance-between-two-points-based-on-latitude-longitude-python
+	*/
+
+	double dlon = (TargetWaypoint).lon - (CurrentWaypoint).lon;
+	double dlat = (TargetWaypoint).lat - (CurrentWaypoint).lat;
+
+	double a = (sin(dlat/2))*2 + cos((CurrentWaypoint).lat) * cos((TargetWaypoint).lat) * (sin(dlon/2))*2;
+	double c = 2 * atan2(sqrt(a), sqrt(1-a));
+
+	*d = EARTH_RADIUS * c;
 }

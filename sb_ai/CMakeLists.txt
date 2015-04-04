@@ -34,3 +34,6 @@ add_dependencies(sim_gps sb_msgs_generate_messages_cpp)
 
 add_executable(test_output src/test_output.cpp)
 target_link_libraries(test_output ${catkin_LIBRARIES})
+
+add_subdirectory(src)
+

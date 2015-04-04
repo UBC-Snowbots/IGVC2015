@@ -1,3 +1,4 @@
+return()
 # CMake requires we pecify a minimum version, current min is 2.8
 if(WIN32)
 	# Require 2.8.2 for configuring Debug/Release configuration options in 
