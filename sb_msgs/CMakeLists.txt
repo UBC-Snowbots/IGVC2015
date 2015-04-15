@@ -19,6 +19,7 @@ find_package(catkin REQUIRED COMPONENTS
    IMU.msg
    jausin.msg
    jausout.msg
+   LocalMap.msg
    LidarNav.msg
    Pose.msg
    RobotState.msg
