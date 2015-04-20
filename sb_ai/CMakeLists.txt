@@ -31,3 +31,9 @@ target_link_libraries(sim_gps ${catkin_LIBRARIES})
 
 add_executable(test_output src/test_output.cpp)
 target_link_libraries(test_output ${catkin_LIBRARIES})
+
+add_executable(simple_mapping src/simple_mapping.cpp)
+target_link_libraries(simple_mapping ${catkin_LIBRARIES})
+
+add_executable(simple_ai src/simple_ai.cpp)
+target_link_libraries(simple_ai ${catkin_LIBRARIES})
