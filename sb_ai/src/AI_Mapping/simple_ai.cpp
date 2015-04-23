@@ -1,6 +1,7 @@
 #include <iostream>
 #include "ros/ros.h"
 #include "sb_msgs/LocalMap.h"
+#include "AIMapping.h"
 
 using namespace std;
 
