@@ -26,6 +26,9 @@ int next_movement = 0;
 void gps_callback(const sb_msgs::AISimGPS::ConstPtr& msg) 
 {
 	start = (msg->latitude * width) + msg->longitude;
+	ROS_INFO("Lat: %ld", msg->latitude);
+	ROS_INFO("Long: %ld", msg->longitude);
+	ROS_INFO("Theta: %ld", msg->theta);
 }
 
 
