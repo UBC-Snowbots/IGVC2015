@@ -28,40 +28,43 @@ int main(int argc, char **argv)
 
 	//Simulated values for now. This is probably where we subscribe to the hokuyo messages
 	
-        sim_map.x = 0;
-        sim_map.y = 0;
-	sim_map.rotation = 0;
+        sim_map.pose.x = 0;
+        sim_map.pose.y = 0;
+	sim_map.pose.theta = 0;
 	int x = 1;
         while (ros::ok()) {
 		//Simulated Values
-		sim_map.map.clear();
+		sim_map.map.data.clear();
 		srand(time(NULL));
-		sim_map.map.push_back(rand()%2);
-		sim_map.map.push_back(rand()%2);
-		sim_map.map.push_back(rand()%2);
-		sim_map.map.push_back(rand()%2);
+		sim_map.map.data.push_back(int8_t(rand()%2));
+		sim_map.map.data.push_back(int8_t(rand()%2));
+		sim_map.map.data.push_back(int8_t(rand()%2));
+		sim_map.map.data.push_back(int8_t(rand()%2));
 
 		if (x % 2 == 0)
 		{
-			sim_map.x = 1;
-			sim_map.y = 1;
-			sim_map.rotation = 1;
+			sim_map.pose.x = 1;
+			sim_map.pose.y = 1;
+			sim_map.pose.theta = 1;
 		}
-
 		else
 		{
-			sim_map.x = 0;
-			sim_map.y = 0;
-			sim_map.rotation = 0;	
+			sim_map.pose.x = 0;
+			sim_map.pose.y = 0;
+			sim_map.pose.theta = 0;	
 		}
 		//End of Simulated
 
-                cout << "[local_mapping_node]" << x << endl;
-		ROS_INFO("x = %d", sim_map.x);
-		ROS_INFO("y = %d", sim_map.y);
-		ROS_INFO("rotation = %d", sim_map.rotation);
+                ROS_INFO("\n[local_mapping_node]");
+		cout << "sim_map.pose.x = " << sim_map.pose.x << endl;
+		cout << "sim_map.pose.y = " << sim_map.pose.y << endl;
+		cout << "sim_map.pose.theta = " << sim_map.pose.theta << endl;
+//		ROS_INFO("pose.x = %d", sim_map.pose.x); //This line used to work
+//		ROS_INFO("pose.y = %d", sim_map.pose.y);
+//		ROS_INFO("pose.theta = %d", sim_map.pose.theta);
 		for(int i = 0; i<4; i++)
-			ROS_INFO("map[%d] = %d", i,sim_map.map[i]);
+			cout << "map[" << i << "] = " << int(sim_map.map.data[i]) << endl; //Should cast to int8_t but does not work
+//			ROS_INFO("map[%d] = %d", i,sim_map.map[i]);
 		x++;
                 local_map_pub.publish(sim_map);
 		ros::spinOnce();
