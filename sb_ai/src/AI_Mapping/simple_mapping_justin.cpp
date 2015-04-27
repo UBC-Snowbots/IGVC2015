@@ -1,45 +1,39 @@
-#include "ros/ros.h"
-#include "geometry_msgs/Pose2D.h"
-#include "nav_msgs/OccupancyGrid.h"
 
-void gpsSubscriberCallback(const geometry_msgs::Pose2D::ConstPtr& pose2DMsg) {
 
-  
+SimpleMapping::SimpleMapping() {
+
+  _pose2DPublisher = _n.advertise<geometry_msgs::Pose2D>("ai_pose2D", 1000);
+  _occupancyGridPublisher = _n.advertise<nav_msgs::OccupancyGrid("ai_occupancy_grid", 1000);
+
+  _gpsSubscriber = _n.subscribe("ai_gps", 1000, gpsSubscriberCallback);
+
+  _pose2DMsg.x = 0;
+  _pose2DMsg.y = 0;
+  _pose2DMsg.theta = 0;
 
 }
 
-int main(int argc, char **argv)
-{
+SimpleMapping::~SimpleMapping() { 
 
-  ros::init(argc, argv, "sb_mapping");
+}
 
-  ros::NodeHandle n;
+void SimpleMapping::GPSSubscriberCallback(const geometry_msgs::Pose2D::ConstPtr& pose2DMsg) {
 
-  ros::Publisher pose2DPublisher = n.advertise<geometry_msgs::Pose2D>("sb_ai_pose2D", 1000);
-  ros::Publisher occupancyGridPublisher = n.advertise<nav_msgs::OccupancyGrid("sb_ai_occupancy_grid", 1000);
+  _pose2DMsg.x = pose2DMsg.x;
+  _pose2DMsg.y = pose2DMsg.y;
+  _pose2DMsg.theta = pose2DMsg.theta;
 
-  ros::Subscriber gpsSubscriber = n.subscribe("sb_gps", 1000, gpsSubscriberCallback);
+}
 
-  ros::Rate loop_rate(10);
+void SimpleMapping::PublishPose2D() {
 
-  while (ros::ok())
-  {
+    _pose2DPublisher.publish(_pose2DMsg);
 
-    geometry_msgs::Pose2D pose2DMsg;
-    nav_msgs::OccupancyGrid occupancyGridMsg;
+}
 
-    // Temporarily setting random values
-    pose2DMsg.x = 0;
-    pose2DMsg.y = 0;
-    pose2DMsg.theta = 0;
-    pose2DPublisher.publish(pose2DMsg);
+void SimpleMapping::PublishOccupanyGrid() {
 
-    ros::spinOnce();
-
-    loop_rate.sleep();
-  }
-
-  return 0;
+  _occupancyGridPublisher.publish(_occupancyGridMsg);
 
 }
 
