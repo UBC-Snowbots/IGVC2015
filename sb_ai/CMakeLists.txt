@@ -41,3 +41,10 @@ target_link_libraries(simple_ai ${catkin_LIBRARIES})
 # catkin_make should work without the -j1 flag with this
 add_dependencies(simple_ai ${PROJECT_NAME}_gencpp)
 
+# add_executable(simple_mapping_justin src/AI_Mapping/simple_mapping_justin.cpp)
+# target_link_libraries(simple_mapping_justin ${catkin_LIBRARIES})
+# add_dependencies(simple_mapping_justin ${PROJECT_NAME}_gencpp)
+
+# add_executable(simple_mapping_justin_test src/AI_Mapping/simple_mapping_justin_test.cpp)
+# target_link_libraries(simple_mapping_justin_test ${catkin_LIBRARIES})
+# add_dependencies(simple_mapping_justin_test ${PROJECT_NAME}_gencpp)
