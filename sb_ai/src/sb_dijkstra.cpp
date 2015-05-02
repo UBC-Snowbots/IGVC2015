@@ -35,15 +35,14 @@ void gps_callback(const sb_msgs::AISimGPS::ConstPtr& msg)
 // The map data is processed here
 void map_callback(const sb_msgs::AISimMap::ConstPtr& msg)
 {
-	free(map_ptr);	// free memory allocated by map previously
-	width = msg->width;
-	height = msg->height;
-	map_ptr = new int[width*height];
+	//width = msg->width;
+	//height = msg->height;
+	//map_ptr = new int[width*height];
 
 	// copy map contents
-	for (int i = 0; i < width*height; i++) {
-		map_ptr[i] = msg->map_grid[i];
-	}
+	//for (int i = 0; i < width*height; i++) {
+	//	map_ptr[i] = msg->map_grid[i];
+	//}
 }
 
 

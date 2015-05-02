@@ -27,9 +27,9 @@ int main(int argc, char **argv)
 	ros::Publisher map_pub = n.advertise<sb_msgs::AISimMap>(MAP_PUB_TOPIC, 100);
 	ros::Rate loop_rate(10);
 
-	sim_map.width = 10;
-	sim_map.height = 10;
-	sim_map.map_grid = RandomMap();
+	//sim_map.width = 10;
+	//sim_map.height = 10;
+	//sim_map.map_grid = RandomMap();
 	
 	while (ros::ok()) {
 		map_pub.publish(sim_map);

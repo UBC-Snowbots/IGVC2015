@@ -34,7 +34,7 @@ void callback(const geometry_msgs::PoseStamped::ConstPtr msg_ptr)//const nav_msg
 	//nav_msgs::MapMetaData info = msg_ptr->info;
 
 	geometry_msgs::Pose pose = msg_ptr->pose;
-	ROS_INFO("%lf %lf %lf", pose.position.x, pose.position.y, pose.position.z);
+	ROS_INFO("%lf %lf -- %lf %lf", pose.position.x, pose.position.y, pose.orientation.z, pose.orientation.w);
 }
 
 int main (int argc, char** argv)
