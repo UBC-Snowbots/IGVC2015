@@ -1,12 +1,12 @@
-add_subdirectory(AI)
+add_subdirectory(Controllers/AI)
 
 set(MAIN_HEADERS
-	ControllerBase.hpp
-	DijkstraController.hpp
-	sb_ai.h)
+	Controllers/ControllerBase.hpp
+	Controllers/DijkstraController.hpp
+	Controllers/sb_ai.h)
 
 set(MAIN_SOURCE
-	DijkstraController.cpp
+	Controllers/DijkstraController.cpp
 	main.cpp)
 
 set(MODE_LIBRARIES

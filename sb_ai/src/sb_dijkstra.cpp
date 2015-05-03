@@ -2,11 +2,11 @@
 #include "std_msgs/String.h"
 #include <string>
 #include <iostream>
-#include "sb_ai.h"
+#include "Controllers/sb_ai.h"
 #include "sb_msgs/AISimMap.h"
 #include "sb_msgs/AISimGPS.h"
-#include "AI/dijkstra/dijkstra.h"
-#include "AI/dijkstra/dijkstra.cpp"	// TODO need to create makefile
+#include "Controllers/AI/dijkstra/dijkstra.h"
+#include "Controllers/AI/dijkstra/dijkstra.cpp"	// TODO need to create makefile
 #include <geometry_msgs/Twist.h>
 
 using namespace std;

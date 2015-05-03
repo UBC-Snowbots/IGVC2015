@@ -2,7 +2,7 @@
 #include "std_msgs/String.h"
 #include <string>
 #include <iostream>
-#include "sb_ai.h"
+#include "Controllers/sb_ai.h"
 #include "sb_msgs/AISimMap.h"
 
 using namespace std;

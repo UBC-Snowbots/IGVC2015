@@ -2,11 +2,11 @@
 #include "std_msgs/String.h"
 #include <string>
 #include <iostream>
-#include "sb_ai.h"
+#include "Controllers/sb_ai.h"
 #include <geometry_msgs/Twist.h>
 
-#include "ControllerBase.hpp"
-#include "DijkstraController.hpp"
+#include "Controllers/ControllerBase.hpp"
+#include "Controllers/DijkstraController.hpp"
 
 ai::ControllerBase* GetController(ros::NodeHandle& nh)
 {

@@ -16,10 +16,6 @@ include_directories(
   ${catkin_INCLUDE_DIRS}
 )
 
-add_executable(dstarlite src/sb_dstarlite.cpp)
-target_link_libraries(dstarlite ${catkin_LIBRARIES})
-add_dependencies(dstarlite sb_msgs_generate_messages_cpp)
-
 add_executable(dijkstra src/sb_dijkstra.cpp)
 target_link_libraries(dijkstra ${catkin_LIBRARIES})
 add_dependencies(dijkstra sb_msgs_generate_messages_cpp)
