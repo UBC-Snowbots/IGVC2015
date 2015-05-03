@@ -1,0 +1,5 @@
+sb_msgs/Waypoint location
+bool move
+---
+bool at_location
+

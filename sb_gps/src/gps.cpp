@@ -1,373 +1,339 @@
-#include <ros/ros.h>
+/* Author: Vincent Yuan
+*  Date: Jan 3, 2015
+*  Purpose: Main GPS function node
+*  Function: Collect, parse NMEA data, create twist message, r, theta
+*/
+
+//Standard Headers
+#include <stdlib.h>
+#include <math.h>
+#include <iostream> //for cout, rather that using stdio
+#include <fstream> //read from file
+#include <sstream>
+#include <ros/ros.h> //for ros system
 #include <std_msgs/String.h>
+#include <string.h>
 #include <geometry_msgs/Twist.h>
 #include "sb_msgs/CarCommand.h"
-#include <sstream>
-#include <iostream>
-#include <fstream>
-#include <string>
-#include <math.h>
-#include <stdlib.h>
+#include "sb_gps/GotoWaypoint.h"
+#include "sb_msgs/Waypoint.h"
 
-// REMEMBER TO EDIT WAYPOINTS FILE DIRECTORY TODO
+//Constants
+#define EARTH_RADIUS 6378.137 //In KM
+#define PI 3.14159265
 
 using namespace std;
 
-struct waypoint 
-{
-	int long_x;
-	int lat_y;
+struct waypoint {
+  double lon;
+  double lat;
+  waypoint(){
+    lon=lat=0;
+  }
 };
 
-// functions
-void GetWaypoint();
-void CalculateAngle(); 
-int* ReturnWaypoints();
-void CheckWaypointStatus();
-void steeringTest();
+// Variables
 
-// variables
-static const string GPS_NODE_NAME = "gps_node"; 
-static const string GPS_OUTPUT_TOPIC = "gps_nav"; 
+double *NMEA; //To hold received suscription message
+double angleCompass;
+bool moveStatus;
+bool goal;
+bool gpsFlag = true; //indicates connection from gps chip
+double *d = 0;
+double *theta = 0;
+waypoint CurrentWaypoint,TargetWaypoint,LastWaypoint;
+geometry_msgs::Twist nextTwist;
+
+
+static const string GPS_NODE_NAME = "gps_node";
+static const string GPS_OUTPUT_TOPIC = "gps_nav";
 static const string GPS_TEST_TOPIC = "vision_vel"; // test sub
 static const string GPS_INPUT_TOPIC = "gps_state"; // gps_state
-//static const int SECOND = 1000000;
-bool isAtGoal = false, isFinished = false; 
-double lat, lon, angle, last_angle = 0, steering;
-struct waypoint current_waypoint;
-struct waypoint goal_waypoint;
-struct waypoint last_waypoint;
-int* waypoints_list = ReturnWaypoints();
-int size = sizeof(waypoints_list), c = 0, x_dist, y_dist;
-float x;
-float y;
-float dx;
-float dy;
-int RunCount = 0;
+static const string NODE_NAME = "sb_gps";
+static const string PUBLISH_TOPIC = "gps_twist";
+static const string GPS_INPUT_DIRECTION = "waypoint";
+static const string SERVICE_NAME = "goto_waypoint";
+
+//static int LOOP_FREQ = 30;
+
+bool goto_waypoint(sb_gps::GotoWaypoint::Request &req, sb_gps::GotoWaypoint::Response &res);
+void gpsSubHandle(const std_msgs::String::ConstPtr& msg);
+geometry_msgs::Twist createNextTwist(geometry_msgs::Twist nextTwist);
+bool checkGoal (waypoint CurrentWayPoint, waypoint TargetWayPoint);
+void createAngle(double *theta, double angleCompass);
+void createDistance (double * d);
+
+int main (int argc, char **argv){
 
 
-// temp callback
-void gpsCallback(const std_msgs::String::ConstPtr& msg) // changed to string
-{
-	//string a = "B,4.293845e+08,-5.394857e+09,3945.33";
 
-	char a[64];
-	char temp[8];
-	int x, y, i = 0, j;
-	string str = msg->data;
-  
-	while (str[i] != '\0') { a[i] = str[i]; i++; }
-	if (a[0] != 'B' && a[1] != ',') { cout << "no B" << endl; return; }  
-	if( a[10] != 'e' && a[24] != 'e') { cout << "no e" << endl; return; } 
-	if( a[14] != ',' && a[28] != ',') { cout << "no comma" << endl; return; }
-	if( a[33] != '.') { cout << "no compass" << endl; return; }
+  ros::init(argc, argv, GPS_NODE_NAME); //initialize access point to communicate
+  ros::NodeHandle nh; //create handle to this process node, NodeHandle is main access point to communication with ROS system. First one intializes node
+  ros::Publisher gps_test_pub = nh.advertise<geometry_msgs::Twist>(GPS_TEST_TOPIC, 20);
+  ros::Publisher gps_data_pub = nh.advertise<sb_msgs::CarCommand>(GPS_OUTPUT_TOPIC, 20);
+  ros::Subscriber gps_Sub = nh.subscribe(GPS_INPUT_TOPIC, 20, gpsSubHandle);
+  ros::ServiceServer service = nh.advertiseService(SERVICE_NAME, goto_waypoint);//finish from sb_WaypointManager
 
-	for (i = 2, j=0; i<9 || j<7; i++, j++) { 
-		if (a[i]=='.') { j--; }
-		else { temp[j] = a[i]; }
-	}
-	last_waypoint.long_x = current_waypoint.long_x;
-	current_waypoint.long_x = atoi(temp); 
-	for (i=15, j=0; i<10 || j<8; i++, j++) {
-		if (a[i] == '.') { j--; }
-		else { temp[j] = a[i]; }
-	}
-	last_waypoint.lat_y = current_waypoint.lat_y;
-	current_waypoint.lat_y = atoi(temp);
+  ros::Rate loop_rate(5); //10hz loop rate
 
-	//current_direction = atof(msg->data.substr(29).c_str());
-	// up to 6 decimal precision ~10cm, error ~2m
-	cout << current_waypoint.lat_y << endl;
-	cout << current_waypoint.long_x << endl;
-	//cout << current_direction << endl;
+
+	while (ros::ok()){
+    ROS_INFO("Everything is going to be ok");
+
+		while (gpsFlag == true){
+
+        createDistance (d);
+  			if(checkGoal (CurrentWaypoint, TargetWaypoint) || moveStatus){
+            nextTwist.linear.x = 0;
+            nextTwist.linear.y = 0;
+            nextTwist.linear.z = 0;
+
+            nextTwist.angular.x = 0;
+            nextTwist.angular.y = 0;
+            nextTwist.angular.z = 0;
+
+            if (moveStatus)
+            ROS_INFO("Command stop");
+            else
+            ROS_INFO("Current Position:");
+            cout << "Current longitude: " << CurrentWaypoint.lon << " Current latitude: " << CurrentWaypoint.lat << endl;
+            ROS_INFO("Target Position:");
+            cout << "Target  longitude: " << TargetWaypoint.lon  << " Target  latitude: " << TargetWaypoint.lat  << endl;
+            cout << "Arrived at destination" << endl;
+  				}
+  			else{
+            createAngle (theta, angleCompass);
+            nextTwist = createNextTwist (nextTwist); //Make new twist message
+            ROS_INFO("Current Position:");
+            cout << "Current longitude: " << CurrentWaypoint.lon << " Current latitude: " << CurrentWaypoint.lat << endl;
+            ROS_INFO("Twist lin.x = %f, Twist lin.y = %f, Twist lin.z = %f", nextTwist.linear.x, nextTwist.linear.y, nextTwist.linear.z);
+            ROS_INFO("Twist ang.x = %f, Twist ang.y = %f, Twist ang.z = %f", nextTwist.angular.x, nextTwist.angular.y, nextTwist.angular.z);
+            cout << "Angle to destination" << theta << endl;
+  		    }
+
+        gps_test_pub.publish(nextTwist); /*tdo: change name of publisher_name*/
+        ros::spinOnce(); //ros spin is to ensure that ros threading does not leave suscribes un processed
+        loop_rate.sleep();
+      }
+    }
+    return 0;
 }
 
-
-int main(int argc, char **argv) 
-{
-
-	// hard code current waypoint 
-	current_waypoint.long_x = 0; // keep like this until we start receiving gps data
-	current_waypoint.lat_y = 0;
-	last_waypoint.long_x = 0;
-	last_waypoint.lat_y = 0;
-	//current_direction = 0;
-
-	ros::init(argc, argv, GPS_NODE_NAME); // start node
-	ros::NodeHandle nh; // main access point to communication with ROS system. First one initializes node.
-
-	ros::Publisher gps_test_pub = nh.advertise<geometry_msgs::Twist>(GPS_TEST_TOPIC, 20); 
-	ros::Publisher gps_data_pub = nh.advertise<sb_msgs::CarCommand>(GPS_OUTPUT_TOPIC, 20);
-	ros::Subscriber gps_sub = nh.subscribe(GPS_INPUT_TOPIC, 20, gpsCallback); 
-
-	ros::Rate loop_rate(5); // 10hz loop rate
-
-	// outputs twist msg
-	geometry_msgs::Twist t_msg;
-	t_msg.linear.x = 0;
-	t_msg.linear.y = 0.0;
-	t_msg.linear.z = 0;
-	t_msg.angular.x = 0;
-	t_msg.angular.y = 0;
-	t_msg.angular.z = 0;
-
-	GetWaypoint();
-
-	// outputs carcommand msg
-	sb_msgs::CarCommand cc_msg;
-	cc_msg.throttle = 0.3;
-	cc_msg.steering = 0;
-	cc_msg.priority = 0;
-
-	while (ros::ok()) 
-	{
-		//CalculateAngle(); // calculate angular.z
-		steeringTest();
-		t_msg.angular.z = steering;
-		cc_msg.steering = steering;
-		gps_test_pub.publish(t_msg);
-		gps_data_pub.publish(cc_msg);
-
-		ROS_INFO("\nLinear.x = %f\nLinear.y = %f\nAngular.z = %f\n", t_msg.linear.x, t_msg.linear.y, t_msg.angular.z);
-		cout << "Curr Lat: " << current_waypoint.long_x << endl;
-	        cout << "Curr Long: " << current_waypoint.lat_y << endl;
-		cout << "Last long: " << last_waypoint.long_x << endl;
-		cout << "Last lat: " << last_waypoint.lat_y << endl;
-		cout << "Goal Lat: " << goal_waypoint.long_x << endl;
-	        cout << "Goal Long: " << goal_waypoint.lat_y << endl;
-		cout << "Curr angle: " << angle << endl;
-		cout << "Last angle: " << last_angle << endl;
-		//cout << "Compass: " <<  << endl;
-
-		CheckWaypointStatus();
-		if (isFinished) { return 0; }
-		ros::spinOnce();
-		loop_rate.sleep(); // sleep for 10hz
-		GetWaypoint();
-	}
-	return 0;
+bool goto_waypoint(sb_gps::GotoWaypoint::Request &req, sb_gps::GotoWaypoint::Response &res){
+  res.at_location = false;
+  ROS_INFO("request: latitude= %i, longitude = %i", req.location.lat, req.location.lon);//Waypointmanager request
+  if (req.move){
+    ROS_INFO("request: move = true");
+    moveStatus = true;
+  }
+  else{
+    ROS_INFO("request: move = false");
+    moveStatus = false;
+    //ROS_INFO("sending back response: []", res);
+  }
+  return true;
 }
 
+void gpsSubHandle(const std_msgs::String::ConstPtr& msg){
+  /*
+ 	Input Parameter: Suscribed Message
+ 	Output: void
+ 		1. Pointer
+ 	Purpose: Handles suscribed gps Message, check for NMEA, Parse
+ 	Notes: Copied from last years' code
+  */
+ 	char a[64];
+ 	char temp[8];
+ 	int x, y, i = 0, j;
+ 	string str = msg->data;
 
-// Get the next waypoint
-void GetWaypoint() 
-{
-	if (c == 0 || isAtGoal) {
-		if (c+2 > size) { isFinished = true; return; }
-		goal_waypoint.long_x = waypoints_list[c];
-		goal_waypoint.lat_y = waypoints_list[c+1];
-		c += 2;
-		isAtGoal = false;
-		return;
-	}
-	return;
+ 	while (str[i] != '\0') { a[i] = str[i]; i++; }
+ 	if (a[0] != 'B' && a[1] != ',') { cout << "no B" << endl; return; }
+ 	if( a[10] != 'e' && a[24] != 'e') { cout << "no e" << endl; return; }
+ 	if( a[14] != ',' && a[28] != ',') { cout << "no comma" << endl; return; }
+ 	if( a[33] != '.') { cout << "no compass" << endl; return; }
+
+ 	//processing x coord
+ 	for (i = 2, j=0; i<9 || j<7; i++, j++) {
+ 		if (a[i]=='.') { j--; }
+ 		else { temp[j] = a[i]; }
+ 	}
+ 	LastWaypoint.lon = CurrentWaypoint.lon;
+ 	CurrentWaypoint.lon = atoi(temp);
+
+ 	//processing y coord
+ 	for (i=15, j=0; i<10 || j<8; i++, j++) {
+ 		if (a[i] == '.') { j--; }
+ 		else { temp[j] = a[i]; }
+ 	}
+ 	LastWaypoint.lat = CurrentWaypoint.lat;
+ 	CurrentWaypoint.lat = atoi(temp);
+
+ 	//current_direction = atof(msg->data.substr(29).c_str());
+ 	// up to 6 decimal precision ~10cm, error ~2m
+ 	ROS_INFO("Current status: ");
+ 	cout << "lat: " << CurrentWaypoint.lat << endl;
+ 	cout << "lon: " << CurrentWaypoint.lon << endl;
+ 	//cout << current_direction << endl;
+  return;
+ }
+geometry_msgs::Twist createNextTwist(geometry_msgs::Twist nextTwist){
+
+  nextTwist.linear.x = 0;// nextTwist.x; // velocity in x [-1,1] 1 is right full throttle
+ 	nextTwist.linear.y = 0; //nextTwist.y; // velocity in y [-1,1] 1 is forwards full-throttle
+ 	nextTwist.linear.z = 0; //nextTwist.z; // always 0
+
+ 	nextTwist.angular.x = 0;//nextTwist.dx; // always 0
+ 	nextTwist.angular.y = 0;//nextTwist.dy; // always 0
+ 	nextTwist.angular.z = 0;//nextTwist.dz;//
 }
 
-
-// Checks if we are sufficiently close to the waypoint
-void CheckWaypointStatus() 
-{
-	// estimated to within ~11cm
-	if (current_waypoint.long_x == goal_waypoint.long_x && current_waypoint.lat_y == goal_waypoint.lat_y) 
-	{ 
-		isAtGoal = true; 
-	}
+bool checkGoal (waypoint CurrentWaypoint, waypoint TargetWaypoint){
+  if (CurrentWaypoint.lon == TargetWaypoint.lon){
+    if (CurrentWaypoint.lat == TargetWaypoint.lat){
+      return true;
+    }
+    else
+      return false;
+  }
+  else
+    return false;
 }
 
+void createAngle(double *theta, double angleCompass){
+	/*
+	Input Parameter:
+	1. pointer to hold angle
+	2. direction of robot from North (0-359 degrees)
+	Output: void (use pointer)
+	3. x and y cordinates of our goal
+	Purpose: calculates angle of robot to target waypoint ((-180)-180 degrees)
+	*/
 
-// Calculates Euclidean distance from position to goal
-void CalculateAngle()
-{
-	 
-/*
-	x_dist = goal_waypoint.long_x - current_waypoint.long_x;
-	y_dist = goal_waypoint.lat_y - current_waypoint.lat_y;
-	if (x_dist == 0 && y_dist == 0) { steering = 0; return; }
+//I'm not too familiar with pointers as parameters, I think this should be correct.
+//I have tested the function and it does create the right angle. -Nick
+	// x is the x cordinate, y is the y cordinate
+	double phi; //variable needed to  calculate theta
+	double x = TargetWaypoint.lon; //need to use meters not cordinates
+	double y = TargetWaypoint.lat;	//need to use meters not cordinates
+	double angleWaypoint; //Angle from North to waypoint
+	double r = sqrt(x*x + y*y); //distance from the robot to waypoint
+	double angleGoal = 180 * (acos(abs(y) / r) / PI); //angle of goal to the y-axis
+	double angleCompass180; //Angle +/- 180
 
-
-	if (current_waypoint.long_x == 0 || current_waypoint.lat_y == 0) { steering = 0; return; }
-	else {
-		cout << y_dist << " " << x_dist << " " << endl;
-		if (current_waypoint.long_x == goal_waypoint.long_x) {
-			if (y_dist / abs(y_dist) == -1) { angle = 180.00; }
-			else { angle = 0.00; }
-		}
-		else if (current_waypoint.lat_y == goal_waypoint.lat_y) {
-			if (x_dist / abs(x_dist) == -1) { angle = 270.00; }
-			else { angle = 90.00; }
-		}
-		else {
-			if (y_dist / abs(y_dist) == -1) { angle = atan(abs(y_dist)/abs(x_dist)); angle = (angle*180)/3.1415; }
-			if (y_dist / abs(y_dist) == 1) { angle = atan(abs(x_dist)/abs(y_dist)); angle = (angle*180)/3.1415; }
-
-			if (x_dist / abs(x_dist) == -1) {
-				if (y_dist / abs(y_dist) == -1) { angle += 180.00; }
-				else { angle += 270.00; } 		
+	if (angleCompass >= 180){
+		angleCompass180 = angleCompass - 180;
+	}
+	else if (angleCompass < 180){
+		angleCompass180 = angleCompass + 180;
+	}
+	//while direction of goal angle is in quadrant 1
+	if (x > 0 && y >= 0) {
+		angleWaypoint = angleGoal;
+		if (angleCompass <= angleCompass180) {
+			if (angleWaypoint > angleCompass180){
+				*theta = (angleWaypoint - angleCompass - 360);
 			}
-			if (x_dist / abs(x_dist) == 1) { // if x positive
-				if (y_dist / abs(y_dist) == -1) { angle += 90.0; }
+			else{
+				*theta = angleWaypoint - angleCompass;
 			}
 		}
-	}
-
-
-// ****************************************************************
-
-	int x = current_waypoint.long_x - last_waypoint.long_x;
-	int y = current_waypoint.lat_y - last_waypoint.lat_y;
-	cout << "x: " << x << " y: " << y << endl;
-	if (abs(x) < 1 && abs(y) < 1) { last_angle = 0; }
-
-	if (last_waypoint.long_x == 0 || last_waypoint.lat_y == 0) { last_angle = 0; }
-	else {
-		if (abs(x) < 1) {
-			if (abs(y) < 1) { last_angle = 0; }
-			else if (y < 0) { last_angle = 180.00; }
-			else { last_angle = 0.00; }
-		}
-		else if (abs(y) < 1) {
-			if (abs(x) < 1) { last_angle = 0; }
-			else if (x < 0) { last_angle = 270.00; }
-			else { last_angle = 90.00; }
-		}
-		else {
-			if (y < 0) { last_angle = atan(abs(y)/abs(x)); last_angle = (last_angle*180)/3.1415; }
-			if (y > 0) { last_angle = atan(abs(x)/abs(y)); last_angle = (last_angle*180)/3.1415; }
-
-			if (x < 0) {
-				if (y < 0) { last_angle += 180.00; }
-				else { last_angle += 270.00; } 		
+		else if (angleCompass > angleCompass180) {
+			if (angleWaypoint < angleCompass180){
+				*theta = (angleCompass - angleWaypoint - 360);
 			}
-			if (x > 0) { // if x positive
-				if (y < 0) { last_angle += 90.0; }
+			else{
+				*theta = angleWaypoint - angleCompass;
+			}
+			if (angleWaypoint < angleCompass180){
+				*theta = -*theta;
 			}
 		}
 	}
-
-Curr Lat: 4267818
-Curr Long: -8319548
-Last long: 4267818
-Last lat: -8319548
-Goal Lat: 4267821
-Goal Long: -8319514
-Curr angle: 0
-Last angle: 0
-
-
-// ***************************************************************
-
-
-
-	if (abs(last_angle - angle) == 0 || abs(last_angle - angle) == 360) { steering = 0; return; }
-	else if (last_angle < angle && abs(last_angle - angle) < 180) { steering = -0.1; return; }
-	else if (last_angle > angle && abs(last_angle - angle) < 180) { steering = 0.1; return; }
-	else if (last_angle < angle && abs(last_angle - angle) >= 180) { steering = 0.1; return; }
-	else { steering = -0.1; return; }
-	return;*/
-}	 
-
-void steeringTest(void)
-{         
-
-//scaling factors:111.412 lat, 78.847 long
-// 
-      
- 	float longscale = 111.412/78.847;
-	
-/*
-	current_waypoint.lat_y = current_waypoint.lat_y/10;	
-	last_waypoint.lat_y =last_waypoint.lat_y/10;
-	goal_waypoint.lat_y = goal_waypoint.lat_y/10;
-*/
-	if(current_waypoint.long_x != 0)
-{
-	 dx = (current_waypoint.long_x-last_waypoint.long_x)*longscale;
-	 x = (goal_waypoint.long_x-current_waypoint.long_x)*longscale;
-}
-
-if(current_waypoint.lat_y != 0)
-{
-	
-	 dy = current_waypoint.lat_y-last_waypoint.lat_y;	
-	 y = goal_waypoint.lat_y-current_waypoint.lat_y;
-}
-
-if(current_waypoint.long_x !=0 || current_waypoint.lat_y !=0)
-	{
-	RunCount++;
-	cout<<"UPDATE COUNT"<< RunCount<<endl;
-	int lquadrant = 0;
-	int cquadrant = 0;
-
-	if((x>=0)&&(y>0)) cquadrant = 1;
-	if((x<0)&&(y>=0)) cquadrant = 2;
-	if((x<=0)&&(y<0)) cquadrant = 3;
-	if((x>0)&&(y<=0)) cquadrant = 4;
-	
-	if((dx>=0)&&(dy>0)) lquadrant = 1;
-	if((dx<0)&&(dy>=0)) lquadrant = 2;
-	if((dx<=0)&&(dy<0)) lquadrant = 3;
-	if((dx>0)&&(dy<=0)) lquadrant = 4;
-
-	float ltheta = abs(atan(dy/dx));
-	float ctheta =  abs(atan(y/x));
-	float current_angle = 0;
-	float l_angle = 0;
-	
-	if( cquadrant == 1)current_angle = ctheta;
-	else if( cquadrant == 2)current_angle = 180-ctheta;
-	else if( cquadrant == 3)current_angle = 180+ctheta;
-	else if( cquadrant == 4)current_angle = 360-ctheta;
-	
-	if( lquadrant == 1)l_angle = ltheta;
-	else if( lquadrant == 2)l_angle = 180-ltheta;
-	else if( lquadrant == 3)l_angle = 180+ltheta;
-	else if( lquadrant == 4)l_angle = 360-ltheta;
-
-	if(current_angle-l_angle > 0) steering = 0.2;
-	else if(current_angle-l_angle < 0) steering = -0.2;
-	else if(current_angle-l_angle == 0) steering = 0.0;
-	
-	if(steering > 0)cout<<"HEADING LEFT"<<endl;
-	if(steering < 0)cout<<"HEADING RIGHT"<<endl;
-	if(steering == 0)cout<<"HEADING STRAIGHT"<<endl;
-	
-	}
-	return;
-}
-
-// Retrieves waypoints from the waypoints file.
-int* ReturnWaypoints() 
-{
-	string output;
-	int count = 0;
-	int array_size;
-	int* waypoints_array = NULL;
-	ifstream waypoints_file ("/home/mecanum/snowbots_ws/src/sb_gps/WaypointsTxt/practice1.txt");
-	if (waypoints_file.is_open())
-	{
-		while (getline(waypoints_file, output))
-		{
-			if (count == 0) {
-				array_size = atoi(output.c_str())*2;
-				waypoints_array = new int [array_size];
-				count++;
+	//while direction of goal angle is in quadrant 4
+	if (x >= 0 && y < 0) {
+		angleWaypoint = (180 - angleGoal);
+		if (angleCompass <= angleCompass180) {
+			if (angleWaypoint > angleCompass180){
+				*theta = (angleWaypoint - angleCompass - 360);
 			}
-			
-			else { 
-				waypoints_array[count-1] = atoi(output.c_str());
-				count++;
+			else{
+				*theta = angleWaypoint - angleCompass;
 			}
 		}
-		waypoints_file.close();
+		else if (angleCompass > angleCompass180) {
+			if (angleWaypoint < angleCompass180){
+				*theta = (angleCompass - angleWaypoint - 360);
+			}
+			else{
+				*theta = angleWaypoint - angleCompass;
+			}
+			if (angleWaypoint < angleCompass180){
+				*theta = -*theta;
+			}
+		}
 	}
-
-	else
-	{
-		ROS_INFO("Unable to open file");
+	//while direction of goal angle is in quadrant 3
+	if (x < 0 && y <= 0) {
+		angleWaypoint = (180 + angleGoal);
+		if (angleCompass <= angleCompass180) {
+			if (angleWaypoint > angleCompass180){
+				*theta = (angleWaypoint - angleCompass - 360);
+			}
+			else{
+				*theta = angleWaypoint - angleCompass;
+			}
+		}
+		else if (angleCompass > angleCompass180) {
+			if (angleWaypoint < angleCompass180){
+				*theta = (angleCompass - angleWaypoint - 360);
+			}
+			else{
+				*theta = angleWaypoint - angleCompass;
+			}
+			if (angleWaypoint > angleCompass180){
+				*theta = (angleWaypoint - angleCompass - 360);
+			}
+		}
 	}
+	//while direction of goal angle is in quadrant 2
+	if (x < 0 && y > 0) {
+		angleWaypoint = (360 - angleGoal);
+		if (angleCompass <= angleCompass180) {
+			if (angleWaypoint > angleCompass180){
+				*theta = (angleWaypoint - angleCompass - 360);
+			}
+			else{
+				*theta = angleWaypoint - angleCompass;
+			}
+		}
+		else if (angleCompass > angleCompass180) {
+			if (angleWaypoint < angleCompass180){
+				*theta = (angleCompass - angleWaypoint - 360);
+			}
+			else{
+				*theta = angleWaypoint - angleCompass;
+			}
+			if (angleWaypoint > angleCompass180){
+				*theta = (angleWaypoint - angleCompass - 360);
+			}
+		}
+	}
+}
 
-	return waypoints_array;
-}	
-    
+void createDistance (double * d){
+	/*
+	Input Parameter: pointer to store distance
+	Output: void (use pointer)
+	Purpose: calculates distance from target waypoints
+	Link:http://stackoverflow.com/questions/19412462/getting-distance-between-two-points-based-on-latitude-longitude-python
+	*/
 
+	double dlon = (TargetWaypoint).lon - (CurrentWaypoint).lon;
+	double dlat = (TargetWaypoint).lat - (CurrentWaypoint).lat;
+
+	double a = (sin(dlat/2))*2 + cos((CurrentWaypoint).lat) * cos((TargetWaypoint).lat) * (sin(dlon/2))*2;
+	double c = 2 * atan2(sqrt(a), sqrt(1-a));
+
+	*d = EARTH_RADIUS * c;
+}
