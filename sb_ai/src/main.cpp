@@ -8,18 +8,28 @@
 #include "ControllerBase.hpp"
 #include "DijkstraController.hpp"
 
-ai::ControllerBase* get_controller(ros::NodeHandle& nh){
+ai::ControllerBase* GetController(ros::NodeHandle& nh)
+{
 	ros::NodeHandle private_nh("~");
 	std::string param;
-	private_nh.getParam(MODE_PARAM,param);
-	if(param=="dijkstra"){
+	private_nh.getParam(MODE_PARAM, param);
+	
+	if (param == "dijkstra")
+	{
 		return new ai::DijkstraController(nh);
-	}else{
-		std::cout << "Invalid " << MODE_PARAM << " '" << param << "'." << std::endl;
 	}
+	else
+	{
+		std::cout << "Invalid ";
+		std::cout << MODE_PARAM << " '";
+		std::cout << param << "'.";
+		std::cout << std::endl;
+	}
+	
 	std::cout << "Current options: " << std::endl;
 	std::cout << "\tdijkstra" << std::endl;
-	std::cout << "Defaulting to dijkstra" << std::endl;
+	std::cout << "Defaulting to dijkstra." << std::endl;
+	
 	return new ai::DijkstraController(nh);
 }
 
@@ -37,18 +47,18 @@ int main(int argc, char **argv)
 	
 	// Initialize publisher to PUB_TOPIC.
 	// Second argument for advertise is the buffer size.
-	ros::Publisher car_pub = nh.advertise<geometry_msgs::Twist>(PUB_TOPIC, 100);	
+	ros::Publisher car_pub = nh.advertise<geometry_msgs::Twist>(PUB_TOPIC, 10);	
 	
-	ai::ControllerBase* controller = get_controller(nh);
+	ai::ControllerBase* controller = GetController(nh);
 	if(!controller) return EXIT_FAILURE;
 	
 	// Frequency of the loop. 
 	// eg. 10 = 10hz
-	ros::Rate loop_rate(controller->get_clock_speed());
+	ros::Rate loop_rate(controller->GetClockSpeed());
 
 	while (ros::ok()) {
 
-		car_pub.publish(controller->update());	// this is where we publish twist output
+		car_pub.publish(controller->Update());	// this is where we publish twist output
 		
 		ros::spinOnce();	// required for subscriptions
 		

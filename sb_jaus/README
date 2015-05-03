@@ -1,6 +1,0 @@
-This build depends on JAUS++. It is now integrated into git, so now you only need JAUS++'s dependencies.
-
-These are:
-libxtst-dev
-libwxgtk-media2.8-dev
-libwxgtk2.8-dev
