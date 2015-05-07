@@ -81,8 +81,6 @@ int main (int argc, char** argv)
 
 	while(ros::ok())
 	{
-		if (i > 10) { car_command.angular.z = 0.1; }
-		if (i > 20) { car_command.angular.z = 0.2; }
 		car_pub.publish(car_command);
 		i++;
 		ROS_INFO("Throttle: %0.2f, Steering: %0.2f", car_command.linear.y, car_command.angular.z);
