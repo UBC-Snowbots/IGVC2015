@@ -2,6 +2,7 @@
 #include <jaus/core/transport/Transport.h>
 #include <iostream>
 #include <thread>
+#include <unistd.h>
 
 const unsigned int SUBSYSTEM_TO_TEST = 100;
 
@@ -83,10 +84,17 @@ int main(){
         
 	JAUS::QueryIdentification id_query(JAUS::Address(5000,1,1),component.GetComponentID());
         JAUS::ReportIdentification id_response;
-	while(!component.Send(&id_query,&id_response,5000));
-        std::cout << "ID: " << id_response.GetIdentification() << std::endl;
-        
+	while(!component.Send(&id_query,&id_response,5000)){
+		//So it doesn't:
+		//  - Peg a CPU core
+		//  - Look like it's frozen
+		std::cout << "...";
+		usleep(1000);
+		std::cout << "\b\b\b\033[K";
+	}
+	//Debug still live
         component.Shutdown();
+	std::cout << "ID: " << id_response.GetIdentification() << std::endl;
         return 0;
 }
 

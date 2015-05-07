@@ -25,7 +25,7 @@ int main(int argc, char* argv[])
         discoveryService->SetSubsystemIdentification(JAUS::Subsystem::Vehicle,"Snowbots");
         discoveryService->SetNodeIdentification("Main");
         discoveryService->SetComponentIdentification("Baseline");
-        int comp_id = 1000;
+	int comp_id = 5000;
         JAUS::Address componentID(comp_id,1,1);
 
         discoveryService->EnableDebugMessages(true);
