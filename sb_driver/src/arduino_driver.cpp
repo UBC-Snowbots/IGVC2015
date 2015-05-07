@@ -65,10 +65,10 @@ int main(int argc, char** argv)
 	    ss << i;	    
 	    if (link.connect(BAUD_RATE,(UNO_PORT_NAME + ss.str())))
 	    {
-	        cout << "connected on port " << i << endl;
+	        cout << "connected on port " << UNO_PORT_NAME << i << endl;
 	        break;
 		} else if (link.connect(BAUD_RATE,(BLUETOOTH_PORT_NAME + ss.str()))) {
-			cout << "connected on bluetooth port " << i << endl;
+			cout << "connected on bluetooth port " << BLUETOOTH_PORT_NAME << i << endl;
 			break;
 	    } else if (i > 15) {
 	        cout << "unable to find a device" << endl;
@@ -116,21 +116,12 @@ int main(int argc, char** argv)
 	    } else {  
             //use carCommand and turretCommand
 			ss << (char)IDENTIFIER_BYTE << twist_x[0] << twist_x[1] << twist_x[2] << twist_y[0] << twist_y[1] << twist_y[2] << twist_z[0] << twist_z[1] << twist_z[2];
-//cout <<ss.str()<<endl;
+
 	    }
 	    link.writeData(ss.str(), 10);
 	    
 	    //delay for sync
 	    usleep(20000);
-	    
-	    //read from arduino
-	    //processData(link.readData(), state);
-
-		//cout << link.readData(38) <<"\n";
-
-	    //link.clearBuffer();
-	    //populate GUI data
-	    //TODO
 	    
 	    //publish data
 	    robot_state.publish(state);
@@ -143,7 +134,7 @@ int main(int argc, char** argv)
 	    link.clearBuffer();
 	    
 	    //log and loop
-	    ROS_INFO("%i,%i,%i",mech.twist_x, mech.twist_y, mech.twist_z);
+	   // ROS_INFO("%i,%i,%i",mech.twist_x, mech.twist_y, mech.twist_z);
 	    spinOnce();
 		loop_rate.sleep();
 	}
@@ -177,6 +168,8 @@ void car_command_callback(const geometry_msgs::TwistConstPtr& msg_ptr)
 	sprintf(twist_x,"%03d",mech.twist_x);
 	sprintf(twist_y,"%03d",mech.twist_y);
 	sprintf(twist_z,"%03d",mech.twist_z);
+	ROS_INFO("Twist_y: %s", twist_y);
+	ROS_INFO("Twist_z: %s", twist_z);
 }
 
 //turret_command_callback
