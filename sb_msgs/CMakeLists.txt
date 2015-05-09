@@ -28,6 +28,7 @@ find_package(catkin REQUIRED COMPONENTS
    VisionNav.msg
    Waypoint.msg
    WaypointList.msg
+   MoveCommand.msg
  )
 
 ## Generate added messages and services with any dependencies listed here

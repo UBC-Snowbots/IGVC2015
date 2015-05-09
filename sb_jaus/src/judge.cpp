@@ -83,9 +83,12 @@ int main(){
         
 	JAUS::QueryIdentification id_query(JAUS::Address(5000,1,1),component.GetComponentID());
         JAUS::ReportIdentification id_response;
-	while(!component.Send(&id_query,&id_response,5000));
-        std::cout << "ID: " << id_response.GetIdentification() << std::endl;
-        
+	while(!component.Send(&id_query,&id_response,5000)){
+		std::cout << "...";
+		usleep(1000);
+		std::cout << "\b\b\b\033[K";
+	}
+	//Debug still live
         component.Shutdown();
         return 0;
 }

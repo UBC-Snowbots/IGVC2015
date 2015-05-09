@@ -189,15 +189,7 @@ geometry_msgs::Twist createNextTwist(geometry_msgs::Twist nextTwist){
 }
 
 bool checkGoal (waypoint CurrentWaypoint, waypoint TargetWaypoint){
-  if (CurrentWaypoint.lon == TargetWaypoint.lon){
-    if (CurrentWaypoint.lat == TargetWaypoint.lat){
-      return true;
-    }
-    else
-      return false;
-  }
-  else
-    return false;
+  return (CurrentWaypoint.lon == TargetWaypoint.lon) && (CurrentWaypoint.lat == TargetWaypoint.lat);
 }
 
 void createAngle(double *theta, double angleCompass){
