@@ -4,9 +4,6 @@
 #include "geometry_msgs/Pose2D.h"
 #include "nav_msgs/OccupancyGrid.h"
 
-/**
-  * Inputs:
-  *   
 class SimpleMapping{
 
   private:
