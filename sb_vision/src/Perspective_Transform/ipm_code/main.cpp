@@ -12,12 +12,8 @@
  */
 
 #include "opencv2/core/core.hpp"
-#include "opencv2/highgui/highgui.hpp"
-#include "opencv2/imgproc/imgproc.hpp"
-#include <iostream>
 #include <stdio.h>
 #include <ctime>
-
 #include "IPM.h"
 
 using namespace cv;
@@ -25,7 +21,7 @@ using namespace std;
 
 int main( int _argc, char** _argv )
 {
-
+/*
     VideoCapture cap(0); // open the video camera no. 0
 
     if (!cap.isOpened())  // if not success, exit program
@@ -94,11 +90,15 @@ break;
 	//cout << "Input video: (" << width << "x" << height << ") at " << fps << ", fourcc = " << fourcc << endl;
 	
 	// The 4-points at the input image	
+
+	int width = 1920;
+	int height = 1080;
+
 	vector<Point2f> origPoints;
-	origPoints.push_back( Point2f(0, height-40) );
-	origPoints.push_back( Point2f(width-100, height-40) );
-	origPoints.push_back( Point2f(width/2-20, 200) );
-	origPoints.push_back( Point2f(width/2-110, 200) );
+	origPoints.push_back( Point2f(0, height) );
+	origPoints.push_back( Point2f(width, height) );
+	origPoints.push_back( Point2f(width/2+450, 580) );
+	origPoints.push_back( Point2f(width/2-250, 580) );
 
 	// The 4-points correspondences in the destination image
 	vector<Point2f> dstPoints;
@@ -119,7 +119,12 @@ break;
 		frameNum++;
 
 		// Get current image
-		cap.read(frame);		
+		//cap.read(frame);	
+
+		//********
+		frame = imread("/home/vagrant/Downloads/Image1.jpg", 1);
+		//********
+
 		if( frame.empty() )
 			break;
 
@@ -137,7 +142,11 @@ break;
 		 printf("%.2f (ms)\r", 1000*elapsed_secs);
 		 ipm.drawPoints(origPoints, frame );
 
-		 // View		
+		 // View	
+		 namedWindow("Input", CV_WINDOW_NORMAL);
+		 namedWindow("Output", CV_WINDOW_NORMAL);
+		 cvMoveWindow("Input", 0, 0);
+		 cvMoveWindow("Output", 500, 0);	
 		 imshow("Input", frame);
 		 imshow("Output", outputImg);
 		 waitKey(1);

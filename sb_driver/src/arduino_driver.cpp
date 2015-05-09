@@ -1,13 +1,7 @@
 /*
- File: arduino_driver.cpp
- 
- Author: Nick Adams and Jarek Ignasmenzies
- Last Edited: December 21, 2010
- Version 1.0
- 
- driver node to communicate and control arduino
- sorts incoming sensor information and outputs correct ros messages 
-*/ //test
+*  driver node to communicate and control arduino
+*  sorts incoming sensor information and outputs correct ros messages 
+*/
 
 #include <iostream>
 #include <sstream>
@@ -32,7 +26,7 @@ static const string ROS_NODE_NAME = "driver";
 static const int ROS_LOOP_RATE = 20; //hz
 
 static const int BAUD_RATE = 115200;
-static const string PORT_NAME = "/dev/ttyUSB";
+//static const string PORT_NAME = "/dev/ttyUSB";
 static const string UNO_PORT_NAME = "/dev/ttyACM";
 static const string BLUETOOTH_PORT_NAME = "/dev/rfcomm";
 
@@ -65,20 +59,16 @@ int main(int argc, char** argv)
 
 	//initialize serial communication
 	SerialCommunication link;
-	for (int i = 1; ; i++)
+	for (int i = 0; ; i++)
 	{
 	    stringstream ss;
 	    ss << i;	    
-	    if (link.connect(BAUD_RATE,(PORT_NAME + ss.str())))
+	    if (link.connect(BAUD_RATE,(UNO_PORT_NAME + ss.str())))
 	    {
-	        cout << "connected on port " << i << endl;
-	        break;
-		} else if (link.connect(BAUD_RATE,(UNO_PORT_NAME + ss.str())))
-	    {
-	        cout << "connected on port " << i << endl;
+	        cout << "connected on port " << UNO_PORT_NAME << i << endl;
 	        break;
 		} else if (link.connect(BAUD_RATE,(BLUETOOTH_PORT_NAME + ss.str()))) {
-			cout << "connected on bluetooth port " << i << endl;
+			cout << "connected on bluetooth port " << BLUETOOTH_PORT_NAME << i << endl;
 			break;
 	    } else if (i > 15) {
 	        cout << "unable to find a device" << endl;
@@ -86,7 +76,7 @@ int main(int argc, char** argv)
 	    }
 	}
 	
-	usleep(20*SECOND);
+	usleep(3*SECOND);
 		
 	//subscribers and publishers
 	Subscriber car_command = n.subscribe(CAR_COMMAND_TOPIC, 1, car_command_callback);
@@ -96,22 +86,6 @@ int main(int argc, char** argv)
 	Publisher robot_state = n.advertise<sb_msgs::RobotState>(ROBOT_STATE_TOPIC,1);
 	Publisher gps_state = n.advertise<std_msgs::String>(GPS_STATE_TOPIC,1);
 	
-	/*
-	//handshake with arduino and initialize robot
-	for(;;)
-	{
-		link.writeData(INIT_STRING,2);
-		usleep(20000);
-		string handshake = link.readData();
-		if(handshake.length() == 2)
-		{
-			if(handshake[0] == INIT_STRING[0] && handshake[1] == INIT_STRING[1])
-			{
-				break;
-			}
-		}
-	}
-	*/
 	sb_msgs::IMU imu;
 	sb_msgs::RobotState state;
 	std_msgs::String gps_data;
@@ -142,21 +116,12 @@ int main(int argc, char** argv)
 	    } else {  
             //use carCommand and turretCommand
 			ss << (char)IDENTIFIER_BYTE << twist_x[0] << twist_x[1] << twist_x[2] << twist_y[0] << twist_y[1] << twist_y[2] << twist_z[0] << twist_z[1] << twist_z[2];
-//cout <<ss.str()<<endl;
+
 	    }
 	    link.writeData(ss.str(), 10);
 	    
 	    //delay for sync
 	    usleep(20000);
-	    
-	    //read from arduino
-	    //processData(link.readData(), state);
-
-		//cout << link.readData(38) <<"\n";
-
-	    //link.clearBuffer();
-	    //populate GUI data
-	    //TODO
 	    
 	    //publish data
 	    robot_state.publish(state);
@@ -169,7 +134,7 @@ int main(int argc, char** argv)
 	    link.clearBuffer();
 	    
 	    //log and loop
-	    ROS_INFO("%i,%i,%i",mech.twist_x, mech.twist_y, mech.twist_z);
+	   // ROS_INFO("%i,%i,%i",mech.twist_x, mech.twist_y, mech.twist_z);
 	    spinOnce();
 		loop_rate.sleep();
 	}
@@ -203,7 +168,8 @@ void car_command_callback(const geometry_msgs::TwistConstPtr& msg_ptr)
 	sprintf(twist_x,"%03d",mech.twist_x);
 	sprintf(twist_y,"%03d",mech.twist_y);
 	sprintf(twist_z,"%03d",mech.twist_z);
-//cout << twist_x[0] <<endl;
+	ROS_INFO("Twist_y: %s", twist_y);
+	ROS_INFO("Twist_z: %s", twist_z);
 }
 
 //turret_command_callback
