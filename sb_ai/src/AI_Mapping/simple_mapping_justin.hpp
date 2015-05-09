@@ -4,6 +4,9 @@
 #include "geometry_msgs/Pose2D.h"
 #include "nav_msgs/OccupancyGrid.h"
 
+/**
+  * Inputs:
+  *   
 class SimpleMapping{
 
   private:
@@ -26,12 +29,14 @@ class SimpleMapping{
 
     ~SimpleMapping();
 
+    // Tells us the robot location and orientation in the global coord system
     void GPSSubscriberCallback(const geometry_msgs::Pose2D::ConstPtr& pose2DMsg);
 
+    // Publish the current global location and orientation
     void PublishPose2D();
 
     void PublishOccupanyGrid();
     
 
-}
+};
 
