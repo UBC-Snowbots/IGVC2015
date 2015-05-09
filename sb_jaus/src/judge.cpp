@@ -34,7 +34,7 @@ std::thread testing;
 
 void communications_loop(JAUS::Component &comp, JAUS::Message &query, JAUS::Message &response){
   unsigned int i = 0;
-    while(!component.Send(query,response,5000)){
+    while(!component.Send(&query,&response,5000)){
       ++i;
       std::cout << "...";
       usleep(1000);
