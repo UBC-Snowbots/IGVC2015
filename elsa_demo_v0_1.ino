@@ -126,6 +126,10 @@ void move_pwm()
   //TODO: add in function to grab rotation of wheels and time information to calculate velocity 
   // this function will be called by talk
   
+  //TODO: Add in compass set-up and read functions (can be "copied") from Mecanum 2
+  
+  //TODO: Add in LED blinking functionality 
+
 
   //checks for battery;
   battery_mon.read();
