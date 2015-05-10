@@ -15,12 +15,21 @@
 #include <stdio.h>
 #include <ctime>
 #include "IPM.h"
-
+ // Use the image_transport classes instead.
+ #include <ros/ros.h>
+#include <image_transport/image_transport.h>
+    
 using namespace cv;
 using namespace std;
 
 int main( int _argc, char** _argv )
 {
+
+   ros::NodeHandle nh;
+   //image_transport::ImageTransport it(nh);
+   //image_transport::Subscriber sub = it.subscribe("in_image_base_topic", 1, imageCallback);
+   //image_transport::Publisher pub = it.advertise("out_image_base_topic", 1);
+
 /*
     VideoCapture cap(0); // open the video camera no. 0
 
@@ -97,8 +106,10 @@ break;
 	vector<Point2f> origPoints;
 	origPoints.push_back( Point2f(0, height) );
 	origPoints.push_back( Point2f(width, height) );
-	origPoints.push_back( Point2f(width/2+450, 580) );
-	origPoints.push_back( Point2f(width/2-250, 580) );
+	//origPoints.push_back( Point2f(width/2+450, 580) );
+	//origPoints.push_back( Point2f(width/2-250, 580) );
+	origPoints.push_back( Point2f(width/2+450, 620) );
+	origPoints.push_back( Point2f(width/2-250, 620) );
 
 	// The 4-points correspondences in the destination image
 	vector<Point2f> dstPoints;
@@ -122,7 +133,8 @@ break;
 		//cap.read(frame);	
 
 		//********
-		frame = imread("/home/vagrant/Downloads/Image1.jpg", 1);
+		frame = imread("/home/jannicke/Pictures/Image2.jpg", 1);
+		
 		//********
 
 		if( frame.empty() )
@@ -149,6 +161,9 @@ break;
 		 cvMoveWindow("Output", 500, 0);	
 		 imshow("Input", frame);
 		 imshow("Output", outputImg);
+		 imwrite( "/home/jannicke/Pictures/Image4.jpg", frame);
+		 imwrite( "/home/jannicke/Pictures/Image3.jpg", outputImg);
+                 //pub.publish(outputImg);
 		 waitKey(1);
 	}
 
