@@ -8,4 +8,8 @@ LocalToGlobalMapping::~LocalToGlobalMapping(){
 
 }
 
+nav_msgs::OccupancyGridTransform LocalToGlobalMapping::LocalToGlobal(nav_msgs::OccupancyGrid& localMap){
 
+  
+
+}

@@ -2,6 +2,7 @@
 
 #include "ros/ros.h"
 #include "nav_msgs/OccupancyGrid.h"
+#include "geometry_msgs/Pose2D.h"
 
 class LocalToGlobalMapping {
 
@@ -15,6 +16,6 @@ class LocalToGlobalMapping {
 
     ~LocalToGlobalMapping();
 
-    nav_msgs::OccupancyGridTransform LocalToGlobal(nav_msgs::OccupancyGrid& localMap);
+    nav_msgs::OccupancyGridTransform LocalToGlobal(const geometry_msgs::Pose2D	 globalLocationPtr, nav_msgs::OccupancyGrid& localMap);
 
 };
