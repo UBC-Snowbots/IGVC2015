@@ -122,10 +122,17 @@ void move_pwm()
     wheels[0]=1500;
     wheels[1]=1500;
   }
+  
+  //TODO: add in function to grab rotation of wheels and time information to calculate velocity 
+  // this function will be called by talk
+  
 
   //checks for battery;
   battery_mon.read();
-  if(battery_mon.voltage()<6 || battery_mon.current_amps()>45)
+  //TODO: Add in check for second battery monitor
+  //TODO: (nice to have) add in LED blinking pattern when battery is too low
+  //TODO: check that the current is ok? 
+  if(battery_mon.voltage()<9 || battery_mon.current_amps()>45)
   {
     safety_count++;
     if(safety_count>10)
@@ -259,6 +266,8 @@ void talk()
         Otwist_x=twist_x;
         Otwist_y=twist_y;
         Otwist_z=twist_z;
+        //TODO: send compass information to the laptop
+        //TODO: send velocity information to the laptop
       }
     }
   }
