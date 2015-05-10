@@ -31,6 +31,9 @@
 
 #include <AP_BattMonitor.h>
 
+#ifdef DOES_ARDUINO_NOT_SUPPORT_CUSTOM_INCLUDE_DIRECTORIES
+#include <AP_ADC_AnalogSource.h>
+#endif
 
 const AP_HAL::HAL& hal = AP_HAL_BOARD_DRIVER;
 
