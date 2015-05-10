@@ -136,7 +136,7 @@ void move_pwm()
   //TODO: Add in check for second battery monitor
   //TODO: (nice to have) add in LED blinking pattern when battery is too low
   //TODO: check that the current is ok? 
-  if(battery_mon.voltage()<9 || battery_mon.current_amps()>45)
+  if(battery_mon.voltage()<9 || battery_mon.current_amps()>19.5)
   {
     safety_count++;
     if(safety_count>10)
