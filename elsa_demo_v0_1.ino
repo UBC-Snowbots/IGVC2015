@@ -59,6 +59,9 @@ AP_BattMonitor battery_mon;
 
 int safety_count=0;
 
+AP_HAL::DigitalSource *a_led;
+AP_HAL::DigitalSource *b_led;
+
 void setup()
 {
   setup_radio();
@@ -78,6 +81,13 @@ void setup()
   //battery monitor
   battery_mon.init();
   battery_mon.set_monitoring(AP_BATT_MONITOR_VOLTAGE_AND_CURRENT);
+  //LED control
+  a_led = hal.gpio->channel(54);//A10 output for LEDs
+  a_led->mode(GPIO_OUTPUT);
+  a_led->write(0);
+  b_led = hal.gpio->channel(53);//A9 output for LEDs
+  b_led->mode(GPIO_OUTPUT);
+  b_led->write(0);
 }
 
 void loop()
@@ -104,23 +114,29 @@ void move_pwm()
 {
   uint16_t wheels[2]; 
   //rotate side forward
-  if(rc[2].control_in < 300)
+  if(rc[2].control_in < 300)//manual control
   {
     //hal.console->printf_P(PSTR("twist"));
     wheels[0]=1500+twist_z-twist_y;//+z*(a+b)
     wheels[1]=1500+twist_z+twist_y;
+    a_led->write(0);//LED solid
+    b_led->write(1);
   }
-  else if(rc[2].control_in < 650)
+  else if(rc[2].control_in < 650)//autonomus
   {
     //hal.console->printf_P(PSTR("radio"));
     wheels[0]=1500+rc[3].control_in+rc[1].control_in;//+z*(a+b)
     wheels[1]=1500+rc[3].control_in-rc[1].control_in;
+    a_led->write(1);//LED Blinking
+    b_led->write(1);
   }
-  else
+  else//wireless e-stop
   {
     //hal.console->printf_P(PSTR("stop"));
     wheels[0]=1500;
     wheels[1]=1500;
+    a_led->write(0);//LED off
+    b_led->write(0);
   }
   
   //TODO: add in function to grab rotation of wheels and time information to calculate velocity 
@@ -242,31 +258,21 @@ void talk()
         twist_y=4*Bints[1]-500;
         twist_z=4*Bints[2]-500;
 
-        if(Otwist_x-twist_x>100)
-        {
+        if(Otwist_x-twist_x>100)// limits rapidthrottle value changes
           twist_x=Otwist_x-100;
-        }
         else if(twist_x-Otwist_x>100)
-        {
           twist_x=Otwist_x+100;
-        }
         
         if(Otwist_y-twist_y>100)
-        {
           twist_y=Otwist_y-100;
-        }
         else if(twist_y-Otwist_y>100)
-        {
           twist_y=Otwist_y+100;
-        }
+          
         if(Otwist_z-twist_z>100)
-        {
           twist_z=Otwist_z-100;
-        }
         else if(twist_z-Otwist_z>100)
-        {
           twist_z=Otwist_z+100;
-        }
+          
         Otwist_x=twist_x;
         Otwist_y=twist_y;
         Otwist_z=twist_z;
