@@ -102,7 +102,7 @@ void read_radio()
 
 void move_pwm()
 {
-  uint16_t wheels[4]; 
+  uint16_t wheels[2]; 
   //rotate side forward
   if(rc[2].control_in < 300)
   {
