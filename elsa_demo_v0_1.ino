@@ -146,7 +146,7 @@ void move_pwm()
     wheels[0]=1500+rc[3].control_in+rc[1].control_in;//+z*(a+b)
     wheels[1]=1500+rc[3].control_in-rc[1].control_in;
     a_led->write(1);//LED Blinking
-    b_led->write(1);
+    b_led->write(0);
   }
   else//wireless e-stop
   {
@@ -177,8 +177,8 @@ void move_pwm()
     {
       wheels[0]=1500;
       wheels[1]=1500;
-      a_led->write(1);//LED Blinking pattern * needs to be implemented on the led mcu
-      b_led->write(0);
+      //a_led->write(1);//LED Blinking pattern * needs to be implemented on the led mcu
+      //b_led->write(0);
     }
   }
   else if(safety_count>0)
