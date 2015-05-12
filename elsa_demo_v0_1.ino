@@ -283,6 +283,10 @@ void talk()
         Otwist_z=twist_z;
         //TODO: send compass information to the laptop
         //TODO: send velocity information to the laptop
+        
+        uint8_t = Comp;//placeholder, compass and odometry need to be implemented first, and SB_driver needs to be modified to read the output as well
+        uint8_t = Velo;
+        hal.console->printf("%u,%u", (unsigned)Comp,(unsigned)Velo);
       }
     }
   }
