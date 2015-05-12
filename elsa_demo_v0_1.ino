@@ -29,7 +29,7 @@
 #include <GCS_MAVLink.h>
 #include <AP_Declination.h>
 
-#include <AP_BattMonitor.h>
+#include <AP_BattMonitor.h>//note needs the modified libary to function
 
 #ifdef DOES_ARDUINO_NOT_SUPPORT_CUSTOM_INCLUDE_DIRECTORIES
 #include <AP_ADC_AnalogSource.h>
@@ -55,7 +55,8 @@ int Otwist_x=0;
 int Otwist_y=0;
 int Otwist_z=0;
 
-AP_BattMonitor battery_mon;
+AP_BattMonitor battery_mon1(1,0);//defult pins
+AP_BattMonitor battery_mon2(2,3);//TODO select acual pins to uses for second battery moniter
 
 int safety_count=0;
 
@@ -79,8 +80,10 @@ void setup()
   hal.rcout->write(1, 1500);
 
   //battery monitor
-  battery_mon.init();
-  battery_mon.set_monitoring(AP_BATT_MONITOR_VOLTAGE_AND_CURRENT);
+  battery_mon1.init();
+  battery_mon1.set_monitoring(AP_BATT_MONITOR_VOLTAGE_AND_CURRENT);
+  battery_mon2.init();
+  battery_mon2.set_monitoring(AP_BATT_MONITOR_VOLTAGE_AND_CURRENT);
   //LED control
   a_led = hal.gpio->channel(54);//A10 output for LEDs
   a_led->mode(GPIO_OUTPUT);
@@ -148,17 +151,19 @@ void move_pwm()
 
 
   //checks for battery;
-  battery_mon.read();
-  //TODO: Add in check for second battery monitor
-  //TODO: (nice to have) add in LED blinking pattern when battery is too low
+  battery_mon1.read();
+  //TODO: Add in check for second battery monitor ** done
+  //TODO: (nice to have) add in LED blinking pattern when battery is too low ** sure why not
   //TODO: check that the current is ok? 
-  if(battery_mon.voltage()<9 || battery_mon.current_amps()>19.5)
+  if(battery_mon1.voltage()<9 || battery_mon1.current_amps()>19 || battery_mon2.voltage()<9 || battery_mon2.current_amps()>19)
   {
     safety_count++;
     if(safety_count>10)
     {
       wheels[0]=1500;
       wheels[1]=1500;
+      a_led->write(1);//LED Blinking pattern * needs to be implemented on the led mcu
+      b_led->write(0);
     }
   }
   else if(safety_count>0)
