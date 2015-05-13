@@ -22,4 +22,4 @@ Every time catkin_make is called it will only build the sb_ai package
 
 To revert back to building all the packages:
 
-> catkin_make _DCATKIN_WHITELIST_PACKAGES=""
+> catkin_make -DCATKIN_WHITELIST_PACKAGES=""
