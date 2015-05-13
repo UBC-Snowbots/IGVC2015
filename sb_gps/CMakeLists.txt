@@ -9,6 +9,8 @@ find_package(catkin REQUIRED COMPONENTS
   message_generation
 )
 
+catkin_python_setup()
+
 add_service_files(
 	FILES
 	GotoWaypoint.srv
@@ -24,6 +26,8 @@ catkin_package(
 CATKIN_DEPENDS roscpp rospy std_msgs sb_msgs message_runtime
 )
 
+
+
 ## catkin_add_gtest(utest test/gps_test.cpp)
 
 include_directories(${catkin_INCLUDE_DIRS})
@@ -38,6 +42,8 @@ add_executable(createDistanceTrial src/getDistanceTrial.cpp)
 target_link_libraries(sb_gps ${catkin_LIBRARIES})
 target_link_libraries(createAngleTrial ${catkin_LIBRARIES})
 target_link_libraries(createDistanceTrial ${catkin_LIBRARIES})
+
+install(PROGRAMS scripts/foo_script DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 
 ## To add package paths:
 ## source ~/catkin_ws/devel/setup.bash
