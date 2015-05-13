@@ -26,12 +26,14 @@ class SimpleMapping{
 
     ~SimpleMapping();
 
+    // Tells us the robot location and orientation in the global coord system
     void GPSSubscriberCallback(const geometry_msgs::Pose2D::ConstPtr& pose2DMsg);
 
+    // Publish the current global location and orientation
     void PublishPose2D();
 
     void PublishOccupanyGrid();
     
 
-}
+};
 
