@@ -1,20 +1,30 @@
 #include "LocalLidarMap.h"
 
-
 LocalLidarMap::LocalLidarMap(int width, int height, float resolution)
 {
-  // Set private variables
-  map_width = width;
-  map_height = height;
-  map_resolution = resolution;
-  
+  // Set map parameters
+  local_map.info.width = width;
+  local_map.info.height = height;
+  local_map.info.resolution = resolution;
+
   // Initialize map
-  int total_map_size = map_width * map_height;
-  map = new int[total_map_size];
-  for (int i = 0; i < total_map_size; i++)
-  {
-    map[i] = 0;
-  }
+  int map_size = width * height;
+  local_map.data.assign(map_size, 0);
+  
+  // Set transformations
+  local_map.info.origin.position.x = width / 2;
+  local_map.info.origin.position.y = height - 1;
+  local_map.info.origin.position.z = 0;
+  // quaternion
+  local_map.info.origin.orientation.x = 0;
+  local_map.info.origin.orientation.y = 0;
+  local_map.info.origin.orientation.z;
+  local_map.info.origin.orientation.w;
+}
+
+nav_msgs::OccupancyGrid * LocalLidarMap::GetLocalMap()
+{
+  return &local_map;
 }
 
 void LocalLidarMap::LidarCallback(const sensor_msgs::LaserScan::ConstPtr& scan)
@@ -32,7 +42,7 @@ void LocalLidarMap::LidarCallback(const sensor_msgs::LaserScan::ConstPtr& scan)
 
 int main(int argc, char **argv)
 {
-  LocalLidarMap lidar_map(10, 10, 1.0f);
+  LocalLidarMap lidar_map(MAP_WIDTH, MAP_HEIGHT, MAP_RESOLUTION);
   
   ros::init(argc, argv, NODE_NAME);
   ros::NodeHandle n;
@@ -44,8 +54,9 @@ int main(int argc, char **argv)
   
   while (ros::ok())
   {
-  
-    ros::spin();
+    ROS_INFO("Width: %i, Height: %i", lidar_map.GetLocalMap()->info.width, lidar_map.GetLocalMap()->info.height);
+    local_map_pub.publish(*lidar_map.GetLocalMap());
+    ros::spinOnce();
     loop_rate.sleep();
   }  
   

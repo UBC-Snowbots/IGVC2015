@@ -7,19 +7,18 @@
 #define LIDAR_SUB "scan"
 #define MAPPING_PUB "sb_mapping"
 
+#define MAP_WIDTH 10
+#define MAP_HEIGHT 10
+#define MAP_RESOLUTION 1.0f
+
 class LocalLidarMap {
 
 private:
-
-  nav_msgs::OccupancyGrid map;
-
-  //int* map;
-  //int map_width, map_height;
-  int pivot_x, pivot_y;
-  //float theta;
-  float map_resolution; // meters per grid index
+  nav_msgs::OccupancyGrid local_map;
   
 public:
+
+  nav_msgs::OccupancyGrid * GetLocalMap();
   LocalLidarMap(int width, int height, float resolution);
   void LidarCallback(const sensor_msgs::LaserScan::ConstPtr& scan);  
   
