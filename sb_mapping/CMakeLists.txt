@@ -26,7 +26,7 @@ include_directories(
 )
 
 add_executable(hector_lidar_mapping src/hector_lidar_mapping.cpp)
-
 target_link_libraries( hector_lidar_mapping ${catkin_LIBRARIES})
 
-
+add_executable(local_lidar_map src/HectorMappingHack/LocalLidarMap.cpp)
+target_link_libraries( local_lidar_map ${catkin_LIBRARIES})
