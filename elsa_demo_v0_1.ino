@@ -1,6 +1,9 @@
 //mechanum main
 //uses MPU6000,RCoutput,RCinput, blizzard4
 
+//**********WARNING*only works with diydrones apm IDE and modified battery moniter libary*************//
+//if this does not compile check thouse two things first
+
 
 #define CH_1 0
 #define CH_2 1
