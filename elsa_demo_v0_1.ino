@@ -77,6 +77,9 @@ AP_Compass_HMC5843 compass;
 #endif
 uint32_t timer;
 
+
+#define Encoder  0x09  //encoder i2c address
+
 void setup()
 {
   setup_radio();
@@ -108,6 +111,9 @@ void setup()
   
   //set up compas and MPU6000
   setup_compass();
+  
+  //set up encoders
+  hal.i2c->writeRegister(Encoder,0x00,0x00);
 }
 
 void loop()
@@ -117,6 +123,7 @@ void loop()
   talk();
   move_pwm();
   run_compass();
+  read_Encoder();
 }
 
 void read_radio()
@@ -418,6 +425,24 @@ hal.console->printf_P(PSTR("%.2f\t\t\t\t%u \t\t  %4.2f  %4.2f  %4.2f \t \t %4.2f
 
 
 }
+}
+
+read_Encoder()
+{
+	uint8_t data[6];
+	uint8_t stat = hal.i2c->readRegisters(Encoder,0x01,8, data);
+	if (stat == 0){
+        long leftE,rightE;//TODO this corently does not get sent anywhere
+        leftE = data[0] << 24;
+        leftE |= data[1] << 16;
+        leftE |= data[2] << 8;
+        leftE |= data[3];
+        
+        rightE = data[4] << 24;
+        rightE |= data[5]] << 16;
+        rightE |= data[6] << 8;
+        rightE |= data[7];
+	}
 }
 
 AP_HAL_MAIN();
