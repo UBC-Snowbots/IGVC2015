@@ -308,8 +308,8 @@ void talk()
         //TODO: send compass information to the laptop
         //TODO: send velocity information to the laptop
         
-        uint8_t = Comp;//placeholder, compass and odometry need to be implemented first, and SB_driver needs to be modified to read the output as well
-        uint8_t = Velo;
+        uint8_t Comp;//placeholder, compass and odometry need to be implemented first, and SB_driver needs to be modified to read the output as well
+        uint8_t Velo;
         hal.console->printf("%u,%u", (unsigned)Comp,(unsigned)Velo);
       }
     }
@@ -438,7 +438,7 @@ void read_Encoder()//talks to the encoder MCU via i2c
         leftE |= data[3];
         
         rightE = data[4] << 24;
-        rightE |= data[5]] << 16;
+        rightE |= data[5] << 16;
         rightE |= data[6] << 8;
         rightE |= data[7];
 	}
