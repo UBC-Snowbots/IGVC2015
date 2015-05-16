@@ -1,8 +1,8 @@
 //mechanum main
 //uses MPU6000,RCoutput,RCinput, blizzard4
 
-//**********WARNING*only works with diydrones apm IDE and modified battery moniter libary*************//
-//if this does not compile check thouse two things first
+//**********WARNING*only works with diydrones apm IDE and modified battery monitor libary*************//
+//if this does not compile check those two things first
 
 
 #define CH_1 0
@@ -59,15 +59,15 @@ int Otwist_x=0;
 int Otwist_y=0;
 int Otwist_z=0;
 
-AP_BattMonitor battery_mon1(1,0);//defult pins
-AP_BattMonitor battery_mon2(2,3);//TODO select acual pins to uses for second battery moniter
+AP_BattMonitor battery_mon1(1,0);//default pins
+AP_BattMonitor battery_mon2(2,3);//TODO select actual pins to use for second battery monitor
 
 int safety_count=0;
 
 AP_HAL::DigitalSource *a_led;
 AP_HAL::DigitalSource *b_led;
 
-const AP_HAL::HAL& hal = AP_HAL_BOARD_DRIVER;//inisilizing the compass
+const AP_HAL::HAL& hal = AP_HAL_BOARD_DRIVER;//initializing the compass
 AP_InertialSensor_MPU6000 ins;
 
 #if CONFIG_HAL_BOARD == HAL_BOARD_PX4
@@ -109,7 +109,7 @@ void setup()
   b_led->mode(GPIO_OUTPUT);
   b_led->write(0);
   
-  //set up compas and MPU6000
+  //set up compass and MPU6000
   setup_compass();
   
   //set up encoders
@@ -156,7 +156,7 @@ void move_pwm()
     wheels[0]=1500+rc[3].control_in+rc[1].control_in;//+z*(a+b)
     wheels[1]=1500+rc[3].control_in-rc[1].control_in;
     a_led->write(1);//LED Blinking
-    b_led->write(0);
+    b_led->write(1);
   }
   else//wireless e-stop
   {
