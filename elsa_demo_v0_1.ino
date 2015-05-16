@@ -4,7 +4,7 @@
 //**********WARNING*only works with diydrones apm IDE and modified battery monitor libary*************//
 //if this does not compile check those two things first
 
-
+//used for raido reciver
 #define CH_1 0
 #define CH_2 1
 #define CH_3 2
@@ -39,7 +39,7 @@
 #include <AP_ADC_AnalogSource.h>
 #endif
 
-const AP_HAL::HAL& hal = AP_HAL_BOARD_DRIVER;
+const AP_HAL::HAL& hal = AP_HAL_BOARD_DRIVER;//required for all APM code
 
 RC_Channel rc_1(CH_1);
 RC_Channel rc_2(CH_2);
@@ -51,26 +51,24 @@ RC_Channel rc_7(CH_7);
 RC_Channel rc_8(CH_8);
 RC_Channel *rc = &rc_1;
 
-int twist_x=0;
-int twist_y=0;
-int twist_z=0;
+int twist_y=0;//throttal
+int twist_z=0;//rotation
 
-int Otwist_x=0;
-int Otwist_y=0;
-int Otwist_z=0;
+int Otwist_y=0;//old throttal
+int Otwist_z=0;//old rotation
 
 AP_BattMonitor battery_mon1(1,0);//default pins
 AP_BattMonitor battery_mon2(2,3);//TODO select actual pins to use for second battery monitor
 
-int safety_count=0;
+int safety_count=0;//used for whne battery voltage is low 
 
-AP_HAL::DigitalSource *a_led;
+AP_HAL::DigitalSource *a_led;//pins for saftey LED
 AP_HAL::DigitalSource *b_led;
 
 const AP_HAL::HAL& hal = AP_HAL_BOARD_DRIVER;//initializing the compass
 AP_InertialSensor_MPU6000 ins;
 
-#if CONFIG_HAL_BOARD == HAL_BOARD_PX4
+#if CONFIG_HAL_BOARD == HAL_BOARD_PX4//used to set up up the imu sensors
 AP_Compass_PX4 compass;
 #else
 AP_Compass_HMC5843 compass;
@@ -82,6 +80,7 @@ uint32_t timer;
 
 void setup()
 {
+  //setup reciver
   setup_radio();
   
   for (int i = 0; i < 30; i++) {
@@ -93,7 +92,7 @@ void setup()
   hal.rcout->enable_ch(0);
   hal.rcout->enable_ch(1);
 
-  hal.rcout->write(0, 1500);
+  hal.rcout->write(0, 1500);//write netral throttal to esc
   hal.rcout->write(1, 1500);
 
   //battery monitor
@@ -120,13 +119,13 @@ void loop()
 {
   hal.scheduler->delay(10);
   read_radio();
-  talk();
+  talk();//send and revice sireial messages
   move_pwm();
   run_compass();
   read_Encoder();
 }
 
-void read_radio()
+void read_radio()//reads the pwm input for rc reciver
 {
   rc_1.set_pwm(hal.rcin->read(CH_1));
   rc_2.set_pwm(hal.rcin->read(CH_2));
@@ -138,7 +137,7 @@ void read_radio()
   rc_8.set_pwm(hal.rcin->read(CH_8));
 }
 
-void move_pwm()
+void move_pwm()// comands the esc
 {
   uint16_t wheels[2]; 
   //rotate side forward
@@ -203,7 +202,7 @@ void move_pwm()
 
 void setup_radio(void)
 {	
-  rc_1.radio_min = 1050;
+  rc_1.radio_min = 1050;//sets up the minimum value from reciver
   rc_2.radio_min = 1076;
   rc_3.radio_min = 1051;
   rc_4.radio_min = 1055;
@@ -212,7 +211,7 @@ void setup_radio(void)
   rc_7.radio_min = 1085;
   rc_8.radio_min = 1085;
   
-  rc_1.radio_max = 1888;
+  rc_1.radio_max = 1888;//setup maximum value from reciver
   rc_2.radio_max = 1893;
   rc_3.radio_max = 1883;
   rc_4.radio_max = 1886;
@@ -222,7 +221,7 @@ void setup_radio(void)
   rc_8.radio_max = 1915;
 
   // 3 is not trimed
-  rc_1.radio_trim = 1472;
+  rc_1.radio_trim = 1472;//setup netral value
   rc_2.radio_trim = 1496;
   rc_3.radio_trim = 1500;
   rc_4.radio_trim = 1471;
@@ -231,11 +230,11 @@ void setup_radio(void)
   rc_7.radio_trim = 1498;
   rc_8.radio_trim = 1500;
 
-  rc_1.set_range(-500,500);
+  rc_1.set_range(-500,500);//set the range the revicer values are converted to
   rc_1.set_default_dead_zone(50);
   rc_2.set_range(-500,500);
   rc_2.set_default_dead_zone(50);
-  rc_3.set_range(0,1000);
+  rc_3.set_range(0,1000);//this is different as it is the one used for the e-stop
   rc_3.set_default_dead_zone(50);
   rc_4.set_range(-500,500);
   rc_4.set_default_dead_zone(50);
@@ -255,9 +254,9 @@ void setup_radio(void)
 void talk()
 {
   //uint8_t Byte[6];
-  char Byte[10];
-  int Bints[3];
-  uint8_t bytes[20];
+  char Byte[10];// used to recive values from serial
+  int Bints[3];//used when chars is bitshifted into ints
+  uint8_t bytes[20];used to send into
   unsigned test=0;
 
   if(hal.console->available() >=10)
@@ -427,7 +426,7 @@ hal.console->printf_P(PSTR("%.2f\t\t\t\t%u \t\t  %4.2f  %4.2f  %4.2f \t \t %4.2f
 }
 }
 
-read_Encoder()
+read_Encoder()//talks to the encoder MCU via i2c
 {
 	uint8_t data[6];
 	uint8_t stat = hal.i2c->readRegisters(Encoder,0x01,8, data);
