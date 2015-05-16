@@ -7,14 +7,16 @@
 #define LIDAR_SUB "scan"
 #define MAPPING_PUB "sb_mapping"
 
-#define MAP_WIDTH 10
-#define MAP_HEIGHT 10
+// Width of map should be double the height
+#define MAP_WIDTH 12  
+#define MAP_HEIGHT 6
 #define MAP_RESOLUTION 1.0f
 
 class LocalLidarMap {
 
 private:
   nav_msgs::OccupancyGrid local_map;
+  int map_size, map_width, map_height;
   
 public:
 

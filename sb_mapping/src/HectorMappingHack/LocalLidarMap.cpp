@@ -1,17 +1,20 @@
 #include "LocalLidarMap.h"
+#include <cmath>
 
 LocalLidarMap::LocalLidarMap(int width, int height, float resolution)
 {
   // Set map parameters
+  map_width = width;
+  map_height = height;
   local_map.info.width = width;
   local_map.info.height = height;
   local_map.info.resolution = resolution;
 
   // Initialize map
-  int map_size = width * height;
+  map_size = width * height;
   local_map.data.assign(map_size, 0);
   
-  // Set transformations
+  // Set transformations; These should be constant, given the first data
   local_map.info.origin.position.x = width / 2;
   local_map.info.origin.position.y = height - 1;
   local_map.info.origin.position.z = 0;
@@ -29,6 +32,9 @@ nav_msgs::OccupancyGrid * LocalLidarMap::GetLocalMap()
 
 void LocalLidarMap::LidarCallback(const sensor_msgs::LaserScan::ConstPtr& scan)
 {
+  // TEST
+  ROS_INFO("Min angle: %f, Max angle: %f", scan->angle_min, scan->angle_max);
+  ROS_INFO("Min range: %f, Max Range: %f", scan->range_min, scan->range_max);
   scan->angle_min;
   scan->angle_max;
   scan->angle_increment;
@@ -38,24 +44,54 @@ void LocalLidarMap::LidarCallback(const sensor_msgs::LaserScan::ConstPtr& scan)
   scan->range_max;
   scan->ranges;
   scan->intensities;
+  
+  int x, y;
+  float range, theta;
+  int scan_rays = scan->ranges.size();
+  ROS_INFO("Range size: %i", (int) scan->ranges.size());
+  local_map.data.assign(map_size, 0); // clears the occupancy grid
+  for (int i = 0; i < scan_rays; i++)
+  {
+    range = scan->ranges[i];
+    
+    if (range < scan->range_min || range > scan->range_max) {}
+    else
+    {
+      theta = i*scan->angle_increment + scan->angle_min;
+      x = range * cos(theta);
+      y = range * sin(theta);
+      if (x < 0) { x = map_width / 2 - x; }
+      else { x = map_width / 2 + x; }
+      x /= map_width;       // floor
+      y /= map_height;      // floor
+      local_map.data[y*map_width + x] = 1;
+      ROS_INFO("Index: %i", (int) y*map_width + x);
+    }
+  }
 }
 
 int main(int argc, char **argv)
 {
+  // Initialize lidar map 
   LocalLidarMap lidar_map(MAP_WIDTH, MAP_HEIGHT, MAP_RESOLUTION);
   
+  // Initialize node and node handler
   ros::init(argc, argv, NODE_NAME);
   ros::NodeHandle n;
   
+  // Initialize subscribers and publishers
   ros::Subscriber lidar_sub = n.subscribe(LIDAR_SUB, 10, &LocalLidarMap::LidarCallback, &lidar_map);
   ros::Publisher local_map_pub = n.advertise<nav_msgs::OccupancyGrid>(MAPPING_PUB, 10);
   
+  // Specify rate for the while loop below
   ros::Rate loop_rate(10);
   
   while (ros::ok())
   {
     ROS_INFO("Width: %i, Height: %i", lidar_map.GetLocalMap()->info.width, lidar_map.GetLocalMap()->info.height);
+    
     local_map_pub.publish(*lidar_map.GetLocalMap());
+    
     ros::spinOnce();
     loop_rate.sleep();
   }  
