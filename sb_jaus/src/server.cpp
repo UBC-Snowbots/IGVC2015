@@ -1,6 +1,8 @@
 #include <jaus/core/Component.h>
 #include <jaus/core/transport/Transport.h>
+#include <jaus/mobility/sensors/LocalPoseSensor.h>
 #include "WaypointDriver.hpp"
+#include "LocalPoseSensor.hpp"
 #include <iostream>
 #include <ros/ros.h>
 
@@ -20,6 +22,7 @@ int main(int argc, char* argv[]){
 	LocalWaypointDriver* localWaypointDriver = new LocalWaypointDriver(self.advertise<sb_msgs::MoveCommand>(MOVE_COMMAND_TOPIC,100),localPoseSensor);
 	component.AddService(localPoseSensor);
 	component.AddService(localWaypointDriver);
+	LocalPoseSensor manager(localPoseSensor);
 	
 	discoveryService = (JAUS::Discovery*)component.GetService(JAUS::Discovery::Name);
 	discoveryService->SetSubsystemIdentification(JAUS::Subsystem::Vehicle,"Snowbots");
