@@ -6,6 +6,8 @@
 
 const std::string MOVE_COMMAND_TOPIC = "move_command";
 
+JAUS::LocalPoseSensor* localPoseSensor = nullptr;
+
 int main(int argc, char* argv[]){
 	ros::init(argc, argv, "jaus");
 	
@@ -14,7 +16,7 @@ int main(int argc, char* argv[]){
 	JAUS::Component component;
 	JAUS::Discovery* discoveryService = nullptr;
 	JAUS::Transport* transportService = nullptr;
-	JAUS::LocalPoseSensor* localPoseSensor = new JAUS::LocalPoseSensor();
+	localPoseSensor = new JAUS::LocalPoseSensor();
 	LocalWaypointDriver* localWaypointDriver = new LocalWaypointDriver(self.advertise<sb_msgs::MoveCommand>(MOVE_COMMAND_TOPIC,100),localPoseSensor);
 	componsnt.AddService(localPoseSensor);
 	component.AddService(localWaypointDriver);
