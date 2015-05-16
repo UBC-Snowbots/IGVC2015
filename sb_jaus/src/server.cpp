@@ -1,6 +1,6 @@
 #include <jaus/core/Component.h>
 #include <jaus/core/transport/Transport.h>
-#include <WaypointDriver.hpp>
+#include "WaypointDriver.hpp"
 #include <iostream>
 #include <ros/ros.h>
 
@@ -18,7 +18,7 @@ int main(int argc, char* argv[]){
 	JAUS::Transport* transportService = nullptr;
 	localPoseSensor = new JAUS::LocalPoseSensor();
 	LocalWaypointDriver* localWaypointDriver = new LocalWaypointDriver(self.advertise<sb_msgs::MoveCommand>(MOVE_COMMAND_TOPIC,100),localPoseSensor);
-	componsnt.AddService(localPoseSensor);
+	component.AddService(localPoseSensor);
 	component.AddService(localWaypointDriver);
 	
 	discoveryService = (JAUS::Discovery*)component.GetService(JAUS::Discovery::Name);

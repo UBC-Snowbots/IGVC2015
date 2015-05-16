@@ -3,6 +3,18 @@ cmake_minimum_required(VERSION 2.8)
 
 project(sb_jaus)
 
+find_package(catkin REQUIRED COMPONENTS
+	roscpp
+	std_msgs
+	sb_msgs
+)
+
+catkin_package(
+	CATKIN_DEPENDS roscpp std_msgs sb_msgs message_runtime
+)
+
+include_directories(${catkin_INCLUDE_DIRS})
+
 #ADD_DEFINITIONS( -Wall )
 
 include(CheckCXXCompilerFlag)
@@ -35,6 +47,11 @@ add_executable(jaus_judge src/judge.cpp)
 
 #find_package(Boost REQUIRED COMPONENTS system)
 
+
+target_link_libraries(jaus_server ${catkin_LIBRARIES})
 target_link_libraries(jaus_server JAUSCore JAUSEnvironment JAUSMobility CxUtils)
 target_link_libraries(jaus_judge JAUSCore JAUSEnvironment JAUSMobility CxUtils)
+
+add_dependencies(jaus_server sb_msgs_generate_messages_cpp)
+
 
