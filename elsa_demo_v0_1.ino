@@ -455,8 +455,8 @@ void velocity()
   {
   read_Encoder();
   
-  Rspeed = (rightE-OrightE)*651.339/0.1;
-  Lspeed = (leftE-OleftE)*651.339/0.1;
+  Rspeed = (rightE-OrightE)*651.944/0.1;
+  Lspeed = (leftE-OleftE)*651.944/0.1;
   OleftE = leftE;
   OrightE = rightE;
   velocity_count = 0;
