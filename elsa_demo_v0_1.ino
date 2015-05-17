@@ -179,7 +179,7 @@ void move_pwm()// comands the esc
   //TODO: Add in check for second battery monitor ** done
   //TODO: (nice to have) add in LED blinking pattern when battery is too low ** sure why not
   //TODO: check that the current is ok? 
-  if(battery_mon1.voltage()<9 || battery_mon1.current_amps()>19 || battery_mon2.voltage()<9 || battery_mon2.current_amps()>19)
+  if(battery_mon1.voltage()<9.5 || battery_mon1.current_amps()>19 || battery_mon2.voltage()<9.5 || battery_mon2.current_amps()>19)
   {
     safety_count++;
     if(safety_count>10)
