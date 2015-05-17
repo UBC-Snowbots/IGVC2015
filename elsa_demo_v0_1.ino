@@ -70,7 +70,8 @@ int voltage_count = 0;
 AP_BattMonitor battery_mon1(1,0);//default pins
 AP_BattMonitor battery_mon2(2,3);//TODO select actual pins to use for second battery monitor
 
-int safety_count=0;//used for when battery voltage is low 
+int safety_count=0;//used for when battery voltage is low
+int healthy_count=0;
 
 AP_HAL::DigitalSource *a_led;//pins for safety LED
 AP_HAL::DigitalSource *b_led;
@@ -208,6 +209,12 @@ void move_pwm()// commands the esc
   else if(safety_count>0)
   {
     safety_count--;
+    if(safety_count>20){
+    	healthy_count++;
+    	if (healthy_count > 10){
+    		safety_count = 0;
+    	}
+    }
   }
   hal.rcout->enable_ch(0);
   hal.rcout->write(0, wheels[0]);
