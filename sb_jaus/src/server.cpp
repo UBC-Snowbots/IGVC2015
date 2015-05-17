@@ -1,8 +1,8 @@
 #include <jaus/core/Component.h>
 #include <jaus/core/transport/Transport.h>
 #include <jaus/mobility/sensors/LocalPoseSensor.h>
-#include "WaypointDriver.hpp"
-#include "LocalPoseSensor.hpp"
+#include "LocalWaypointDriver.hpp"
+#include "LocalPoseSensorManager.hpp"
 #include <iostream>
 #include <ros/ros.h>
 

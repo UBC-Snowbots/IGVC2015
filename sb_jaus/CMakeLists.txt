@@ -41,7 +41,11 @@ set(BUILD_JAUS_ONLY yes)
 set(ACTIVE_PROJECT_ROOT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/JAUS++)
 add_subdirectory(JAUS++)
 
-add_executable(jaus_server src/server.cpp src/LocalPoseSensor.cpp src/LocalWaypointListDriver.cpp src/WaypointDriver.cpp)
+add_executable(jaus_server
+	src/server.cpp
+	src/LocalPoseSensorManager.cpp
+	src/LocalWaypointListDriver.cpp
+	src/WaypointDriver.cpp)
 
 add_executable(jaus_judge src/judge.cpp)
 
