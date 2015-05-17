@@ -4,7 +4,7 @@
 //**********WARNING*only works with diydrones apm IDE and modified battery monitor libary*************//
 //if this does not compile check those two things first
 
-//used for radio reciver
+//used for radio receiver
 #define CH_1 0
 #define CH_2 1
 #define CH_3 2
@@ -123,7 +123,7 @@ void loop()
 {
   hal.scheduler->delay(10);
   read_radio();
-  talk();//send and revice serial messages
+  talk();//send and receive serial messages
   move_pwm();
   run_compass();
   velocity();
@@ -434,8 +434,8 @@ hal.console->printf_P(PSTR("%.2f\t\t\t\t%u \t\t  %4.2f  %4.2f  %4.2f \t \t %4.2f
 
 void velocity()
 {
-  long Lspeed;
-  long Rspeed;
+  float Lspeed;
+  float Rspeed;
   
   //only updates speed every 10 loops = 10 Hz
   if (velocity_count<10)
