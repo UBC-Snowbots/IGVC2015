@@ -202,8 +202,16 @@ void move_pwm()// commands the esc
       wheels[0]=1500;
       wheels[1]=1500;
       
-      //a_led->write(1);//LED Blinking pattern
-      //b_led->write(0);
+      a_led->write(0);
+      
+      if (safety_count%10 < 5)
+      b_led->write(0);
+
+      else
+      b_led->write(1);
+      
+      	}
+      }
     }
   }
   else if(safety_count>0)
