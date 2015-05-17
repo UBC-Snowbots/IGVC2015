@@ -32,7 +32,7 @@
 #include <GCS_MAVLink.h>
 #include <AP_Declination.h>
 
-#include <AP_BattMonitor.h>//note needs the modified libary to function
+#include <AP_BattMonitor.h>//note needs the modified library to function
 #include <AP_Compass.h> // Compass Library
 
 #ifdef DOES_ARDUINO_NOT_SUPPORT_CUSTOM_INCLUDE_DIRECTORIES
@@ -60,6 +60,7 @@ int Otwist_z=0;//old rotation
 long leftE,rightE; //encoder ticks and velocity variables
 long OleftE, OrightE;
 int velocity_count=0;
+float Lspeed, Rspeed;
 
 float left_motor_cal, right_motor_cal =1; //calibration variables
 float voltage1, voltage2 = 0;
@@ -320,7 +321,8 @@ void talk()
         Otwist_y=twist_y;
         Otwist_z=twist_z;
         //TODO: send compass information to the laptop
-        //TODO: send velocity information to the laptop
+        //TODO: send velocity information to the laptop 
+        //TODO: send Rspeed, Lspeed
         
         uint8_t Comp;//placeholder, compass and odometry need to be implemented first, and SB_driver needs to be modified to read the output as well
         uint8_t Velo;
@@ -443,9 +445,7 @@ hal.console->printf_P(PSTR("%.2f\t\t\t\t%u \t\t  %4.2f  %4.2f  %4.2f \t \t %4.2f
 
 void velocity()
 {
-  float Lspeed;
-  float Rspeed;
-  
+
   //only updates speed every 10 loops = 10 Hz
   if (velocity_count<10)
   {
