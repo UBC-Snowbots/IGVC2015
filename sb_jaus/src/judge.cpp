@@ -103,7 +103,6 @@ int main() {
     component.Send(&local_pose_query, &local_pose_response);
     local_pose_response.PrintMessageBody();
 
-
     //Debug still live
     component.Shutdown();
     return 0;
