@@ -57,9 +57,14 @@ int twist_z=0;//rotation
 int Otwist_y=0;//old throttle
 int Otwist_z=0;//old rotation
 
-long leftE,rightE; //encoder ticks
+long leftE,rightE; //encoder ticks and velocity variables
 long OleftE, OrightE;
 int velocity_count=0;
+
+float left_motor_cal, right_motor_cal =1; //calibration variables
+float voltage1, voltage2 = 0;
+float batt_mon1_vol, batt_mon2_vol = 0;
+int voltage_count = 0;
 
 AP_BattMonitor battery_mon1(1,0);//default pins
 AP_BattMonitor battery_mon2(2,3);//TODO select actual pins to use for second battery monitor
@@ -127,6 +132,7 @@ void loop()
   move_pwm();
   run_compass();
   velocity();
+  motor_calibration();
 }
 
 void read_radio()//reads the pwm input for rc receiver
@@ -183,7 +189,10 @@ void move_pwm()// commands the esc
   //TODO: Add in check for second battery monitor ** done
   //TODO: (nice to have) add in LED blinking pattern when battery is too low ** sure why not
   //TODO: check that the current is ok? 
-  if(battery_mon1.voltage()<9.5 || battery_mon1.current_amps()>19 || battery_mon2.voltage()<9.5 || battery_mon2.current_amps()>19)
+  batt_mon1_vol = battery_mon1.voltage();
+  batt_mon2_vol = battery_mon2.voltage();
+  
+  if(batt_mon1_vol<9.5 || battery_mon1.current_amps()>19 || batt_mon2_vol<9.5 || battery_mon2.current_amps()>19)
   {
     safety_count++;
     if(safety_count>10)
@@ -476,5 +485,34 @@ void read_Encoder()//talks to the encoder MCU via i2c
         rightE |= data[7];
 	}
 }
+
+void motor_calibration(){
+  
+  //double check that 1 = left, 2 = right
+  
+  if(voltage_count<500)
+  {
+  voltage1 += batt_mon1_vol;
+  voltage2 += batt_mon2_vol;
+  
+  voltage_count++;
+  }
+  
+  else
+  {
+  voltage1 = voltage1/(500*12.1);
+  voltage2 = voltage2/(500*12.1);
+  
+  left_motor_cal = voltage1; //multiply by left hardware constant
+  right_motor_cal = voltage2; //multiply by right hardware constant
+  
+  voltage1 = 0;
+  voltage2 = 0;
+  voltage_count = 0;
+  }
+  
+  //TODO: Find hardware constant (if any)
+  //TODO: Insert the right_motor_cal/left_motor_cal where necessary
+}  
 
 AP_HAL_MAIN();
