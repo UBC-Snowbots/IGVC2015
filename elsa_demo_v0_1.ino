@@ -217,9 +217,11 @@ void move_pwm()// commands the esc
   else if(safety_count>0)
   {
     safety_count--;
-    if(safety_count>20){
+    if(safety_count>20)
+    {
     	healthy_count++;
-    	if (healthy_count > 10){
+    	if (healthy_count > 10)
+    	{
     		safety_count = 0;
     	}
     }
