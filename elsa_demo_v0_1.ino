@@ -4,7 +4,7 @@
 //**********WARNING*only works with diydrones apm IDE and modified battery monitor libary*************//
 //if this does not compile check those two things first
 
-//used for raido reciver
+//used for radio reciver
 #define CH_1 0
 #define CH_2 1
 #define CH_3 2
@@ -51,18 +51,22 @@ RC_Channel rc_7(CH_7);
 RC_Channel rc_8(CH_8);
 RC_Channel *rc = &rc_1;
 
-int twist_y=0;//throttal
+int twist_y=0;//throttle
 int twist_z=0;//rotation
 
-int Otwist_y=0;//old throttal
+int Otwist_y=0;//old throttle
 int Otwist_z=0;//old rotation
+
+long leftE,rightE; //encoder ticks
+long OleftE, OrightE;
+int velocity_count=0;
 
 AP_BattMonitor battery_mon1(1,0);//default pins
 AP_BattMonitor battery_mon2(2,3);//TODO select actual pins to use for second battery monitor
 
-int safety_count=0;//used for whne battery voltage is low 
+int safety_count=0;//used for when battery voltage is low 
 
-AP_HAL::DigitalSource *a_led;//pins for saftey LED
+AP_HAL::DigitalSource *a_led;//pins for safety LED
 AP_HAL::DigitalSource *b_led;
 
 //initializing the compass
@@ -80,7 +84,7 @@ uint32_t timer;
 
 void setup()
 {
-  //setup reciver
+  //setup receiver
   setup_radio();
   
   for (int i = 0; i < 30; i++) {
@@ -92,7 +96,7 @@ void setup()
   hal.rcout->enable_ch(0);
   hal.rcout->enable_ch(1);
 
-  hal.rcout->write(0, 1500);//write netral throttal to esc
+  hal.rcout->write(0, 1500);//write neutral throttle to esc
   hal.rcout->write(1, 1500);
 
   //battery monitor
@@ -119,13 +123,13 @@ void loop()
 {
   hal.scheduler->delay(10);
   read_radio();
-  talk();//send and revice sireial messages
+  talk();//send and revice serial messages
   move_pwm();
   run_compass();
-  read_Encoder();
+  velocity();
 }
 
-void read_radio()//reads the pwm input for rc reciver
+void read_radio()//reads the pwm input for rc receiver
 {
   rc_1.set_pwm(hal.rcin->read(CH_1));
   rc_2.set_pwm(hal.rcin->read(CH_2));
@@ -137,7 +141,7 @@ void read_radio()//reads the pwm input for rc reciver
   rc_8.set_pwm(hal.rcin->read(CH_8));
 }
 
-void move_pwm()// comands the esc
+void move_pwm()// commands the esc
 {
   uint16_t wheels[2]; 
   //rotate side forward
@@ -149,7 +153,7 @@ void move_pwm()// comands the esc
     a_led->write(0);//LED solid
     b_led->write(1);
   }
-  else if(rc[2].control_in < 650)//autonomus
+  else if(rc[2].control_in < 650)//autonomous
   {
     //hal.console->printf_P(PSTR("radio"));
     wheels[0]=1500+rc[3].control_in+rc[1].control_in;//+z*(a+b)
@@ -186,7 +190,8 @@ void move_pwm()// comands the esc
     {
       wheels[0]=1500;
       wheels[1]=1500;
-      //a_led->write(1);//LED Blinking pattern * needs to be implemented on the led mcu
+      
+      //a_led->write(1);//LED Blinking pattern
       //b_led->write(0);
     }
   }
@@ -339,10 +344,11 @@ void setup_compass()
     }
 
     compass.set_offsets(0,0,0); // set offsets to account for surrounding interference
-    compass.set_declination(ToRad(0.0)); // set local difference between magnetic north and true north
+    compass.set_declination(ToRa
+    d(0.0)); // set local difference between magnetic north and true north
 }
 
-void run_compass()//compass function, remove prints and consol reads
+void run_compass()//compass function, remove prints and console reads
 {
     Vector3f accel;
     Vector3f gyro;
@@ -426,12 +432,39 @@ hal.console->printf_P(PSTR("%.2f\t\t\t\t%u \t\t  %4.2f  %4.2f  %4.2f \t \t %4.2f
 }
 }
 
+void velocity()
+{
+  long Lspeed;
+  long Rspeed;
+  
+  //only updates speed every 10 loops = 10 Hz
+  if (velocity_count<10)
+  {
+    velocity_count++;
+  }
+  else
+  {
+  read_Encoder();
+  
+  Rspeed = (rightE-OrightE)*651.339/0.1;
+  Lspeed = (leftE-OleftE)*651.339/0.1;
+  OleftE = leftE;
+  OrightE = rightE;
+  velocity_count = 0;
+  }
+  
+  //TODO:
+  //send the speeds to the laptop
+  //read the compass heading and send that too
+  
+}
+
 void read_Encoder()//talks to the encoder MCU via i2c
 {
 	uint8_t data[6];
 	uint8_t stat = hal.i2c->readRegisters(Encoder,0x01,8, data);
 	if (stat == 0){
-        long leftE,rightE;//TODO this corently does not get sent anywhere
+        
         leftE = data[0] << 24;
         leftE |= data[1] << 16;
         leftE |= data[2] << 8;
