@@ -47,6 +47,7 @@ add_executable(ObjectDetect src/ObjectDetect.cpp)
 add_executable( ipm src/Perspective_Transform/ipm_code/main.cpp 
 			src/Perspective_Transform/ipm_code/IPM.cpp 
 			src/Perspective_Transform/ipm_code/IPM.h)
+add_executable( Pylon_Detector src/Pylon_Detector/Pylon_Detector.cpp )
 
 target_link_libraries( Line_Detector ${catkin_LIBRARIES} ${OpenCV_LIBS})
 target_link_libraries( LaneDetector  ${catkin_LIBRARIES} ${OpenCV_LIBS})
@@ -59,6 +60,7 @@ target_link_libraries( jan11 ${catkin_LIBRARIES})
 target_link_libraries( CameraCal ${catkin_LIBRARIES} ${OpenCV_LIBS})
 target_link_libraries( ObjectDetect ${catkin_LIBRARIES} ${OpenCV_LIBS})
 target_link_libraries( ipm ${catkin_LIBRARIES} ${OpenCV_LIBS})
+target_link_libraries( Pylon_Detector ${catkin_LIBRARIES} ${OpenCV_LIBS})
 
 add_dependencies(LaneDetector sb_msgs_generate_messages_cpp)
 
