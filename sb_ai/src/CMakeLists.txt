@@ -1,16 +1,26 @@
 add_subdirectory(AI)
 
+find_package(OpenCV REQUIRED)
+
 set(MAIN_HEADERS
 	ControllerBase.hpp
 	DijkstraController.hpp
+	VisionController.hpp
 	sb_ai.h)
 
 set(MAIN_SOURCE
 	DijkstraController.cpp
+	VisionController.cpp
 	main.cpp)
 
 set(MODE_LIBRARIES
-	ai_dijkstra)
+	ai_dijkstra
+	${OpenCV_LIBS})
+
+set(MODE_INCLUDE_DIRS
+	${OpenCV_INCLUDE_DIRS})
+
+include_directories( ${MODE_INCLUDE_DIRS} )
 
 add_executable(sb_ai ${MAIN_HEADERS} ${MAIN_SOURCE})
 add_dependencies(sb_ai sb_msgs_generate_messages_cpp)
