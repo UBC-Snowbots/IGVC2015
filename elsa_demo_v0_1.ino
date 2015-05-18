@@ -204,11 +204,13 @@ void move_pwm()// commands the esc
       
       a_led->write(0);
       
-      if (safety_count%10 < 5)
-      b_led->write(0);
+      //2 Hz blink
+      
+      if (safety_count%100 < 50)
+      	b_led->write(0);
 
       else
-      b_led->write(1);
+      	b_led->write(1);
       
       	}
       }
