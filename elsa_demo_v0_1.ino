@@ -178,19 +178,10 @@ void move_pwm()// commands the esc
     b_led->write(0);
   }
   
-  //TODO: add in function to grab rotation of wheels and time information to calculate velocity 
-  // this function will be called by talk
-  
   //TODO: Add in compass set-up and read functions (can be "copied") from Mecanum 2
-  
-  //TODO: Add in LED blinking functionality 
-
 
   //checks for battery;
   battery_mon1.read();
-  //TODO: Add in check for second battery monitor ** done
-  //TODO: (nice to have) add in LED blinking pattern when battery is too low ** sure why not
-  //TODO: check that the current is ok? 
   batt_mon1_vol = battery_mon1.voltage();
   batt_mon2_vol = battery_mon2.voltage();
   
@@ -341,7 +332,6 @@ void talk()
         Otwist_y=twist_y;
         Otwist_z=twist_z;
         //TODO: send compass information to the laptop
-        //TODO: send velocity information to the laptop 
         //TODO: send Rspeed, Lspeed
         
         uint8_t Comp;//placeholder, compass and odometry need to be implemented first, and SB_driver needs to be modified to read the output as well
@@ -481,11 +471,6 @@ void velocity()
   OrightE = rightE;
   velocity_count = 0;
   }
-  
-  //TODO:
-  //send the speeds to the laptop
-  //read the compass heading and send that too
-  
 }
 
 void read_Encoder()//talks to the encoder MCU via i2c
@@ -532,7 +517,7 @@ void motor_calibration(){
   }
   
   //TODO: Find hardware constant (if any)
-  //TODO: Insert the right_motor_cal/left_motor_cal where necessary
+  //TODO: Insert the right_motor_cal/left_motor_cal where necessary (multiplies what where)
 }  
 
 AP_HAL_MAIN();
