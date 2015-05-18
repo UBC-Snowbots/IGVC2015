@@ -225,6 +225,7 @@ void move_pwm()// commands the esc
     	if (healthy_count > 10)
     	{
     		safety_count = 0;
+    		healthy count = 0;
     	}
     }
   }
