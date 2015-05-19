@@ -2,6 +2,7 @@
 //uses MPU6000,RCoutput,RCinput, blizzard4
 
 //**********WARNING*only works with diydrones apm IDE and modified battery monitor libary*************//
+//download AP_BatteryMon.h from electrical projects on google drive
 //if this does not compile check those two things first
 
 //used for radio receiver
@@ -32,7 +33,7 @@
 #include <GCS_MAVLink.h>
 #include <AP_Declination.h>
 
-#include <AP_BattMonitor.h>//note needs the modified library to function
+#include <AP_BatteryMon.h>//note needs the modified library to function
 #include <AP_Compass.h> // Compass Library
 
 #ifdef DOES_ARDUINO_NOT_SUPPORT_CUSTOM_INCLUDE_DIRECTORIES
@@ -67,8 +68,8 @@ float voltage1, voltage2 = 0;
 float batt_mon1_vol, batt_mon2_vol = 0;
 int voltage_count = 0;
 
-AP_BattMonitor battery_mon1(1,0);//default pins
-AP_BattMonitor battery_mon2(2,3);//TODO select actual pins to use for second battery monitor
+AP_BatteryMon battery_mon1(1,0);//default pins
+AP_BatteryMon battery_mon2(2,3);//TODO select actual pins to use for second battery monitor
 
 int safety_count=0;//used for when battery voltage is low
 int healthy_count=0;
@@ -203,8 +204,6 @@ void move_pwm()// commands the esc
       else
       	b_led->write(1);
       
-      	}
-      }
     }
   }
   else if(safety_count>0)
@@ -365,8 +364,7 @@ void setup_compass()
     }
 
     compass.set_offsets(0,0,0); // set offsets to account for surrounding interference
-    compass.set_declination(ToRa
-    d(0.0)); // set local difference between magnetic north and true north
+    compass.set_declination(ToRad(0.0)); // set local difference between magnetic north and true north
 }
 
 void run_compass()//compass function, remove prints and console reads
