@@ -7,6 +7,7 @@
 
 #include "ControllerBase.hpp"
 #include "DijkstraController.hpp"
+#include "VisionController.hpp"
 
 ai::ControllerBase* get_controller(ros::NodeHandle& nh){
 	ros::NodeHandle private_nh("~");
@@ -14,11 +15,14 @@ ai::ControllerBase* get_controller(ros::NodeHandle& nh){
 	private_nh.getParam(MODE_PARAM,param);
 	if(param=="dijkstra"){
 		return new ai::DijkstraController(nh);
+	}else if(param=="vision"){
+		return new ai::VisionController;
 	}else{
 		std::cout << "Invalid " << MODE_PARAM << " '" << param << "'." << std::endl;
 	}
 	std::cout << "Current options: " << std::endl;
 	std::cout << "\tdijkstra" << std::endl;
+	std::cout << "\tvision" << std::endl;
 	std::cout << "Defaulting to dijkstra" << std::endl;
 	return new ai::DijkstraController(nh);
 }
