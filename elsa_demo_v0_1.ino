@@ -329,15 +329,15 @@ void talk()
         //TODO: send Rspeed, Lspeed
         char outbytes[10];
         outbytes[0]=compdeg>>8;
-        outbytes[0]=compdeg;
-        outbytes[0]=Rspeed>>24;
-        outbytes[0]=Rspeed>>16;
-        outbytes[0]=Rspeed>>8;
-        outbytes[0]=Rspeed;
-        outbytes[0]=Lspeed>>24;
-        outbytes[0]=Lspeed>>16;
-        outbytes[0]=Lspeed>>8;
-        outbytes[0]=Lspeed;
+        outbytes[1]=compdeg;
+        outbytes[2]=Rspeed>>24;
+        outbytes[3]=Rspeed>>16;
+        outbytes[4]=Rspeed>>8;
+        outbytes[5]=Rspeed;
+        outbytes[6]=Lspeed>>24;
+        outbytes[7]=Lspeed>>16;
+        outbytes[8]=Lspeed>>8;
+        outbytes[9]=Lspeed;
         
         hal.console->printf("%c", utbytes[10]);
       }
