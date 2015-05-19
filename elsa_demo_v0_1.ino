@@ -1,7 +1,10 @@
 //mechanum main
 //uses MPU6000,RCoutput,RCinput, blizzard4
 
+//**********WARNING*only works with diydrones apm IDE and modified battery monitor libary*************//
+//if this does not compile check those two things first
 
+//used for radio receiver
 #define CH_1 0
 #define CH_2 1
 #define CH_3 2
@@ -29,14 +32,14 @@
 #include <GCS_MAVLink.h>
 #include <AP_Declination.h>
 
-#include <AP_BattMonitor.h>//note needs the modified libary to function
+#include <AP_BattMonitor.h>//note needs the modified library to function
 #include <AP_Compass.h> // Compass Library
 
 #ifdef DOES_ARDUINO_NOT_SUPPORT_CUSTOM_INCLUDE_DIRECTORIES
 #include <AP_ADC_AnalogSource.h>
 #endif
 
-const AP_HAL::HAL& hal = AP_HAL_BOARD_DRIVER;
+const AP_HAL::HAL& hal = AP_HAL_BOARD_DRIVER;//required for all APM code
 
 RC_Channel rc_1(CH_1);
 RC_Channel rc_2(CH_2);
@@ -48,34 +51,47 @@ RC_Channel rc_7(CH_7);
 RC_Channel rc_8(CH_8);
 RC_Channel *rc = &rc_1;
 
-int twist_x=0;
-int twist_y=0;
-int twist_z=0;
+int twist_y=0;//throttle
+int twist_z=0;//rotation
 
-int Otwist_x=0;
-int Otwist_y=0;
-int Otwist_z=0;
+int Otwist_y=0;//old throttle
+int Otwist_z=0;//old rotation
 
-AP_BattMonitor battery_mon1(1,0);//defult pins
-AP_BattMonitor battery_mon2(2,3);//TODO select acual pins to uses for second battery moniter
+long leftE,rightE; //encoder ticks and velocity variables
+long OleftE, OrightE;
+int velocity_count=0;
+float Lspeed, Rspeed;
 
-int safety_count=0;
+float left_motor_cal, right_motor_cal =1; //calibration variables
+float voltage1, voltage2 = 0;
+float batt_mon1_vol, batt_mon2_vol = 0;
+int voltage_count = 0;
 
-AP_HAL::DigitalSource *a_led;
+AP_BattMonitor battery_mon1(1,0);//default pins
+AP_BattMonitor battery_mon2(2,3);//TODO select actual pins to use for second battery monitor
+
+int safety_count=0;//used for when battery voltage is low
+int healthy_count=0;
+
+AP_HAL::DigitalSource *a_led;//pins for safety LED
 AP_HAL::DigitalSource *b_led;
 
-const AP_HAL::HAL& hal = AP_HAL_BOARD_DRIVER;//inisilizing the compass
+//initializing the compass
 AP_InertialSensor_MPU6000 ins;
 
-#if CONFIG_HAL_BOARD == HAL_BOARD_PX4
+#if CONFIG_HAL_BOARD == HAL_BOARD_PX4//used to set up up the imu sensors
 AP_Compass_PX4 compass;
 #else
 AP_Compass_HMC5843 compass;
 #endif
 uint32_t timer;
 
+
+#define Encoder  0x09  //encoder i2c address
+
 void setup()
 {
+  //setup receiver
   setup_radio();
   
   for (int i = 0; i < 30; i++) {
@@ -87,7 +103,7 @@ void setup()
   hal.rcout->enable_ch(0);
   hal.rcout->enable_ch(1);
 
-  hal.rcout->write(0, 1500);
+  hal.rcout->write(0, 1500);//write neutral throttle to esc
   hal.rcout->write(1, 1500);
 
   //battery monitor
@@ -103,20 +119,25 @@ void setup()
   b_led->mode(GPIO_OUTPUT);
   b_led->write(0);
   
-  //set up compas and MPU6000
+  //set up compass and MPU6000
   setup_compass();
+  
+  //set up encoders
+  hal.i2c->writeRegister(Encoder,0x00,0x00);
 }
 
 void loop()
 {
   hal.scheduler->delay(10);
   read_radio();
-  talk();
+  talk();//send and receive serial messages
   move_pwm();
   run_compass();
+  velocity();
+  motor_calibration();
 }
 
-void read_radio()
+void read_radio()//reads the pwm input for rc receiver
 {
   rc_1.set_pwm(hal.rcin->read(CH_1));
   rc_2.set_pwm(hal.rcin->read(CH_2));
@@ -128,7 +149,7 @@ void read_radio()
   rc_8.set_pwm(hal.rcin->read(CH_8));
 }
 
-void move_pwm()
+void move_pwm()// commands the esc
 {
   uint16_t wheels[2]; 
   //rotate side forward
@@ -140,13 +161,13 @@ void move_pwm()
     a_led->write(0);//LED solid
     b_led->write(1);
   }
-  else if(rc[2].control_in < 650)//autonomus
+  else if(rc[2].control_in < 650)//autonomous
   {
     //hal.console->printf_P(PSTR("radio"));
     wheels[0]=1500+rc[3].control_in+rc[1].control_in;//+z*(a+b)
     wheels[1]=1500+rc[3].control_in-rc[1].control_in;
     a_led->write(1);//LED Blinking
-    b_led->write(0);
+    b_led->write(1);
   }
   else//wireless e-stop
   {
@@ -157,33 +178,47 @@ void move_pwm()
     b_led->write(0);
   }
   
-  //TODO: add in function to grab rotation of wheels and time information to calculate velocity 
-  // this function will be called by talk
-  
   //TODO: Add in compass set-up and read functions (can be "copied") from Mecanum 2
-  
-  //TODO: Add in LED blinking functionality 
-
 
   //checks for battery;
   battery_mon1.read();
-  //TODO: Add in check for second battery monitor ** done
-  //TODO: (nice to have) add in LED blinking pattern when battery is too low ** sure why not
-  //TODO: check that the current is ok? 
-  if(battery_mon1.voltage()<9 || battery_mon1.current_amps()>19 || battery_mon2.voltage()<9 || battery_mon2.current_amps()>19)
+  batt_mon1_vol = battery_mon1.voltage();
+  batt_mon2_vol = battery_mon2.voltage();
+  
+  if(batt_mon1_vol<9.5 || battery_mon1.current_amps()>19 || batt_mon2_vol<9.5 || battery_mon2.current_amps()>19)
   {
     safety_count++;
     if(safety_count>10)
     {
       wheels[0]=1500;
       wheels[1]=1500;
-      //a_led->write(1);//LED Blinking pattern * needs to be implemented on the led mcu
-      //b_led->write(0);
+      
+      a_led->write(0);
+      
+      //2 Hz blink
+      
+      if (safety_count%100 < 50)
+      	b_led->write(0);
+
+      else
+      	b_led->write(1);
+      
+      	}
+      }
     }
   }
   else if(safety_count>0)
   {
     safety_count--;
+    if(safety_count>20)
+    {
+    	healthy_count++;
+    	if (healthy_count > 10)
+    	{
+    		safety_count = 0;
+    		healthy_count = 0;
+    	}
+    }
   }
   hal.rcout->enable_ch(0);
   hal.rcout->write(0, wheels[0]);
@@ -193,7 +228,7 @@ void move_pwm()
 
 void setup_radio(void)
 {	
-  rc_1.radio_min = 1050;
+  rc_1.radio_min = 1050;//sets up the minimum value from reciver
   rc_2.radio_min = 1076;
   rc_3.radio_min = 1051;
   rc_4.radio_min = 1055;
@@ -202,7 +237,7 @@ void setup_radio(void)
   rc_7.radio_min = 1085;
   rc_8.radio_min = 1085;
   
-  rc_1.radio_max = 1888;
+  rc_1.radio_max = 1888;//setup maximum value from reciver
   rc_2.radio_max = 1893;
   rc_3.radio_max = 1883;
   rc_4.radio_max = 1886;
@@ -212,7 +247,7 @@ void setup_radio(void)
   rc_8.radio_max = 1915;
 
   // 3 is not trimed
-  rc_1.radio_trim = 1472;
+  rc_1.radio_trim = 1472;//setup netral value
   rc_2.radio_trim = 1496;
   rc_3.radio_trim = 1500;
   rc_4.radio_trim = 1471;
@@ -221,11 +256,11 @@ void setup_radio(void)
   rc_7.radio_trim = 1498;
   rc_8.radio_trim = 1500;
 
-  rc_1.set_range(-500,500);
+  rc_1.set_range(-500,500);//set the range the revicer values are converted to
   rc_1.set_default_dead_zone(50);
   rc_2.set_range(-500,500);
   rc_2.set_default_dead_zone(50);
-  rc_3.set_range(0,1000);
+  rc_3.set_range(0,1000);//this is different as it is the one used for the e-stop
   rc_3.set_default_dead_zone(50);
   rc_4.set_range(-500,500);
   rc_4.set_default_dead_zone(50);
@@ -245,9 +280,9 @@ void setup_radio(void)
 void talk()
 {
   //uint8_t Byte[6];
-  char Byte[10];
-  int Bints[3];
-  uint8_t bytes[20];
+  char Byte[10];// used to recive values from serial
+  int Bints[3];//used when chars is bitshifted into ints
+  uint8_t bytes[20];//used to send into
   unsigned test=0;
 
   if(hal.console->available() >=10)
@@ -274,16 +309,16 @@ void talk()
         //twist_x=Bints[0];
         Bints[1]=100*(int)(Byte[4]-'0')+10*(int)(Byte[5]-'0')+(int)(Byte[6]-'0');
         Bints[2]=100*(int)(Byte[7]-'0')+10*(int)(Byte[8]-'0')+(int)(Byte[9]-'0');
-        twist_x=4*Bints[0]-500;
+        //twist_x=4*Bints[0]-500;
         twist_y=4*Bints[1]-500;
         twist_z=4*Bints[2]-500;
 
-        if(Otwist_x-twist_x>100)// limits rapidthrottle value changes
+        /*if(Otwist_x-twist_x>100)// limits rapidthrottle value changes
           twist_x=Otwist_x-100;
         else if(twist_x-Otwist_x>100)
-          twist_x=Otwist_x+100;
+          twist_x=Otwist_x+100;*/
         
-        if(Otwist_y-twist_y>100)
+        if(Otwist_y-twist_y>100)// limits rapidthrottle value changes
           twist_y=Otwist_y-100;
         else if(twist_y-Otwist_y>100)
           twist_y=Otwist_y+100;
@@ -293,14 +328,14 @@ void talk()
         else if(twist_z-Otwist_z>100)
           twist_z=Otwist_z+100;
           
-        Otwist_x=twist_x;
+        //Otwist_x=twist_x;
         Otwist_y=twist_y;
         Otwist_z=twist_z;
         //TODO: send compass information to the laptop
-        //TODO: send velocity information to the laptop
+        //TODO: send Rspeed, Lspeed
         
-        uint8_t = Comp;//placeholder, compass and odometry need to be implemented first, and SB_driver needs to be modified to read the output as well
-        uint8_t = Velo;
+        uint8_t Comp;//placeholder, compass and odometry need to be implemented first, and SB_driver needs to be modified to read the output as well
+        uint8_t Velo;
         hal.console->printf("%u,%u", (unsigned)Comp,(unsigned)Velo);
       }
     }
@@ -330,10 +365,11 @@ void setup_compass()
     }
 
     compass.set_offsets(0,0,0); // set offsets to account for surrounding interference
-    compass.set_declination(ToRad(0.0)); // set local difference between magnetic north and true north
+    compass.set_declination(ToRa
+    d(0.0)); // set local difference between magnetic north and true north
 }
 
-void run_compass()//compass function, remove prints and consol reads
+void run_compass()//compass function, remove prints and console reads
 {
     Vector3f accel;
     Vector3f gyro;
@@ -416,5 +452,72 @@ hal.console->printf_P(PSTR("%.2f\t\t\t\t%u \t\t  %4.2f  %4.2f  %4.2f \t \t %4.2f
 
 }
 }
+
+void velocity()
+{
+
+  //only updates speed every 10 loops = 10 Hz
+  if (velocity_count<10)
+  {
+    velocity_count++;
+  }
+  else
+  {
+  read_Encoder();
+  
+  Rspeed = (rightE-OrightE)*651.944/0.1;
+  Lspeed = (leftE-OleftE)*651.944/0.1;
+  OleftE = leftE;
+  OrightE = rightE;
+  velocity_count = 0;
+  }
+}
+
+void read_Encoder()//talks to the encoder MCU via i2c
+{
+	uint8_t data[6];
+	uint8_t stat = hal.i2c->readRegisters(Encoder,0x01,8, data);
+	if (stat == 0){
+        
+        leftE = data[0] << 24;
+        leftE |= data[1] << 16;
+        leftE |= data[2] << 8;
+        leftE |= data[3];
+        
+        rightE = data[4] << 24;
+        rightE |= data[5] << 16;
+        rightE |= data[6] << 8;
+        rightE |= data[7];
+	}
+}
+
+void motor_calibration(){
+  
+  //double check that 1 = left, 2 = right
+  
+  if(voltage_count<500)
+  {
+  voltage1 += batt_mon1_vol;
+  voltage2 += batt_mon2_vol;
+  
+  voltage_count++;
+  }
+  
+  else
+  {
+  voltage1 = voltage1/(500*12.1);
+  voltage2 = voltage2/(500*12.1);
+  
+  left_motor_cal = voltage1; //multiply by left hardware constant
+  right_motor_cal = voltage2; //multiply by right hardware constant
+  
+  voltage1 = 0;
+  voltage2 = 0;
+  voltage_count = 0;
+  }
+  
+  //TODO: Find hardware constant (if any)
+  //TODO: Insert the right_motor_cal/left_motor_cal where necessary (multiplies what where)
+}  
 
 AP_HAL_MAIN();
