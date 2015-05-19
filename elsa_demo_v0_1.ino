@@ -63,6 +63,8 @@ long OleftE, OrightE;
 int velocity_count=0;
 float Lspeed, Rspeed;
 
+int compdeg;//compass heading in degrees
+
 float left_motor_cal, right_motor_cal =1; //calibration variables
 float voltage1, voltage2 = 0;
 float batt_mon1_vol, batt_mon2_vol = 0;
@@ -279,7 +281,7 @@ void setup_radio(void)
 void talk()
 {
   //uint8_t Byte[6];
-  char Byte[10];// used to recive values from serial
+  char Byte[7];// used to recive values from serial
   int Bints[3];//used when chars is bitshifted into ints
   uint8_t bytes[20];//used to send into
   unsigned test=0;
@@ -293,24 +295,17 @@ void talk()
       //hal.console->println(Byte[0]);
       if(Byte[0]=='B')// make sure all data begains with a zero
       {
-        Byte[4]= hal.console->read();//swaped to try and fix wrong incorect input
-        Byte[5]= hal.console->read();
-        Byte[6]= hal.console->read();
         Byte[1]= hal.console->read();
         Byte[2]= hal.console->read();
         Byte[3]= hal.console->read();
-        Byte[7]= hal.console->read();
-        Byte[8]= hal.console->read();
-        Byte[9]= hal.console->read();
+        Byte[4]= hal.console->read();
+        Byte[5]= hal.console->read();
+        Byte[6]= hal.console->read();
         hal.console->flush();
-        //Bints[0]=100*(int)(Byte[1]-'0');
-        Bints[0]=100*(int)(Byte[1]-'0')+10*(int)(Byte[2]-'0')+(int)(Byte[3]-'0');
-        //twist_x=Bints[0];
+        Bints[0]=100*(int)(Byte[1]-'0')+10*(int)(Byte[2]-'0')+(int)(Byte[3]-'0')
         Bints[1]=100*(int)(Byte[4]-'0')+10*(int)(Byte[5]-'0')+(int)(Byte[6]-'0');
-        Bints[2]=100*(int)(Byte[7]-'0')+10*(int)(Byte[8]-'0')+(int)(Byte[9]-'0');
-        //twist_x=4*Bints[0]-500;
-        twist_y=4*Bints[1]-500;
-        twist_z=4*Bints[2]-500;
+        twist_y=4*Bints[0]-500;
+        twist_z=4*Bints[1]-500;
 
         /*if(Otwist_x-twist_x>100)// limits rapidthrottle value changes
           twist_x=Otwist_x-100;
@@ -332,10 +327,19 @@ void talk()
         Otwist_z=twist_z;
         //TODO: send compass information to the laptop
         //TODO: send Rspeed, Lspeed
+        char outbytes[10];
+        outbytes[0]=compdeg>>8;
+        outbytes[0]=compdeg;
+        outbytes[0]=Rspeed>>24;
+        outbytes[0]=Rspeed>>16;
+        outbytes[0]=Rspeed>>8;
+        outbytes[0]=Rspeed;
+        outbytes[0]=Lspeed>>24;
+        outbytes[0]=Lspeed>>16;
+        outbytes[0]=Lspeed>>8;
+        outbytes[0]=Lspeed;
         
-        uint8_t Comp;//placeholder, compass and odometry need to be implemented first, and SB_driver needs to be modified to read the output as well
-        uint8_t Velo;
-        hal.console->printf("%u,%u", (unsigned)Comp,(unsigned)Velo);
+        hal.console->printf("%c", utbytes[10]);
       }
     }
   }
@@ -430,7 +434,7 @@ void run_compass()//compass function, remove prints and console reads
         // display all to user
 
 
-        hal.console->println();
+        //hal.console->println();
     
 
 
@@ -444,8 +448,7 @@ void run_compass()//compass function, remove prints and console reads
 
         length = accel.length();
 
-hal.console->printf_P(PSTR("%.2f\t\t\t\t%u \t\t  %4.2f  %4.2f  %4.2f \t \t %4.2f \t\t\t%4.2f %4.2f %4.2f\n"), 
-								ToDeg(heading), (unsigned)read_time, accel.x, accel.y, accel.z, length, gyro.x, gyro.y, gyro.z);
+	compdeg=ToDeg(heading);
 
 
 }
