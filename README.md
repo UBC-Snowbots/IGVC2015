@@ -27,7 +27,11 @@ To revert back to building all the packages:
 -----------------------------------------
 
 To use the sb_gps branch: 
+
 1. > chmod +x sb_gps/scripts/gps_receiver.py 
+
 2. Make sure that the shebang is pointing to the correct directory on your computer 
+
 3. >rosrun sb_gps gps_receiver.py 
+
 The node will start streaming data
