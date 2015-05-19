@@ -23,3 +23,11 @@ Every time catkin_make is called it will only build the sb_ai package
 To revert back to building all the packages:
 
 > catkin_make _DCATKIN_WHITELIST_PACKAGES=""
+
+-----------------------------------------
+
+To use the sb_gps branch: 
+1. > chmod +x sb_gps/scripts/gps_receiver.py 
+2. Make sure that the shebang is pointing to the correct directory on your computer 
+3. >rosrun sb_gps gps_receiver.py 
+The node will start streaming data
