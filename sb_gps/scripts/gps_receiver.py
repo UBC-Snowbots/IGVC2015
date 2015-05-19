@@ -1,8 +1,10 @@
-#!usr/bin/python2.7
+#!/usr/bin/python
 
 #Author: Vincent Yuan 
 #Purpose: serial adapter, because c++ is too hard to serial communication 
 #Date: May 17, 2015
+#Reminder: chmod +x gps_receiver.py 
+#Run: rosrun sb_gps gps_receiver.py 
 
 import serial
 import rospy
