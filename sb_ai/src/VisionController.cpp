@@ -21,9 +21,9 @@ VisionController::VisionController():
 	lowThrottle(0.35),
 	count(0)
 {
-	image = imread("/home/jannicke/Pictures/Image1.jpg", 1);
+	image = imread("/home/mecanum/Pictures/course1.jpg", 1);
 	filterImage();
-	imwrite( "/home/jannicke/Pictures/Image2.jpg", image_direction);
+	//imwrite( "/home/jannicke/Pictures/Image2.jpg", image_direction);
 }
 
 geometry_msgs::Twist VisionController::update(){
