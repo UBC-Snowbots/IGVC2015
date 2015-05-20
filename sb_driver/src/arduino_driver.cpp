@@ -147,8 +147,11 @@ int main(int argc, char** argv)
 void processData(string data,sb_msgs::RobotState &state)
 {
 	state.compass.push_back(data[0] << 8|data[1]);
-	state.RightVelo.push_back(data[2] << 24|data[2] << 16|data[2] << 8|data[3]);
-	state.LeftVelo.push_back(data[2] << 24|data[2] << 16|data[2] << 8|data[3]);
+	long right=(data[2] << 24|data[3] << 16|data[4] << 8|data[5]);
+	long left=(data[6] << 24|data[7] << 16|data[8] << 8|data[9]);
+	
+	state.RightVelo.push_back(float(right)/1000);
+	state.LeftVelo.push_back(float(left)/1000);
 }
 
 //car_command_callback
