@@ -303,7 +303,7 @@ void talk()
         Byte[5]= hal.console->read();
         Byte[6]= hal.console->read();
         hal.console->flush();
-        Bints[0]=100*(int)(Byte[1]-'0')+10*(int)(Byte[2]-'0')+(int)(Byte[3]-'0')
+        Bints[0]=100*(int)(Byte[1]-'0')+10*(int)(Byte[2]-'0')+(int)(Byte[3]-'0');
         Bints[1]=100*(int)(Byte[4]-'0')+10*(int)(Byte[5]-'0')+(int)(Byte[6]-'0');
         twist_y=4*Bints[0]-500;
         twist_z=4*Bints[1]-500;
