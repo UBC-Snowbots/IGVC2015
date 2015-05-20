@@ -44,7 +44,6 @@ static const int SECOND = 1000000;
 //global variables
 ServoControl servo;
 MechControl mech;
-char twist_x[3]={'1','2','5'};
 char twist_y[3]={'1','2','5'};
 char twist_z[3]={'1','2','5'};
 
@@ -91,7 +90,6 @@ int main(int argc, char** argv)
 	std_msgs::String gps_data;
 	
 	ROS_INFO("arduino_driver ready");
-	mech.twist_x=125;
 	mech.twist_y=125;
 	mech.twist_z=125;
 
@@ -112,10 +110,10 @@ int main(int argc, char** argv)
 	    if (eStop)
 	    {	
 			cout << "eStop on" << endl;
-			ss << (char)IDENTIFIER_BYTE << "125125125";
+			ss << (char)IDENTIFIER_BYTE << "125125";
 	    } else {  
             //use carCommand and turretCommand
-			ss << (char)IDENTIFIER_BYTE << twist_x[0] << twist_x[1] << twist_x[2] << twist_y[0] << twist_y[1] << twist_y[2] << twist_z[0] << twist_z[1] << twist_z[2];
+			ss << (char)IDENTIFIER_BYTE<< twist_y[0] << twist_y[1] << twist_y[2] << twist_z[0] << twist_z[1] << twist_z[2];
 
 	    }
 	    link.writeData(ss.str(), 10);
@@ -124,11 +122,9 @@ int main(int argc, char** argv)
 	    usleep(20000);
 	    
 	    //publish data
+	    processData(link.readData(10),robot_state);
 	    robot_state.publish(state);
 	    
-	    gps_data.data = link.readData(38);
-	    cout << "GPS DATA " << gps_data.data << endl; // print out gps datas
-	    gps_state.publish(gps_data);
 	    
 	    //clear buffer (MAY NOT WORK)
 	    link.clearBuffer();
@@ -150,33 +146,21 @@ int main(int argc, char** argv)
 //dummy function
 void processData(string data,sb_msgs::RobotState &state)
 {
-	state.ir.push_back(data[0] << 8|data[1]);
-	state.ir.push_back(data[2] << 8|data[3]);
-	state.ir.push_back(data[4] << 8|data[5]);
-	state.ir.push_back(data[6] << 8|data[7]);
-	state.ir.push_back(data[8] << 8|data[9]);
-	state.num_analog = (int)state.ir.size();
+	state.compass.push_back(data[0] << 8|data[1]);
+	state.RightVelo.push_back(data[2] << 24|data[2] << 16|data[2] << 8|data[3]);
+	state.LeftVelo.push_back(data[2] << 24|data[2] << 16|data[2] << 8|data[3]);
 }
 
 //car_command_callback
 void car_command_callback(const geometry_msgs::TwistConstPtr& msg_ptr)
 {
-	mech.twist_x = 125;
 	mech.twist_y = msg_ptr->linear.y * 125+125; 
 	mech.twist_z = -msg_ptr->angular.z * 125+125;
 
-	sprintf(twist_x,"%03d",mech.twist_x);
 	sprintf(twist_y,"%03d",mech.twist_y);
 	sprintf(twist_z,"%03d",mech.twist_z);
 	ROS_INFO("Twist_y: %s", twist_y);
 	ROS_INFO("Twist_z: %s", twist_z);
-}
-
-//turret_command_callback
-void turret_command_callback(const sb_msgs::TurretCommandConstPtr& msg_ptr)
-{
-	servo.pan = msg_ptr->pan * 90 + 90;
-    servo.tilt = msg_ptr->tilt * 90 + 90;
 }
 
 //eStop_callback
