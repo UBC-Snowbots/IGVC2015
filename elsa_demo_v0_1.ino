@@ -61,7 +61,8 @@ int Otwist_z=0;//old rotation
 long leftE,rightE; //encoder ticks and velocity variables
 long OleftE, OrightE;
 int velocity_count=0;
-float Lspeed, Rspeed;
+float L_speed, R_speed;
+long Lspeed, Rspeed;
 
 int compdeg;//compass heading in degrees
 
@@ -339,7 +340,7 @@ void talk()
         outbytes[8]=Lspeed>>8;
         outbytes[9]=Lspeed;
         
-        hal.console->printf("%c", utbytes[10]);
+        hal.console->printf("%c", outbytes[10]);
       }
     }
   }
@@ -466,8 +467,10 @@ void velocity()
   {
   read_Encoder();
   
-  Rspeed = (rightE-OrightE)*651.944/0.1;
-  Lspeed = (leftE-OleftE)*651.944/0.1;
+  R_speed = (rightE-OrightE)*651.944/0.1;
+  L_speed = (leftE-OleftE)*651.944/0.1;
+  Rspeed = R_speed*1000;
+  Lspeed = L_speed*1000;
   OleftE = leftE;
   OrightE = rightE;
   velocity_count = 0;
