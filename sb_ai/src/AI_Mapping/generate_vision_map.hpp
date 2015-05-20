@@ -15,7 +15,11 @@ class GenerateVisionMap {
 
     uint8_t ConvertIndexToYCoord(uint8 index);
 
+    uint8_t ConvertXYCoordToIndex(uint8_t x, uint8_t y, uint8_t width);
+
     void VisionSubscriberCallback(const sensor_msgs::Image::ConstPtr& imageMsg);
+ 
+    void CompassSubscriberCallback(const int angle);
 
     ros::NodeHandle _n;
 
@@ -23,12 +27,16 @@ class GenerateVisionMap {
 
     sensor_msgs::Image _imageMsg;
 
+    geometry_msgs::Pose2D _poseMsg;
+
+    uint32_t _visionMapSize;
+
   public:
 
     GenerateVisionMap();
 
     ~GenerateVisionMap();
 
-    nav_msgs::OccupancyGrid LocalToGlobal(const geometry_msgs::Pose2D globalLocationPtr, nav_msgs::OccupancyGrid& localMap);
+    void UpdateGlobalMapWithVisionData(const geometry_msgs::Pose2D globalLocationPtr, nav_msgs::OccupancyGrid& localMap);
 
 };
