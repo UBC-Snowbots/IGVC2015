@@ -35,17 +35,8 @@ void LocalLidarMap::LidarCallback(const sensor_msgs::LaserScan::ConstPtr& scan)
   // TEST
   ROS_INFO("Min angle: %f, Max angle: %f", scan->angle_min, scan->angle_max);
   ROS_INFO("Min range: %f, Max Range: %f", scan->range_min, scan->range_max);
-  scan->angle_min;
-  scan->angle_max;
-  scan->angle_increment;
-  scan->time_increment;
-  scan->scan_time;
-  scan->range_min;
-  scan->range_max;
-  scan->ranges;
-  scan->intensities;
   
-  int x, y;
+  float x, y;
   float range, theta;
   int scan_rays = scan->ranges.size();
   ROS_INFO("Range size: %i", (int) scan->ranges.size());
@@ -53,19 +44,22 @@ void LocalLidarMap::LidarCallback(const sensor_msgs::LaserScan::ConstPtr& scan)
   for (int i = 0; i < scan_rays; i++)
   {
     range = scan->ranges[i];
+    ROS_INFO("Range: %f", range);
     
-    if (range < scan->range_min || range > scan->range_max) {}
+    if (range < scan->range_min || range > scan->range_max || isinf(range) || isnan(range)) {}
     else
     {
       theta = i*scan->angle_increment + scan->angle_min;
+      ROS_INFO("Theta: %f", theta);
       x = range * cos(theta);
       y = range * sin(theta);
-      if (x < 0) { x = map_width / 2 - x; }
-      else { x = map_width / 2 + x; }
-      x /= map_width;       // floor
-      y /= map_height;      // floor
-      local_map.data[y*map_width + x] = 1;
-      ROS_INFO("Index: %i", (int) y*map_width + x);
+      x = map_width / 2 + x; 
+      //x /= map_width;       // floor
+      //y /= map_height;      // floor
+      int index = (int) y*map_width + x;
+      local_map.data[index] = 1;
+      ROS_INFO("Index: %f, %i", y*map_width + x, index);
+      ROS_INFO("Map size: %lus", local_map.data.size());
     }
   }
 }
