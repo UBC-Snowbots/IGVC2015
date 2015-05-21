@@ -7,17 +7,17 @@
 #include "geometry_msgs/Pose2D.h"
 #include "sensor_msgs/Image.h"
 
-class GenerateVisionMap {
+class GenerateGlobalMap {
 
   private:
 
-    uint8_t ConvertIndexToXCoord(uint8 index);
+    uint8_t ConvertIndexToXCoord(uint8_t index);
 
-    uint8_t ConvertIndexToYCoord(uint8 index);
+    uint8_t ConvertIndexToYCoord(uint8_t index);
 
     uint8_t ConvertXYCoordToIndex(uint8_t x, uint8_t y, uint8_t width);
 
-    void VisionSubscriberCallback(const sensor_msgs::Image::ConstPtr& imageMsg);
+    void LocalMapSubscriberCallback(const sensor_msgs::Image::ConstPtr& imageMsg);
  
     void CompassSubscriberCallback(const int angle);
 
@@ -29,13 +29,17 @@ class GenerateVisionMap {
 
     geometry_msgs::Pose2D _poseMsg;
 
-    uint32_t _visionMapSize;
+    nav_msgs::OccupancyGrid _globalMap;
+
+    uint32_t _localMapSize;
 
   public:
 
-    GenerateVisionMap();
+    GenerateGlobalMap();
 
-    ~GenerateVisionMap();
+    ~GenerateGlobalMap();
+
+    void testDoSomething();
 
     void UpdateGlobalMapWithVisionData(const geometry_msgs::Pose2D globalLocationPtr, nav_msgs::OccupancyGrid& localMap);
 

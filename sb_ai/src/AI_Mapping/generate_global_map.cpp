@@ -1,17 +1,17 @@
 #include "generate_vision_map.hpp"
 #include "math.h"
 
-GenerateVisionMap::GenerateVisionMap(){
+GenerateGlobalMap::GenerateGlobalMap(){
 
   _imageSubscriber = _n.subscribe("vision_node", 1000, VisionSubscriberCallback);
 
 }
 
-GenerateVisionMap::~GenerateVisionMap(){
+GenerateGlobalMap::~GenerateGlobalMap(){
 
 }
 
-void GenerateVisionMap::UpdateGlobalMapWithVisionData(nav_msgs::OccupancyGrid& globalMap){
+void GenerateGlobalMap::UpdateGlobalMapWithVisionData(nav_msgs::OccupancyGrid& globalMap){
 
   // Loop through the vision map
   for(int index = 0; index < _visionMapSize; index++) {
@@ -31,25 +31,25 @@ void GenerateVisionMap::UpdateGlobalMapWithVisionData(nav_msgs::OccupancyGrid& g
 
 }
 
-uint8_t GenerateVisionMap::ConvertIndexToXCoord(uint8_t index){
+uint8_t GenerateGlobalMap::ConvertIndexToXCoord(uint8_t index){
 
    return index % _imageMsg->width;
 
 }
 
-uint8_t GenerateVisionMap::ConvertIndexToXCoord(uint8_t index){
+uint8_t GenerateGlobalMap::ConvertIndexToXCoord(uint8_t index){
 
    return index / _imageMsg->width;
 
 }
 
-uint8_t GenerateVisionMap::ConvertXYCoordToIndex(uint8_t x, uint8_t y, uint8_t width) {
+uint8_t GenerateGlobalMap::ConvertXYCoordToIndex(uint8_t x, uint8_t y, uint8_t width) {
 
   return y * width + x;
 
 }
 
-void GenerateVisionMap::VisionSubscriberCallback(const sensor_msgs::Image::ConstPtr& imageMsg){
+void GenerateGlobalMap::LocalMapSubscriberCallback(const sensor_msgs::Image::ConstPtr& imageMsg){
 
   _imageMsg.height = imageMsg->height; // Number of rows
   _imageMsg.width = imageMsg->width; // Number of columns
@@ -64,8 +64,14 @@ void GenerateVisionMap::VisionSubscriberCallback(const sensor_msgs::Image::Const
 
 }
 
-void GenerateVisionMap::CompassSubscriberCallback(const int angle){
+void GenerateGlobalMap::CompassSubscriberCallback(const int angle){
   
   _poseMsg.theta = angle; // probably isn't the angle of the robot w.r.t to the global map, need to fix this
+
+}
+
+void GenerateGlobalMap::testDoSomething() {
+
+  printf("Did something");
 
 }
