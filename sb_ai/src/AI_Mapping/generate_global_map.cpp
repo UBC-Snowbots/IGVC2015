@@ -1,9 +1,20 @@
 #include "generate_vision_map.hpp"
 #include "math.h"
 
+static const string VISION_TOPIC = "vision_topic";
+static const string GEO_POINT_TOPIC = "geo_point_topic";
+static const string ANGLE_TOPIC = "angle_topic";
+
 GenerateGlobalMap::GenerateGlobalMap(){
 
-  _imageSubscriber = _n.subscribe("vision_node", 1000, LocalMapSubscriberCallback);
+  _imageSubscriber = _n.subscribe(VISION_TOPIC, 1000, LocalMapSubscriberCallback);
+  _geoPointSubscriber = _n.subscribe(GPS_TOPIC, 1000, GeoPointSubscriberCallback);
+  _angleSubscriber = _n.subscribe(GPS_TOPIC, 1000, AngleSubscriberCallback);
+
+  // Initialize global map
+  _globalMap.data.info.width = 100;
+  _globalMap.data.info.height = 100;
+  // _globalMap.data.data[_globalMap.data.info.width * _globalMap.data.info.height]; // Not sure about this...
 
 }
 
@@ -54,7 +65,7 @@ void GenerateGlobalMap::LocalMapSubscriberCallback(const sensor_msgs::Image::Con
   _imageMsg.height = imageMsg->height; // Number of rows
   _imageMsg.width = imageMsg->width; // Number of columns
   _imageMsg.step = imageMsg->step;
-  _mapSize = imageMsg->step * imageMsg->height;
+  _mapSize = imageMsg->step * imageMsg->height; // no clue if this is right, according to the documentation it is... wtf, row * col makes more sense to me
 
   for(int index = 0; index < _mapSize; index++){
 
@@ -64,9 +75,16 @@ void GenerateGlobalMap::LocalMapSubscriberCallback(const sensor_msgs::Image::Con
 
 }
 
-void GenerateGlobalMap::CompassSubscriberCallback(const int angle){
+void GenerateGlobalMap::GeoPointSubscriberCallback(const geographic_msgs::GeoPoint::ConstPtr& geoPointMsg){
+
+  _globalMap.info.origin.position.x = pose2DMsg->x; // FIXME CONVERT STUFF TO X AND Y
+  _globalMap.info.origin.position.y = pose2DMsg->y;
+
+}
+
+void GenerateGlobalMap::AngleSubscriberCallback(const std_msgs::Float32::ConstPtr& angleMsg){
   
-  _poseMsg.theta = angle; // probably isn't the angle of the robot w.r.t to the global map, need to fix this
+  _poseMsg.theta = angleMsg.data;
 
 }
 
