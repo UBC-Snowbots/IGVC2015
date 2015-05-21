@@ -3,7 +3,7 @@
 
 GenerateGlobalMap::GenerateGlobalMap(){
 
-  _imageSubscriber = _n.subscribe("vision_node", 1000, VisionSubscriberCallback);
+  _imageSubscriber = _n.subscribe("vision_node", 1000, LocalMapSubscriberCallback);
 
 }
 
@@ -11,7 +11,7 @@ GenerateGlobalMap::~GenerateGlobalMap(){
 
 }
 
-void GenerateGlobalMap::UpdateGlobalMapWithVisionData(nav_msgs::OccupancyGrid& globalMap){
+void GenerateGlobalMap::TransformLocalToGlobal(){
 
   // Loop through the vision map
   for(int index = 0; index < _visionMapSize; index++) {
@@ -19,13 +19,13 @@ void GenerateGlobalMap::UpdateGlobalMapWithVisionData(nav_msgs::OccupancyGrid& g
     // If there is an obstacle, then update the global map
     if(_imageMsg.data[index] == 1) {
 
-      xGlobalVisionCoord = cos(_poseMsg.angle) * ConvertIndexToXCoord(index) - sin(_poseMsg.angle) * ConvertIndexToYCoord(index) +            globalMap.info.origin.position.x;
-      yGlobalVisionCoord = sin(_poseMsg.angle) * ConvertIndexToXCoord(index) + cos(_poseMsg.angle) * ConvertIndexToYCoord(index) + globalMap.info.origin.position.y;
+      xGlobalVisionCoord = cos(_poseMsg.angle) * ConvertIndexToXCoord(index) - sin(_poseMsg.angle) * ConvertIndexToYCoord(index) +            _globalMap.info.origin.position.x;
+      yGlobalVisionCoord = sin(_poseMsg.angle) * ConvertIndexToXCoord(index) + cos(_poseMsg.angle) * ConvertIndexToYCoord(index) + _globalMap.info.origin.position.y;
 
     }
 
     // Update global map with 1 to show that an obstacle exists
-    globalMap.data[ConvertXYCoordToIndex(xGlobalVisionCoord, yGlobalVisionCoord, globalMap.data.info.width)] = 1;
+    _globalMap.data[ConvertXYCoordToIndex(xGlobalVisionCoord, yGlobalVisionCoord, _globalMap.data.info.width)] = 1;
 
   }
 
