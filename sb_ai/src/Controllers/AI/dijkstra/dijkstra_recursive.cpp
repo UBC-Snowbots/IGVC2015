@@ -1,5 +1,5 @@
 #include <iostream>
-#include "dijkstra.h"
+#include "dijkstra_recursive.h"
 #include <assert.h>
 
 using namespace std;

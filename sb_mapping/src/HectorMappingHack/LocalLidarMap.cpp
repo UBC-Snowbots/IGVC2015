@@ -33,8 +33,8 @@ nav_msgs::OccupancyGrid * LocalLidarMap::GetLocalMap()
 void LocalLidarMap::LidarCallback(const sensor_msgs::LaserScan::ConstPtr& scan)
 {
   // TEST
-  ROS_INFO("Min angle: %f, Max angle: %f", scan->angle_min, scan->angle_max);
-  ROS_INFO("Min range: %f, Max Range: %f", scan->range_min, scan->range_max);
+  //ROS_INFO("Min angle: %f, Max angle: %f", scan->angle_min, scan->angle_max);
+  //ROS_INFO("Min range: %f, Max Range: %f", scan->range_min, scan->range_max);
   
   float x, y;
   float range, theta;
@@ -44,22 +44,22 @@ void LocalLidarMap::LidarCallback(const sensor_msgs::LaserScan::ConstPtr& scan)
   for (int i = 0; i < scan_rays; i++)
   {
     range = scan->ranges[i];
-    ROS_INFO("Range: %f", range);
+    //ROS_INFO("Range: %f", range);
     
     if (range < scan->range_min || range > scan->range_max || isinf(range) || isnan(range)) {}
     else
     {
       theta = i*scan->angle_increment + scan->angle_min;
-      ROS_INFO("Theta: %f", theta);
+      //ROS_INFO("Theta: %f", theta);
       x = range * cos(theta);
-      y = range * sin(theta);
+      x /= MAP_RESOLUTION;
       x = map_width / 2 + x; 
-      //x /= map_width;       // floor
-      //y /= map_height;      // floor
+      y = range * sin(theta);
+      y /= MAP_RESOLUTION;
       int index = (int) y*map_width + x;
       local_map.data[index] = 100;
-      ROS_INFO("Index: %f, %i", y*map_width + x, index);
-      ROS_INFO("Map size: %lus", local_map.data.size());
+      //ROS_INFO("Index: %f, %i", y*map_width + x, index);
+      //ROS_INFO("Map size: %lus", local_map.data.size());
     }
   }
 }
@@ -82,7 +82,7 @@ int main(int argc, char **argv)
   
   while (ros::ok())
   {
-    ROS_INFO("Width: %i, Height: %i", lidar_map.GetLocalMap()->info.width, lidar_map.GetLocalMap()->info.height);
+    //ROS_INFO("Width: %i, Height: %i", lidar_map.GetLocalMap()->info.width, lidar_map.GetLocalMap()->info.height);
     
     local_map_pub.publish(*lidar_map.GetLocalMap());
     

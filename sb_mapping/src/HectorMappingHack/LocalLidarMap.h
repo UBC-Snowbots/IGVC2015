@@ -10,7 +10,7 @@
 // Width of map should be double the height
 #define MAP_WIDTH 256  
 #define MAP_HEIGHT 128
-#define MAP_RESOLUTION 1.0f
+#define MAP_RESOLUTION 0.2f
 
 class LocalLidarMap {
 
