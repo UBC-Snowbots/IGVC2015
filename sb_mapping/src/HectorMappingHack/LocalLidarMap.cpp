@@ -57,7 +57,7 @@ void LocalLidarMap::LidarCallback(const sensor_msgs::LaserScan::ConstPtr& scan)
       //x /= map_width;       // floor
       //y /= map_height;      // floor
       int index = (int) y*map_width + x;
-      local_map.data[index] = 1;
+      local_map.data[index] = 100;
       ROS_INFO("Index: %f, %i", y*map_width + x, index);
       ROS_INFO("Map size: %lus", local_map.data.size());
     }

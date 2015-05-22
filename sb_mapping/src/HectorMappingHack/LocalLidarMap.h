@@ -8,8 +8,8 @@
 #define MAPPING_PUB "sb_mapping"
 
 // Width of map should be double the height
-#define MAP_WIDTH 12  
-#define MAP_HEIGHT 6
+#define MAP_WIDTH 256  
+#define MAP_HEIGHT 128
 #define MAP_RESOLUTION 1.0f
 
 class LocalLidarMap {
