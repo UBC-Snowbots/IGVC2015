@@ -18,6 +18,10 @@
 #include "SerialCommunication.h"
 #include "arduino_driver.h"
 
+#include <tf/transform_broadcaster.h>//odom stuff
+#include <nav_msgs/Odometry.h>
+
+
 using namespace std;
 using namespace ros;
 
@@ -85,6 +89,9 @@ int main(int argc, char** argv)
 	Publisher robot_state = n.advertise<sb_msgs::RobotState>(ROBOT_STATE_TOPIC,1);
 	Publisher gps_state = n.advertise<std_msgs::String>(GPS_STATE_TOPIC,1);
 	
+	ros::Publisher odom_pub = n.advertise<nav_msgs::Odometry>("odom", 50);//odom stuff
+	tf::TransformBroadcaster odom_broadcaster;
+	
 	sb_msgs::IMU imu;
 	sb_msgs::RobotState state;
 	std_msgs::String gps_data;
@@ -124,6 +131,23 @@ int main(int argc, char** argv)
 	    //publish data
 	    processData(link.readData(10),robot_state);
 	    robot_state.publish(state);
+	    
+	    //since all odometry is 6DOF we'll need a quaternion created from yaw
+	    geometry_msgs::Quaternion odom_quat = tf::createQuaternionMsgFromYaw(robot_state.compass);//units of compass right? (degrees)
+  	
+  	//first, we'll publish the transform over tf
+  	geometry_msgs::TransformStamped odom_trans;
+  	odom_trans.header.stamp = current_time;
+  	odom_trans.header.frame_id = "odom";
+  	odom_trans.child_frame_id = "base_link";
+  	
+  	odom_trans.transform.translation.x = x;
+  	odom_trans.transform.translation.y = y;
+  	odom_trans.transform.translation.z = 0.0;
+  	odom_trans.transform.rotation = odom_quat;
+  
+  	//send the transform
+  	odom_broadcaster.sendTransform(odom_trans);
 	    
 	    
 	    //clear buffer (MAY NOT WORK)
