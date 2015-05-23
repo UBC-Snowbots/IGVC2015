@@ -19,7 +19,7 @@
 #include "arduino_driver.h"
 
 #include <tf/transform_broadcaster.h>//odom stuff
-#include <nav_msgs/Odometry.h>
+#include <nav_msgs/Odometry.h>//http://wiki.ros.org/navigation/Tutorials/RobotSetup/Odom reference
 
 
 using namespace std;
