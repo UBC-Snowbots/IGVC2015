@@ -59,6 +59,9 @@ int main(int argc, char** argv)
     init(argc, argv, ROS_NODE_NAME);
 	NodeHandle n;
 	Rate loop_rate(ROS_LOOP_RATE);
+	
+	current_time = ros::Time::now();//odom stuff
+	last_time = ros::Time::now();
 
 	//initialize serial communication
 	SerialCommunication link;
@@ -132,6 +135,7 @@ int main(int argc, char** argv)
 	    processData(link.readData(10),robot_state);
 	    robot_state.publish(state);
 	    
+	    current_time = ros::Time::now();//odom stuff
 	    //since all odometry is 6DOF we'll need a quaternion created from yaw
 	    geometry_msgs::Quaternion odom_quat = tf::createQuaternionMsgFromYaw(robot_state.compass);//units of compass right? (degrees)
   	
