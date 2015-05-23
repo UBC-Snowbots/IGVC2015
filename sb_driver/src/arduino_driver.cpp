@@ -12,7 +12,7 @@
 #include <std_msgs/String.h>
 #include <geometry_msgs/Twist.h>
 #include <geometry_msgs/Vector3.h>
-#include "sb_msgs/TurretCommand.h"
+//#include "sb_msgs/TurretCommand.h"
 #include "sb_msgs/RobotState.h"
 #include "sb_msgs/IMU.h"
 #include "SerialCommunication.h"
@@ -46,7 +46,7 @@ static const char IDENTIFIER_BYTE = 'B';
 static const int SECOND = 1000000;
 
 //global variables
-ServoControl servo;
+//ServoControl servo;
 MechControl mech;
 char twist_y[3]={'1','2','5'};
 char twist_z[3]={'1','2','5'};
@@ -59,7 +59,8 @@ int main(int argc, char** argv)
     init(argc, argv, ROS_NODE_NAME);
 	NodeHandle n;
 	Rate loop_rate(ROS_LOOP_RATE);
-	
+
+	ros::Time current_time, last_time;
 	current_time = ros::Time::now();//odom stuff
 	last_time = ros::Time::now();
 	
@@ -94,7 +95,7 @@ int main(int argc, char** argv)
 		
 	//subscribers and publishers
 	Subscriber car_command = n.subscribe(CAR_COMMAND_TOPIC, 1, car_command_callback);
-	Subscriber turret_command = n.subscribe(TURRET_COMMAND_TOPIC, 1, turret_command_callback);
+//	Subscriber turret_command = n.subscribe(TURRET_COMMAND_TOPIC, 1, turret_command_callback);
 	Subscriber eStop_topic = n.subscribe(ESTOP_TOPIC, 1, eStop_callback);
 	
 	Publisher robot_state = n.advertise<sb_msgs::RobotState>(ROBOT_STATE_TOPIC,1);
@@ -140,18 +141,18 @@ int main(int argc, char** argv)
 	    usleep(20000);
 	    
 	    //publish data
-	    processData(link.readData(10),robot_state);
+	    processData(link.readData(10),state);
 	    robot_state.publish(state);
 	    
-	    vth=th+robot_state.compass*pi()/180;
-	    th=robot_state.compass*pi()/180;//check units is degres what you need?
-	    vy=(robot_state.RightVelo+robot_state.LeftVelo)/2;
+	    vth=th+state.compass*M_PI/180;
+	    th=state.compass*M_PI/180;//check units is degres what you need?
+	    vy=(state.RightVelo+state.LeftVelo)/2;
 	    
 	    //compute odometry in a typical way given the velocities of the robot
 	    double dt = (current_time - last_time).toSec();
   	double delta_x = (vx * cos(th) - vy * sin(th)) * dt;
   	double delta_y = (vx * sin(th) + vy * cos(th)) * dt;
-  	x += delta_x
+  	x += delta_x;
   	y += delta_y;
 	    
 	    current_time = ros::Time::now();//odom stuff
@@ -211,12 +212,16 @@ int main(int argc, char** argv)
 //dummy function
 void processData(string data,sb_msgs::RobotState &state)
 {
-	state.compass.push_back(data[0] << 8|data[1]);
+//	state.compass.push_back(data[0] << 8|data[1]);
+	state.compass=data[0] << 8|data[1];//Replaced push_back
 	long right=(data[2] << 24|data[3] << 16|data[4] << 8|data[5]);
 	long left=(data[6] << 24|data[7] << 16|data[8] << 8|data[9]);
 	
-	state.RightVelo.push_back(float(right)/1000);
-	state.LeftVelo.push_back(float(left)/1000);
+	state.RightVelo = float(right)/1000;
+	state.LeftVelo = float(left)/1000;
+
+//	state.RightVelo.push_back(float(right)/1000);
+//	state.LeftVelo.push_back(float(left)/1000);
 }
 
 //car_command_callback

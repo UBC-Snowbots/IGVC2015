@@ -29,12 +29,14 @@ include_directories(
    src/SerialCommunication.cpp
  )
 
+ add_library((sb_driver_node_headers src/arduino_driver.cpp)
  add_executable(sb_driver_node src/arduino_driver.cpp)
  add_dependencies(sb_driver_node sb_msgs_generate_messages_cpp)
 
  target_link_libraries(
   sb_driver_node 
   sb_serial_communication
+  sb_driver_node_headers
   ${catkin_LIBRARIES}
  )
 
