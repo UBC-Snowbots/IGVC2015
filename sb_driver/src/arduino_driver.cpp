@@ -143,7 +143,8 @@ int main(int argc, char** argv)
 	    processData(link.readData(10),robot_state);
 	    robot_state.publish(state);
 	    
-	    th=robot_state.compass;//check units is degres what you need?
+	    vth=th+robot_state.compass*pi()/180;
+	    th=robot_state.compass*pi()/180;//check units is degres what you need?
 	    vy=(robot_state.RightVelo+robot_state.LeftVelo)/2;
 	    
 	    //compute odometry in a typical way given the velocities of the robot
