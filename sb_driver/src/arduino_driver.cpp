@@ -62,6 +62,14 @@ int main(int argc, char** argv)
 	
 	current_time = ros::Time::now();//odom stuff
 	last_time = ros::Time::now();
+	
+	double x = 0.0;
+	double y = 0.0;
+  	double th = 0.0;
+  
+  	double vx = 0;
+  	double vy = 0;
+  	double vth = 0;
 
 	//initialize serial communication
 	SerialCommunication link;
@@ -135,9 +143,19 @@ int main(int argc, char** argv)
 	    processData(link.readData(10),robot_state);
 	    robot_state.publish(state);
 	    
+	    th=robot_state.compass;//check units is degres what you need?
+	    vy=(robot_state.RightVelo+robot_state.LeftVelo)/2;
+	    
+	    //compute odometry in a typical way given the velocities of the robot
+	    double dt = (current_time - last_time).toSec();
+  	double delta_x = (vx * cos(th) - vy * sin(th)) * dt;
+  	double delta_y = (vx * sin(th) + vy * cos(th)) * dt;
+  	x += delta_x
+  	y += delta_y;
+	    
 	    current_time = ros::Time::now();//odom stuff
 	    //since all odometry is 6DOF we'll need a quaternion created from yaw
-	    geometry_msgs::Quaternion odom_quat = tf::createQuaternionMsgFromYaw(robot_state.compass);//units of compass right? (degrees)
+	    geometry_msgs::Quaternion odom_quat = tf::createQuaternionMsgFromYaw(th);//units of compass right? (degrees)
   	
   	//first, we'll publish the transform over tf
   	geometry_msgs::TransformStamped odom_trans;
@@ -152,6 +170,24 @@ int main(int argc, char** argv)
   
   	//send the transform
   	odom_broadcaster.sendTransform(odom_trans);
+  	
+  	//next, we'll publish the odometry message over ROS
+  	nav_msgs::Odometry odom;
+  	odom.header.stamp = current_time;
+  	odom.header.frame_id = "odom";
+  	
+  	//set the position
+  	odom.pose.pose.position.x = x;
+  	odom.pose.pose.position.y = y;
+  	odom.pose.pose.position.z = 0.0;
+  	odom.pose.pose.orientation = odom_quat;
+  	//set the velocity
+  	odom.child_frame_id = "base_link";
+  	odom.twist.twist.linear.x = vx;
+  	odom.twist.twist.linear.y = vy;
+  	odom.twist.twist.angular.z = vth;
+  	//publish the message
+  	odom_pub.publish(odom);
 	    
 	    
 	    //clear buffer (MAY NOT WORK)
