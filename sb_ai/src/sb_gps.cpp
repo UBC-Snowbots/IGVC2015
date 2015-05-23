@@ -55,7 +55,6 @@ void gpsSubHandle(const std_msgs::String::ConstPtr& msg){
 	for (i = 0; i < 6; i++)
 		nmea_type[i] = a[i];
 	string msg_type(nmea_type);
-	cout << msg_type << endl;
 	if (msg_type[4] == 'G' && msg_type[5] == 'A'){
 		msg_flag = true;
 		for (i = 18; i < 30; i++) 
@@ -133,7 +132,7 @@ geometry_msgs::Twist GetTwistMsg(int next_move)
 	return twist;
 	}
 	else if (next_move > 10){
-	twist.angular.z = (double)next_move/100;
+	twist.linear.y = (double)next_move/100;
 	return twist;
 	}
 	
