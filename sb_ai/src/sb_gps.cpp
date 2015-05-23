@@ -7,6 +7,8 @@
 
 #include "ros/ros.h"
 #include "std_msgs/String.h"
+#include "sb_msgs/Waypoint.h"
+#include "sb_msgs/Gps_info.h"
 #include <string>
 #include <iostream>
 #include "sb_ai.h"
@@ -15,32 +17,23 @@
 
 
 using namespace std; 
+using namespace sb_msgs;
 
 #define EARTH_RADIUS 6378.137
 #define PI 3.14159265
 
-struct waypoint {
-  double lon;
-  double lat;
-  waypoint(){
-    lon=lat=0;
-  }
-  waypoint(double x,double y){
-	lon = x; 
-	lat = y;
-	}
-};
-double *NMEA; //To hold received suscription message
+
 double angleCompass;
 bool moveStatus;
 bool goal;
 bool msg_flag = false;
 double d = 0; //distance in metres from currentWaypoint to targetWaypoint
 double theta = 0; //theta is the angle the robot needs to turn from currentWaypoint to targetWaypoint
-waypoint CurrentWaypoint,TargetWaypoint,LastWaypoint;
+sb_msgs::Waypoint CurrentWaypoint,TargetWaypoint,LastWaypoint,off;
 geometry_msgs::Twist twist_msg;
+sb_msgs::Gps_info pub_data; //Angle and distance are being published
 int next_move, prev_move = 0;
-waypoint off;
+
 
 void startGps(void){
   double lon = 49.262511;
@@ -89,7 +82,7 @@ void gpsSubHandle(const std_msgs::String::ConstPtr& msg){
 		
   return;
  }
-bool checkGoal (waypoint CurrentWaypoint, waypoint TargetWaypoint){
+bool checkGoal (Waypoint CurrentWaypoint, Waypoint TargetWaypoint){
   if (CurrentWaypoint.lon == TargetWaypoint.lon){
     if (CurrentWaypoint.lat == TargetWaypoint.lat){
       return true;
@@ -101,22 +94,23 @@ bool checkGoal (waypoint CurrentWaypoint, waypoint TargetWaypoint){
     return false;
 }
 
-int NextMoveLogic (int prev_move, double distance, double angle){
+int NextMoveLogic (double distance, double angle){
 	int next_move; 
 	if (checkGoal) 
 		return 0;
 	else{
 		if (angle < 0.0) 
-			return 0.2; 
+			return 2; 
 		else if (angle > 0.0)
-			return -0.2;
+			return -2;
 		else{
 			if (distance > 100)
-					return 0.5;
+				return 50;
 			else if (distance < 100)
-				return 0.2; 
+				return 20; 
 			else 
-				cout << "Error in NextMoveLogic: " << distance << endl;}	
+				cout << "Error in NextMoveLogic: " << distance << endl;
+			}	
 }
 }
 geometry_msgs::Twist GetTwistMsg(int next_move) 
@@ -131,10 +125,18 @@ geometry_msgs::Twist GetTwistMsg(int next_move)
 	twist.angular.y = 0;
 	twist.angular.z = 0;
 
-	if (next_move == -1 || next_move == 1) { twist.linear.x = next_move; }
-	if (next_move == -2 || next_move == 2) { twist.linear.y = next_move; }
-	cout << "Next move: " << next_move << endl;
+	if (next_move == 0){
 	return twist;
+	}
+	else if (next_move < 10){
+	twist.angular.z = (double)next_move/10;
+	return twist;
+	}
+	else if (next_move > 10){
+	twist.angular.z = (double)next_move/100;
+	return twist;
+	}
+	
 }
 
 double createDistance (void){
@@ -159,7 +161,7 @@ double createDistance (void){
 	return d;
 }
 
-double createAngle(){
+double createAngle(void){
 	/*
 	Input Parameter:
 	1. direction of robot from North (0-359 degrees)
@@ -202,14 +204,24 @@ double createAngle(){
 	}
 	return theta;
 }
+
+sb_msgs::Gps_info createdata(void){
+
+  sb_msgs::Gps_info data; 
+  data.distance = createDistance();
+  data.angle = createAngle();
+	
+  return data;  
+}
+
 int main (int argc, char **argv){
-  double gps_distance,gps_angle = 0.0;
+
   ros::init(argc, argv, AI_NODE_NAME); //initialize access point to communicate
   ros::NodeHandle nh; //create handle to this process node, NodeHandle is main access point to communication with ROS system. First one intializes node
   ros::Subscriber gps_Sub = nh.subscribe("GPS_USB_DATA", 20, gpsSubHandle);
   ros::Publisher car_pub = nh.advertise<geometry_msgs::Twist>(PUB_TOPIC, 100);
-  ros::Publisher gps_pub_d = nh.advertise<std_msgs::String>("GPS_DISTANCE",50);
-  ros::Publisher gps_pub_a = nh.advertise<std_msgs::String>("GPS_ANGLE",50);
+  ros::Publisher gps_pub = nh.advertise<sb_msgs::Gps_info>("GPS_DATA",50);
+  ros::Publisher coord_pub = nh.advertise<sb_msgs::Waypoint>("GPS_COORD", 100);
 
   ros::Rate loop_rate(5); //10hz loop rate
 /*  while (!msg_flag){
@@ -219,7 +231,7 @@ int main (int argc, char **argv){
   startGps();*/
   while (ros::ok()){
 
-	  if (msg_flag){
+	 if (msg_flag){
 	    	  ROS_INFO ("Position:");
 		  cout << "Current longitude: " << CurrentWaypoint.lon << " Current latitude: " << CurrentWaypoint.lat << endl;
 	}
@@ -227,12 +239,12 @@ int main (int argc, char **argv){
 		ROS_INFO("No Fix:"); 
   	}
 	   //twist out 
-	  gps_distance = createDistance();
-	  gps_pub_d.publish(gps_distance); //d out 
-	  gps_angle = createAngle();
-	  gps_pub_a.publish(gps_angle); //a out 
+	  pub_data = createdata();
+	  gps_pub.publish(pub_data); //a out 
+	  
+	  coord_pub.publish(CurrentWaypoint);
 
-	  //next_move = NextMoveLogic(prev_move,gps_distance,gps_angle);
+	  next_move = NextMoveLogic(pub_data.distance,pub_data.angle);
 	  twist_msg = GetTwistMsg(next_move);
 	  car_pub.publish(twist_msg);
 
