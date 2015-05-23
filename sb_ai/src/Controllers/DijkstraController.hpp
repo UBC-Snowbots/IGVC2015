@@ -5,7 +5,7 @@
 #include <iostream>
 #include "sb_ai.h"
 #include "sb_msgs/AISimMap.h"
-#include "AI/dijkstra/dijkstra.h"
+#include "AI/dijkstra/dijkstra_recursive.h"
 #include <geometry_msgs/Twist.h>
 #include "ControllerBase.hpp"
 

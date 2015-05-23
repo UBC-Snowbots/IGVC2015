@@ -14,5 +14,6 @@ set(MODE_LIBRARIES
 
 add_executable(sb_ai ${MAIN_HEADERS} ${MAIN_SOURCE})
 add_dependencies(sb_ai sb_msgs_generate_messages_cpp)
-target_link_libraries(sb_ai ${catkin_LIBRARIES} ${MODE_LIBRARIES})
+add_library(dijkstra_rec Controllers/AI/dijkstra/dijkstra_recursive.cpp)
+target_link_libraries(sb_ai ${catkin_LIBRARIES} ${MODE_LIBRARIES} dijkstra_rec)
 

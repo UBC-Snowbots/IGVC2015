@@ -8,8 +8,7 @@
 #define MAPPING_PUB "sb_mapping"
 
 // Width of map should be double the height
-#define MAP_WIDTH 256  
-#define MAP_HEIGHT 128
+#define RANGE_M 6
 #define MAP_RESOLUTION 0.2f
 
 class LocalLidarMap {
@@ -21,7 +20,7 @@ private:
 public:
 
   nav_msgs::OccupancyGrid * GetLocalMap();
-  LocalLidarMap(int width, int height, float resolution);
+  LocalLidarMap(int range, float resolution);
   void LidarCallback(const sensor_msgs::LaserScan::ConstPtr& scan);  
   
 };

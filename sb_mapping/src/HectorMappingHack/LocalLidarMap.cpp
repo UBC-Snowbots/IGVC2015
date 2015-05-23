@@ -1,22 +1,22 @@
 #include "LocalLidarMap.h"
 #include <cmath>
 
-LocalLidarMap::LocalLidarMap(int width, int height, float resolution)
+LocalLidarMap::LocalLidarMap(int range, float resolution)
 {
   // Set map parameters
-  map_width = width;
-  map_height = height;
-  local_map.info.width = width;
-  local_map.info.height = height;
+  map_width = (range * 2) / resolution;
+  map_height = range / resolution;
+  local_map.info.width = map_width;
+  local_map.info.height = map_height;
   local_map.info.resolution = resolution;
 
   // Initialize map
-  map_size = width * height;
+  map_size = map_width * map_height;
   local_map.data.assign(map_size, 0);
   
   // Set transformations; These should be constant, given the first data
-  local_map.info.origin.position.x = width / 2;
-  local_map.info.origin.position.y = height - 1;
+  local_map.info.origin.position.x = map_width / 2;
+  local_map.info.origin.position.y = map_height - 1;
   local_map.info.origin.position.z = 0;
   // quaternion
   local_map.info.origin.orientation.x = 0;
@@ -31,11 +31,7 @@ nav_msgs::OccupancyGrid * LocalLidarMap::GetLocalMap()
 }
 
 void LocalLidarMap::LidarCallback(const sensor_msgs::LaserScan::ConstPtr& scan)
-{
-  // TEST
-  //ROS_INFO("Min angle: %f, Max angle: %f", scan->angle_min, scan->angle_max);
-  //ROS_INFO("Min range: %f, Max Range: %f", scan->range_min, scan->range_max);
-  
+{  
   float x, y;
   float range, theta;
   int scan_rays = scan->ranges.size();
@@ -44,13 +40,11 @@ void LocalLidarMap::LidarCallback(const sensor_msgs::LaserScan::ConstPtr& scan)
   for (int i = 0; i < scan_rays; i++)
   {
     range = scan->ranges[i];
-    //ROS_INFO("Range: %f", range);
     
     if (range < scan->range_min || range > scan->range_max || isinf(range) || isnan(range)) {}
     else
     {
       theta = i*scan->angle_increment + scan->angle_min;
-      //ROS_INFO("Theta: %f", theta);
       x = range * cos(theta);
       x /= MAP_RESOLUTION;
       x = map_width / 2 + x; 
@@ -58,8 +52,6 @@ void LocalLidarMap::LidarCallback(const sensor_msgs::LaserScan::ConstPtr& scan)
       y /= MAP_RESOLUTION;
       int index = (int) y*map_width + x;
       local_map.data[index] = 100;
-      //ROS_INFO("Index: %f, %i", y*map_width + x, index);
-      //ROS_INFO("Map size: %lus", local_map.data.size());
     }
   }
 }
@@ -67,7 +59,7 @@ void LocalLidarMap::LidarCallback(const sensor_msgs::LaserScan::ConstPtr& scan)
 int main(int argc, char **argv)
 {
   // Initialize lidar map 
-  LocalLidarMap lidar_map(MAP_WIDTH, MAP_HEIGHT, MAP_RESOLUTION);
+  LocalLidarMap lidar_map(RANGE_M, MAP_RESOLUTION);
   
   // Initialize node and node handler
   ros::init(argc, argv, NODE_NAME);
