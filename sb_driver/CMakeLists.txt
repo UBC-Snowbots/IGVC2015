@@ -30,6 +30,7 @@ include_directories(
    src/SerialCommunication.cpp
  )
 
+
  add_library(sb_driver_elsa_headers src/avalanche_driver.cpp)
  add_library(sb_driver_avalanche_headers src/elsa_driver.cpp)
  add_executable(sb_driver_avalanche src/avalanche_driver.cpp)
@@ -43,6 +44,7 @@ include_directories(
   sb_driver_avalanche_headers
   ${catkin_LIBRARIES}
  )
+
 
 target_link_libraries(
   sb_driver_elsa
