@@ -9,6 +9,7 @@ find_package(catkin REQUIRED COMPONENTS
   rospy
   std_msgs
   sb_msgs
+  tf
 )
 
 catkin_package()
@@ -29,7 +30,7 @@ include_directories(
    src/SerialCommunication.cpp
  )
 
- add_library((sb_driver_node_headers src/arduino_driver.cpp)
+ add_library(sb_driver_node_headers src/arduino_driver.cpp)
  add_executable(sb_driver_node src/arduino_driver.cpp)
  add_dependencies(sb_driver_node sb_msgs_generate_messages_cpp)
 
