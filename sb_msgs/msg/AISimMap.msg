@@ -1,3 +1,3 @@
-uint32 width
-uint32 height
-int8[] map_grid
+std_msgs/Header header
+geometry_msgs/Pose2D pose
+nav_msgs/OccupancyGrid map

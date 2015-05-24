@@ -2,19 +2,24 @@
 #include "std_msgs/String.h"
 #include <string>
 #include <iostream>
-#include "sb_ai.h"
+#include "Controllers/sb_ai.h"
 #include <geometry_msgs/Twist.h>
 
-#include "ControllerBase.hpp"
-#include "DijkstraController.hpp"
+//#include "ControllerBase.hpp"
+//#include "DijkstraController.hpp"
+#include "Controllers/ControllerBase.hpp"
+#include "Controllers/DijkstraController.hpp"
 #include "VisionController.hpp"
 #include "LidarController.hpp"
 
-ai::ControllerBase* get_controller(ros::NodeHandle& nh){
+ai::ControllerBase* GetController(ros::NodeHandle& nh)
+{
 	ros::NodeHandle private_nh("~");
 	std::string param;
-	private_nh.getParam(MODE_PARAM,param);
-	if(param=="dijkstra"){
+	private_nh.getParam(MODE_PARAM, param);
+	
+	if (param == "dijkstra")
+	{
 		return new ai::DijkstraController(nh);
 	}else if(param=="vision"){
 		return new ai::VisionController;
@@ -25,9 +30,18 @@ ai::ControllerBase* get_controller(ros::NodeHandle& nh){
 	}else{
 		std::cout << "Invalid " << MODE_PARAM << " '" << param << "'." << std::endl;
 	}
+	else
+	{
+		std::cout << "Invalid ";
+		std::cout << MODE_PARAM << " '";
+		std::cout << param << "'.";
+		std::cout << std::endl;
+	}
+	
 	std::cout << "Current options: " << std::endl;
   std::cout<<"????"<<std::endl;
 	std::cout << "\tdijkstra" << std::endl;
+<<<<<<< HEAD
 	std::cout << "\tlidar" << std::endl;
 	std::cout << "\tvision" << std::endl;
 	std::cout << "\tgps" << std::endl;
@@ -49,18 +63,18 @@ int main(int argc, char **argv)
 	
 	// Initialize publisher to PUB_TOPIC.
 	// Second argument for advertise is the buffer size.
-	ros::Publisher car_pub = nh.advertise<geometry_msgs::Twist>(PUB_TOPIC, 100);	
+	ros::Publisher car_pub = nh.advertise<geometry_msgs::Twist>(PUB_TOPIC, 10);	
 	
-	ai::ControllerBase* controller = get_controller(nh);
+	ai::ControllerBase* controller = GetController(nh);
 	if(!controller) return EXIT_FAILURE;
 	
 	// Frequency of the loop. 
 	// eg. 10 = 10hz
-	ros::Rate loop_rate(controller->get_clock_speed());
+	ros::Rate loop_rate(controller->GetClockSpeed());
 
 	while (ros::ok()) {
 
-		car_pub.publish(controller->update());	// this is where we publish twist output
+		car_pub.publish(controller->Update());	// this is where we publish twist output
 		
 		ros::spinOnce();	// required for subscriptions
 		

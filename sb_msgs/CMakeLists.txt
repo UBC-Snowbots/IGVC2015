@@ -5,6 +5,8 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   rospy
   std_msgs
+  geometry_msgs
+  nav_msgs
   message_generation
 )
 
@@ -19,6 +21,7 @@ find_package(catkin REQUIRED COMPONENTS
    IMU.msg
    jausin.msg
    jausout.msg
+   LocalMap.msg
    LidarNav.msg
    Pose.msg
    RobotState.msg
@@ -35,10 +38,12 @@ find_package(catkin REQUIRED COMPONENTS
  generate_messages(
    DEPENDENCIES
    std_msgs
+   geometry_msgs
+   nav_msgs
  )
 
 catkin_package(
-  CATKIN_DEPENDS roscpp rospy std_msgs message_runtime
+  CATKIN_DEPENDS roscpp rospy std_msgs geometry_msgs nav_msgs message_runtime
 
 )
 

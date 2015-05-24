@@ -12,7 +12,7 @@
 #include "sb_msgs/Gps_info.h"
 #include <string>
 #include <iostream>
-#include "sb_ai.h"
+#include "Controllers/sb_ai.h"
 #include <geometry_msgs/Twist.h>
 #include <math.h>
 
