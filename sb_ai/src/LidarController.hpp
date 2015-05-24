@@ -27,9 +27,9 @@ static const double STEERING_CONST  = -2;
 static const unsigned int MICROSECOND = 2000000;	// sleep time
 
 //ros related constants
-static const string NODE_NAME       = "lidar_node";
-static const string SUBSCRIBE_TOPIC = "scan";
-static const string PUBLISH_TOPIC   = "lidar_nav";
+static const std::string NODE_NAME       = "lidar_node";
+static const std::string SUBSCRIBE_TOPIC = "scan";
+static const std::string PUBLISH_TOPIC   = "lidar_nav";
 static int LOOP_FREQ = 30;
 
 // user defined data types

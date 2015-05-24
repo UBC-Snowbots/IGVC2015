@@ -26,6 +26,7 @@ ai::ControllerBase* get_controller(ros::NodeHandle& nh){
 		std::cout << "Invalid " << MODE_PARAM << " '" << param << "'." << std::endl;
 	}
 	std::cout << "Current options: " << std::endl;
+  std::cout<<"????"<<std::endl;
 	std::cout << "\tdijkstra" << std::endl;
 	std::cout << "\tlidar" << std::endl;
 	std::cout << "\tvision" << std::endl;
