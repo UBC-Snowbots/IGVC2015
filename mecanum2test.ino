@@ -182,10 +182,10 @@ void move_pwm()
   if(rc[2].control_in < 300)
   {
     //hal.console->printf_P(PSTR("twist"));
-    wheels[0]=1500+twist_z+twist_x-twist_y;//+z*(a+b)
-    wheels[1]=1500+twist_z+twist_x+twist_y;
-    wheels[2]=1500+twist_z-twist_x+twist_y;
-    wheels[3]=1500+twist_z-twist_x-twist_y;
+    wheels[0]=1500-twist_z-twist_x+twist_y;//+z*(a+b)
+    wheels[1]=1500-twist_z-twist_x-twist_y;
+    wheels[2]=1500-twist_z+twist_x-twist_y;
+    wheels[3]=1500-twist_z+twist_x+twist_y;
 
     if(LEDcount<20)
     {
@@ -204,10 +204,10 @@ void move_pwm()
   else if(rc[2].control_in < 650)
   {
     //hal.console->printf_P(PSTR("radio"));
-    wheels[0]=1500+rc[3].control_in+rc[1].control_in-rc[0].control_in;//+z*(a+b)
-    wheels[1]=1500+rc[3].control_in+rc[1].control_in+rc[0].control_in+60;
-    wheels[2]=1500+rc[3].control_in-rc[1].control_in+rc[0].control_in+20;
-    wheels[3]=1500+rc[3].control_in-rc[1].control_in-rc[0].control_in;
+    wheels[0]=1500-rc[3].control_in-rc[1].control_in+rc[0].control_in;//+z*(a+b)
+    wheels[1]=1500-rc[3].control_in-rc[1].control_in-rc[0].control_in;
+    wheels[2]=1500-rc[3].control_in+rc[1].control_in-rc[0].control_in;
+    wheels[3]=1500-rc[3].control_in+rc[1].control_in+rc[0].control_in;
     
 
     a_led->write(1);

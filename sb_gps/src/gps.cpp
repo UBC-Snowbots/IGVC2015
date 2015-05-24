@@ -39,8 +39,8 @@ double angleCompass;
 bool moveStatus;
 bool goal;
 bool gpsFlag = true; //indicates connection from gps chip
-double *d = 0;
-double *theta = 0;
+double d = 0; //distance in metres from currentWaypoint to targetWaypoint
+double theta = 0; //theta is the angle the robot needs to turn from currentWaypoint to targetWaypoint
 waypoint CurrentWaypoint,TargetWaypoint,LastWaypoint;
 geometry_msgs::Twist nextTwist;
 
@@ -60,8 +60,8 @@ bool goto_waypoint(sb_gps::GotoWaypoint::Request &req, sb_gps::GotoWaypoint::Res
 void gpsSubHandle(const std_msgs::String::ConstPtr& msg);
 geometry_msgs::Twist createNextTwist(geometry_msgs::Twist nextTwist);
 bool checkGoal (waypoint CurrentWayPoint, waypoint TargetWayPoint);
-void createAngle(double *theta, double angleCompass);
-void createDistance (double * d);
+double createAngle(double compassAngle);
+double createDistance (void);
 
 int main (int argc, char **argv){
 
@@ -82,7 +82,7 @@ int main (int argc, char **argv){
 
 		while (gpsFlag == true){
 
-        createDistance (d);
+        createDistance ();
   			if(checkGoal (CurrentWaypoint, TargetWaypoint) || moveStatus){
             nextTwist.linear.x = 0;
             nextTwist.linear.y = 0;
@@ -102,7 +102,7 @@ int main (int argc, char **argv){
             cout << "Arrived at destination" << endl;
   				}
   			else{
-            createAngle (theta, angleCompass);
+            theta = createAngle(angleCompass);
             nextTwist = createNextTwist (nextTwist); //Make new twist message
             ROS_INFO("Current Position:");
             cout << "Current longitude: " << CurrentWaypoint.lon << " Current latitude: " << CurrentWaypoint.lat << endl;
@@ -200,140 +200,67 @@ bool checkGoal (waypoint CurrentWaypoint, waypoint TargetWaypoint){
     return false;
 }
 
-void createAngle(double *theta, double angleCompass){
+double createAngle(double angleCompass){
 	/*
 	Input Parameter:
-	1. pointer to hold angle
-	2. direction of robot from North (0-359 degrees)
-	Output: void (use pointer)
-	3. x and y cordinates of our goal
-	Purpose: calculates angle of robot to target waypoint ((-180)-180 degrees)
+	1. direction of robot from North (0-359 degrees)
+	??
+	2. x cordinates of TargetWaypoint in metres
+	3. y cordinates of TargetWaypoint in metres
+	Output: the direction the robot needs to turn 
+	Purpose: calculates angle of robot to target waypoint ((-180) to 180 degrees)
 	*/
+	double x = 1, y = 1; //x and y cordinates in metres, this needs to be calculated or passed in a paramaters
 
-//I'm not too familiar with pointers as parameters, I think this should be correct.
-//I have tested the function and it does create the right angle. -Nick
-	// x is the x cordinate, y is the y cordinate
-	double phi; //variable needed to  calculate theta
-	double x = TargetWaypoint.lon; //need to use meters not cordinates
-	double y = TargetWaypoint.lat;	//need to use meters not cordinates
-	double angleWaypoint; //Angle from North to waypoint
-	double r = sqrt(x*x + y*y); //distance from the robot to waypoint
-	double angleGoal = 180 * (acos(abs(y) / r) / PI); //angle of goal to the y-axis
-	double angleCompass180; //Angle +/- 180
+	double theta = 0, angleWaypoint = 180; //theta: angle robot needs to turn, angleWaypoint goal angle from North
+	double r = sqrt(x*x + y*y); //r = distance from the robot to waypoint
+	double angleGoal = 180/PI * (acos(abs(y) / r)); //reference angle with respect to y-axis
 
-	if (angleCompass >= 180){
-		angleCompass180 = angleCompass - 180;
-	}
-	else if (angleCompass < 180){
-		angleCompass180 = angleCompass + 180;
-	}
-	//while direction of goal angle is in quadrant 1
-	if (x > 0 && y >= 0) {
+	if (x > 0 && y >= 0) //goal angle in quad 1
 		angleWaypoint = angleGoal;
-		if (angleCompass <= angleCompass180) {
-			if (angleWaypoint > angleCompass180){
-				*theta = (angleWaypoint - angleCompass - 360);
-			}
-			else{
-				*theta = angleWaypoint - angleCompass;
-			}
-		}
-		else if (angleCompass > angleCompass180) {
-			if (angleWaypoint < angleCompass180){
-				*theta = (angleCompass - angleWaypoint - 360);
-			}
-			else{
-				*theta = angleWaypoint - angleCompass;
-			}
-			if (angleWaypoint < angleCompass180){
-				*theta = -*theta;
-			}
-		}
-	}
-	//while direction of goal angle is in quadrant 4
-	if (x >= 0 && y < 0) {
+	else if (x >= 0 && y < 0) //goal angle in quad 4
 		angleWaypoint = (180 - angleGoal);
-		if (angleCompass <= angleCompass180) {
-			if (angleWaypoint > angleCompass180){
-				*theta = (angleWaypoint - angleCompass - 360);
-			}
-			else{
-				*theta = angleWaypoint - angleCompass;
-			}
-		}
-		else if (angleCompass > angleCompass180) {
-			if (angleWaypoint < angleCompass180){
-				*theta = (angleCompass - angleWaypoint - 360);
-			}
-			else{
-				*theta = angleWaypoint - angleCompass;
-			}
-			if (angleWaypoint < angleCompass180){
-				*theta = -*theta;
-			}
-		}
+	//checking special condition under quad 1 and 4
+	if (angleCompass > angleWaypoint + 180)
+		theta = 360 - angleCompass + angleWaypoint;
+
+	if (x < 0 && y <= 0) //goal angle in quad 3
+		angleWaypoint = angleGoal + 180;
+	else if (x < 0 && y > 0) //goal angle in quad 2 
+		angleWaypoint = 360 - angleGoal;
+	//checking special condition under quad 3 and 2 
+	if (angleCompass <= angleWaypoint - 180){
+		if (x < 0 && y <= 0) //checks for quad 3 
+			theta = angleGoal - angleCompass - 180;
+		else if (x < 0 && y > 0) //checks for quad 2
+			theta = -angleCompass - angleGoal;
 	}
-	//while direction of goal angle is in quadrant 3
-	if (x < 0 && y <= 0) {
-		angleWaypoint = (180 + angleGoal);
-		if (angleCompass <= angleCompass180) {
-			if (angleWaypoint > angleCompass180){
-				*theta = (angleWaypoint - angleCompass - 360);
-			}
-			else{
-				*theta = angleWaypoint - angleCompass;
-			}
-		}
-		else if (angleCompass > angleCompass180) {
-			if (angleWaypoint < angleCompass180){
-				*theta = (angleCompass - angleWaypoint - 360);
-			}
-			else{
-				*theta = angleWaypoint - angleCompass;
-			}
-			if (angleWaypoint > angleCompass180){
-				*theta = (angleWaypoint - angleCompass - 360);
-			}
-		}
+
+	//for any other condtions
+	if (theta == 0){
+		theta = angleWaypoint - angleCompass;
 	}
-	//while direction of goal angle is in quadrant 2
-	if (x < 0 && y > 0) {
-		angleWaypoint = (360 - angleGoal);
-		if (angleCompass <= angleCompass180) {
-			if (angleWaypoint > angleCompass180){
-				*theta = (angleWaypoint - angleCompass - 360);
-			}
-			else{
-				*theta = angleWaypoint - angleCompass;
-			}
-		}
-		else if (angleCompass > angleCompass180) {
-			if (angleWaypoint < angleCompass180){
-				*theta = (angleCompass - angleWaypoint - 360);
-			}
-			else{
-				*theta = angleWaypoint - angleCompass;
-			}
-			if (angleWaypoint > angleCompass180){
-				*theta = (angleWaypoint - angleCompass - 360);
-			}
-		}
-	}
+	return theta;
 }
 
-void createDistance (double * d){
+double createDistance (void){
 	/*
-	Input Parameter: pointer to store distance
-	Output: void (use pointer)
+	Input Parameter: void
+	Output: distance in meteres from currentWaypoint to targetWaypoint
 	Purpose: calculates distance from target waypoints
 	Link:http://stackoverflow.com/questions/19412462/getting-distance-between-two-points-based-on-latitude-longitude-python
 	*/
 
-	double dlon = (TargetWaypoint).lon - (CurrentWaypoint).lon;
-	double dlat = (TargetWaypoint).lat - (CurrentWaypoint).lat;
+	//requires CurrentWaypoint.lat, CurrentWaypoint.lon, TargetWaypoint.lat, TargetWaypoint.lon
+	double toRad = PI / 180;
 
-	double a = (sin(dlat/2))*2 + cos((CurrentWaypoint).lat) * cos((TargetWaypoint).lat) * (sin(dlon/2))*2;
-	double c = 2 * atan2(sqrt(a), sqrt(1-a));
-
-	*d = EARTH_RADIUS * c;
+	double lat1 = CurrentWaypoint.lat * toRad;
+	double lon1 = CurrentWaypoint.lon * toRad;
+	double lat2 = TargetWaypoint.lat * toRad;
+	double lon2 = TargetWaypoint.lon * toRad;
+	//from http://www.movable-type.co.uk/scripts/latlong.html, Distance formula (using haversine)
+	double a = sin((lat2 - lat1) / 2)*sin((lat2 - lat1) / 2) + cos(lat1) * cos(lat2) * sin((lon2 - lon1) / 2)*sin((lon2 - lon1) / 2);
+	double c = 2 * atan2(sqrt(a), sqrt(1 - a));
+	double d = 6371000 * c;
+	return d;
 }
