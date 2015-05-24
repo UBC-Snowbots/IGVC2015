@@ -35,16 +35,9 @@ add_dependencies(sim_gps sb_msgs_generate_messages_cpp)
 add_executable(test_output src/test_output.cpp)
 target_link_libraries(test_output ${catkin_LIBRARIES})
 
-<<<<<<< HEAD
-<<<<<<< HEAD
 add_executable(sb_gps src/sb_gps.cpp)
 target_link_libraries(sb_gps ${catkin_LIBRARIES})
 add_dependencies(sb_gps sb_msgs_generate_messages_cpp)
-=======
-add_subdirectory(src)
 
->>>>>>> origin/master
-=======
-add_subdirectory(src)
 
->>>>>>> origin/master
+
