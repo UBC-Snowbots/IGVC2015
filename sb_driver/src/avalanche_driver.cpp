@@ -12,14 +12,11 @@
 #include <std_msgs/String.h>
 #include <geometry_msgs/Twist.h>
 #include <geometry_msgs/Vector3.h>
+#include "sb_msgs/TurretCommand.h"
 #include "sb_msgs/RobotState.h"
 #include "sb_msgs/IMU.h"
 #include "SerialCommunication.h"
-#include "arduino_driver.h"
-#include "sb_msgs/compass.h"
-#include <tf/transform_broadcaster.h>//odom stuff
-#include <nav_msgs/Odometry.h>//http://wiki.ros.org/navigation/Tutorials/RobotSetup/Odom reference
-
+#include "avalanche_driver.h"
 
 using namespace std;
 using namespace ros;
@@ -38,7 +35,6 @@ static const string TURRET_COMMAND_TOPIC = "turret_command";
 static const string ESTOP_TOPIC = "eStop";
 static const string ROBOT_STATE_TOPIC = "robot_state";
 static const string GPS_STATE_TOPIC = "gps_state";
-static const string COMPASS_STATE_TOPIC = "compass_state";
 
 static const string INIT_STRING = "BG";
 static const char IDENTIFIER_BYTE = 'B';
@@ -46,39 +42,20 @@ static const char IDENTIFIER_BYTE = 'B';
 static const int SECOND = 1000000;
 
 //global variables
-//ServoControl servo;
+ServoControl servo;
 MechControl mech;
+char twist_x[3]={'1','2','5'};
 char twist_y[3]={'1','2','5'};
 char twist_z[3]={'1','2','5'};
 
 bool eStop = false;
 
-sb_msgs::compass createComp(double compass_val){
-	sb_msgs::compass compas;
-	compas.compass = compass_val;
-	return compas;
-}
-
 int main(int argc, char** argv)
 {
     //initialize ros
     init(argc, argv, ROS_NODE_NAME);
-	  NodeHandle n;
-	  Rate loop_rate(ROS_LOOP_RATE);
-
-	  ros::Time current_time, last_time;
-	  current_time = ros::Time::now();//odom stuff
-	  last_time = ros::Time::now();
-	
-	  double x = 0.0;
-	  double y = 0.0;
-  	double th = 0.0;
-  
-  	double vx = 0;
-  	double vy = 0;
-  	double vth = 0;
-
-
+	NodeHandle n;
+	Rate loop_rate(ROS_LOOP_RATE);
 
 	//initialize serial communication
 	SerialCommunication link;
@@ -103,23 +80,18 @@ int main(int argc, char** argv)
 		
 	//subscribers and publishers
 	Subscriber car_command = n.subscribe(CAR_COMMAND_TOPIC, 1, car_command_callback);
-//	Subscriber turret_command = n.subscribe(TURRET_COMMAND_TOPIC, 1, turret_command_callback);
+	Subscriber turret_command = n.subscribe(TURRET_COMMAND_TOPIC, 1, turret_command_callback);
 	Subscriber eStop_topic = n.subscribe(ESTOP_TOPIC, 1, eStop_callback);
 	
-  Publisher compass_state = n.advertise<sb_msgs::compass>(COMPASS_STATE_TOPIC,1);
 	Publisher robot_state = n.advertise<sb_msgs::RobotState>(ROBOT_STATE_TOPIC,1);
 	Publisher gps_state = n.advertise<std_msgs::String>(GPS_STATE_TOPIC,1);
 	
-
-	ros::Publisher odom_pub = n.advertise<nav_msgs::Odometry>("odom", 50);//odom stuff
-	tf::TransformBroadcaster odom_broadcaster;
-	
 	sb_msgs::IMU imu;
 	sb_msgs::RobotState state;
-    sb_msgs::compass compass;
 	std_msgs::String gps_data;
 	
 	ROS_INFO("arduino_driver ready");
+	mech.twist_x=125;
 	mech.twist_y=125;
 	mech.twist_z=125;
 
@@ -140,10 +112,10 @@ int main(int argc, char** argv)
 	    if (eStop)
 	    {	
 			cout << "eStop on" << endl;
-			ss << (char)IDENTIFIER_BYTE << "125125";
+			ss << (char)IDENTIFIER_BYTE << "125125125";
 	    } else {  
             //use carCommand and turretCommand
-			ss << (char)IDENTIFIER_BYTE<< twist_y[0] << twist_y[1] << twist_y[2] << twist_z[0] << twist_z[1] << twist_z[2];
+			ss << (char)IDENTIFIER_BYTE << twist_x[0] << twist_x[1] << twist_x[2] << twist_y[0] << twist_y[1] << twist_y[2] << twist_z[0] << twist_z[1] << twist_z[2];
 
 	    }
 	    link.writeData(ss.str(), 10);
@@ -152,60 +124,11 @@ int main(int argc, char** argv)
 	    usleep(20000);
 	    
 	    //publish data
-	    processData(link.readData(10),state);
 	    robot_state.publish(state);
-     
 	    
-	    vth=th+state.compass*M_PI/180;
-	    th=state.compass*M_PI/180;//check units is degres what you need?
-	    vy=(state.RightVelo+state.LeftVelo)/2;
-
-     	compass = createComp(th);
-      compass_state.publish(compass);
-	    
-	    //compute odometry in a typical way given the velocities of the robot
-	    double dt = (current_time - last_time).toSec();
-  	double delta_x = (vx * cos(th) - vy * sin(th)) * dt;
-  	double delta_y = (vx * sin(th) + vy * cos(th)) * dt;
-  	x += delta_x;
-  	y += delta_y;
-	    
-	    current_time = ros::Time::now();//odom stuff
-	    //since all odometry is 6DOF we'll need a quaternion created from yaw
-	    geometry_msgs::Quaternion odom_quat = tf::createQuaternionMsgFromYaw(th);//units of compass right? (degrees)
-  	
-  	//first, we'll publish the transform over tf
-  	geometry_msgs::TransformStamped odom_trans;
-  	odom_trans.header.stamp = current_time;
-  	odom_trans.header.frame_id = "odom";
-  	odom_trans.child_frame_id = "base_link";
-  	
-  	odom_trans.transform.translation.x = x;
-  	odom_trans.transform.translation.y = y;
-  	odom_trans.transform.translation.z = 0.0;
-  	odom_trans.transform.rotation = odom_quat;
-  
-  	//send the transform
-  	odom_broadcaster.sendTransform(odom_trans);
-  	
-  	//next, we'll publish the odometry message over ROS
-  	nav_msgs::Odometry odom;
-  	odom.header.stamp = current_time;
-  	odom.header.frame_id = "odom";
-  	
-  	//set the position
-  	odom.pose.pose.position.x = x;
-  	odom.pose.pose.position.y = y;
-  	odom.pose.pose.position.z = 0.0;
-  	odom.pose.pose.orientation = odom_quat;
-  	//set the velocity
-  	odom.child_frame_id = "base_link";
-  	odom.twist.twist.linear.x = vx;
-  	odom.twist.twist.linear.y = vy;
-  	odom.twist.twist.angular.z = vth;
-  	//publish the message
-  	odom_pub.publish(odom);
-	    
+	    gps_data.data = link.readData(38);
+	    cout << "GPS DATA " << gps_data.data << endl; // print out gps datas
+	    gps_state.publish(gps_data);
 	    
 	    //clear buffer (MAY NOT WORK)
 	    link.clearBuffer();
@@ -227,28 +150,33 @@ int main(int argc, char** argv)
 //dummy function
 void processData(string data,sb_msgs::RobotState &state)
 {
-//	state.compass.push_back(data[0] << 8|data[1]);
-	state.compass=data[0] << 8|data[1];//Replaced push_back
-	long right=(data[2] << 24|data[3] << 16|data[4] << 8|data[5]);
-	long left=(data[6] << 24|data[7] << 16|data[8] << 8|data[9]);
-	
-	state.RightVelo = float(right)/1000;
-	state.LeftVelo = float(left)/1000;
-
-//	state.RightVelo.push_back(float(right)/1000);
-//	state.LeftVelo.push_back(float(left)/1000);
+	state.ir.push_back(data[0] << 8|data[1]);
+	state.ir.push_back(data[2] << 8|data[3]);
+	state.ir.push_back(data[4] << 8|data[5]);
+	state.ir.push_back(data[6] << 8|data[7]);
+	state.ir.push_back(data[8] << 8|data[9]);
+	state.num_analog = (int)state.ir.size();
 }
 
 //car_command_callback
 void car_command_callback(const geometry_msgs::TwistConstPtr& msg_ptr)
 {
+	mech.twist_x = 125;
 	mech.twist_y = msg_ptr->linear.y * 125+125; 
 	mech.twist_z = -msg_ptr->angular.z * 125+125;
 
+	sprintf(twist_x,"%03d",mech.twist_x);
 	sprintf(twist_y,"%03d",mech.twist_y);
 	sprintf(twist_z,"%03d",mech.twist_z);
 	ROS_INFO("Twist_y: %s", twist_y);
 	ROS_INFO("Twist_z: %s", twist_z);
+}
+
+//turret_command_callback
+void turret_command_callback(const sb_msgs::TurretCommandConstPtr& msg_ptr)
+{
+	servo.pan = msg_ptr->pan * 90 + 90;
+    servo.tilt = msg_ptr->tilt * 90 + 90;
 }
 
 //eStop_callback
