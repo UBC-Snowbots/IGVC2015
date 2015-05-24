@@ -33,6 +33,7 @@ find_package(catkin REQUIRED COMPONENTS
    Waypoint.msg
    WaypointList.msg
    Gps_info.msg
+   MoveCommand.msg
  )
 
 ## Generate added messages and services with any dependencies listed here
