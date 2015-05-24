@@ -218,7 +218,7 @@ sb_msgs::Gps_info createdata(void){
   return data;  
 }
 
-<<<<<<< HEAD
+
 /*void compassSubHandle (const sb_msgs::compass::ConstPtr& compass){
 =======
 void compassSubHandle (sb_msgs::compass compass){
