@@ -27,6 +27,8 @@ include_directories(
 add_executable(imagine_lidar src/imagineday_lidar.cpp)
 target_link_libraries(imagine_lidar ${catkin_LIBRARIES})
 
+add_executable(lidar_v1 src/lidar_v1.cpp)
+target_link_libraries(lidar_v1 ${catkin_LIBRARIES})
 
 #add_executable(demo_lidar src/demo_code.cpp)
 #target_link_libraries(demo_lidar ${catkin_LIBRARIES})

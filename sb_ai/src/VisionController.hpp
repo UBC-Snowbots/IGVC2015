@@ -6,7 +6,6 @@
 #include <geometry_msgs/Twist.h>
 #include <geometry_msgs/Vector3.h>
 #include <string>
-//---VISION-----------
 #include <sstream>
 #include <stdio.h>
 #include <iostream>
@@ -16,14 +15,12 @@
 #include <vector>
 #include <fstream>
 #include <limits>
-
 #include "opencv2/imgproc/imgproc.hpp"
 #include "opencv2/opencv.hpp"
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/calib3d/calib3d.hpp>
 #include <opencv2/video/video.hpp>
-
 #include "ControllerBase.hpp"
 
 namespace ai{

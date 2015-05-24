@@ -6,11 +6,13 @@ set(MAIN_HEADERS
 	ControllerBase.hpp
 	DijkstraController.hpp
 	VisionController.hpp
+  LidarController.hpp
 	sb_ai.h)
 
 set(MAIN_SOURCE
 	DijkstraController.cpp
 	VisionController.cpp
+  LidarController.cpp
 	main.cpp)
 
 set(MODE_LIBRARIES
