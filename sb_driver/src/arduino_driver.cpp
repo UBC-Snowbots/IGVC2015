@@ -12,12 +12,11 @@
 #include <std_msgs/String.h>
 #include <geometry_msgs/Twist.h>
 #include <geometry_msgs/Vector3.h>
-//#include "sb_msgs/TurretCommand.h"
 #include "sb_msgs/RobotState.h"
 #include "sb_msgs/IMU.h"
 #include "SerialCommunication.h"
 #include "arduino_driver.h"
-
+#include "sb_msgs/compass.h"
 #include <tf/transform_broadcaster.h>//odom stuff
 #include <nav_msgs/Odometry.h>//http://wiki.ros.org/navigation/Tutorials/RobotSetup/Odom reference
 
@@ -39,6 +38,7 @@ static const string TURRET_COMMAND_TOPIC = "turret_command";
 static const string ESTOP_TOPIC = "eStop";
 static const string ROBOT_STATE_TOPIC = "robot_state";
 static const string GPS_STATE_TOPIC = "gps_state";
+static const string COMPASS_STATE_TOPIC = "compass_state";
 
 static const string INIT_STRING = "BG";
 static const char IDENTIFIER_BYTE = 'B';
@@ -53,24 +53,32 @@ char twist_z[3]={'1','2','5'};
 
 bool eStop = false;
 
+sb_msgs::compass createComp(double compass_val){
+	sb_msgs::compass compas;
+	compas.compass = compass_val;
+	return compas;
+}
+
 int main(int argc, char** argv)
 {
     //initialize ros
     init(argc, argv, ROS_NODE_NAME);
-	NodeHandle n;
-	Rate loop_rate(ROS_LOOP_RATE);
+	  NodeHandle n;
+	  Rate loop_rate(ROS_LOOP_RATE);
 
-	ros::Time current_time, last_time;
-	current_time = ros::Time::now();//odom stuff
-	last_time = ros::Time::now();
+	  ros::Time current_time, last_time;
+	  current_time = ros::Time::now();//odom stuff
+	  last_time = ros::Time::now();
 	
-	double x = 0.0;
-	double y = 0.0;
+	  double x = 0.0;
+	  double y = 0.0;
   	double th = 0.0;
   
   	double vx = 0;
   	double vy = 0;
   	double vth = 0;
+
+
 
 	//initialize serial communication
 	SerialCommunication link;
@@ -98,14 +106,17 @@ int main(int argc, char** argv)
 //	Subscriber turret_command = n.subscribe(TURRET_COMMAND_TOPIC, 1, turret_command_callback);
 	Subscriber eStop_topic = n.subscribe(ESTOP_TOPIC, 1, eStop_callback);
 	
+  Publisher compass_state = n.advertise<sb_msgs::compass>(COMPASS_STATE_TOPIC,1);
 	Publisher robot_state = n.advertise<sb_msgs::RobotState>(ROBOT_STATE_TOPIC,1);
 	Publisher gps_state = n.advertise<std_msgs::String>(GPS_STATE_TOPIC,1);
 	
+
 	ros::Publisher odom_pub = n.advertise<nav_msgs::Odometry>("odom", 50);//odom stuff
 	tf::TransformBroadcaster odom_broadcaster;
 	
 	sb_msgs::IMU imu;
 	sb_msgs::RobotState state;
+    sb_msgs::compass compass;
 	std_msgs::String gps_data;
 	
 	ROS_INFO("arduino_driver ready");
@@ -143,10 +154,14 @@ int main(int argc, char** argv)
 	    //publish data
 	    processData(link.readData(10),state);
 	    robot_state.publish(state);
+     
 	    
 	    vth=th+state.compass*M_PI/180;
 	    th=state.compass*M_PI/180;//check units is degres what you need?
 	    vy=(state.RightVelo+state.LeftVelo)/2;
+
+     	compass = createComp(th);
+      compass_state.publish(compass);
 	    
 	    //compute odometry in a typical way given the velocities of the robot
 	    double dt = (current_time - last_time).toSec();
