@@ -4,6 +4,7 @@
 //Input: Compass Data (sb_driver node), GPS Data (sb_gps node) 
 //Output: long, lat, distance(relative to waypoint), theta (relative to waypoint)
 //Things needed to be implemented: compass callback function, struct 
+//Need to be within 1m radius 
 
 #include "ros/ros.h"
 #include "std_msgs/String.h"
@@ -19,7 +20,6 @@
 using namespace std; 
 using namespace sb_msgs;
 
-#define EARTH_RADIUS 6378.137
 #define PI 3.14159265
 
 
@@ -29,17 +29,18 @@ bool goal;
 bool msg_flag = false;
 double d = 0; //distance in metres from currentWaypoint to targetWaypoint
 double theta = 0; //theta is the angle the robot needs to turn from currentWaypoint to targetWaypoint
-sb_msgs::Waypoint CurrentWaypoint,TargetWaypoint,LastWaypoint,off;
+sb_msgs::Waypoint CurrentWaypoint,LastWaypoint,off;
 geometry_msgs::Twist twist_msg;
 sb_msgs::Gps_info pub_data; //Angle and distance are being published
 int next_move, prev_move = 0;
-
+sb_msgs::Waypoint TargetWaypoint;
+static double const EART_RADIUS = 6378.137;
 
 void startGps(void){
-  double lon = 49.262511;
-  double lat = -123.248619;
-  off.lon = lon - CurrentWaypoint.lon;
-  off.lat = lat - CurrentWaypoint.lat;
+  double lon = 49.262368;
+  double lat = -123.248591;
+  off.lon = abs(lon - 49.157263);
+  off.lat = abs(lat - (-123.14894706));
   return;
 }
 
@@ -50,7 +51,6 @@ void gpsSubHandle(const std_msgs::String::ConstPtr& msg){
 	int i = 0;
 	char lon_dir, lat_dir;
 	string str = msg->data;
-	cout.precision(13);
 	while (str[i] != '\0') { a[i] = str[i]; i++; }
 	for (i = 0; i < 6; i++)
 		nmea_type[i] = a[i];
@@ -62,17 +62,17 @@ void gpsSubHandle(const std_msgs::String::ConstPtr& msg){
 		lon_dir = a[31];
 		//cout << lon_dir << endl;
 		if (lon_dir == 'N')
-			CurrentWaypoint.lon = atof(temp)/100 - off.lon;
+			CurrentWaypoint.lon = atof(temp)/100 + off.lon;
 		else if (lon_dir == 'S')
-			CurrentWaypoint.lon = (-1)*(atof(temp)/100 - off.lon);
+			CurrentWaypoint.lon = (-1)*(atof(temp)/100 + off.lon);
 		for (i = 33; i < 45; i++)
 			temp [i-33] = a[i];
 		lat_dir = a[47];
 		//cout << lat_dir << endl;
 		if (lat_dir == 'E')
-			CurrentWaypoint.lat = atof(temp)/100 - off.lat;
+			CurrentWaypoint.lat = atof(temp)/100 + off.lat;
 		else if (lat_dir == 'W')
-			CurrentWaypoint.lat = (-1)*(atof(temp)/100 - off.lat);
+			CurrentWaypoint.lat = (-1)*(atof(temp)/100 + off.lat);
 	}
 	else{
 		msg_flag = false;
@@ -98,15 +98,19 @@ int NextMoveLogic (double distance, double angle){
 	if (checkGoal) 
 		return 0;
 	else{
-		if (angle < 0.0) 
+		if (angle < 0.0){
 			return 2; 
-		else if (angle > 0.0)
+			cout << "turn right" << endl;}
+		else if (angle > 0.0){
 			return -2;
+			cout << "turn left" << endl;}
 		else{
-			if (distance > 100)
+			if (distance > 100){
 				return 50;
-			else if (distance < 100)
+				cout << "forward quickly" << endl;}
+			else if (distance < 100){
 				return 20; 
+				cout << "forward slowly" << endl;}
 			else 
 				cout << "Error in NextMoveLogic: " << distance << endl;
 			}	
@@ -223,16 +227,22 @@ int main (int argc, char **argv){
   ros::Publisher coord_pub = nh.advertise<sb_msgs::Waypoint>("GPS_COORD", 100);
 
   ros::Rate loop_rate(5); //10hz loop rate
+	cout.precision(13);
 /*  while (!msg_flag){
 		cout << "Waiting for GPS Fix" << endl;	
 		loop_rate.sleep();
-	}
-  startGps();*/
-  while (ros::ok()){
+	}*/
 
+	TargetWaypoint.lon = 49.261928;
+	TargetWaypoint.lat = -123.2487812;
+  startGps();
+  while (ros::ok()){
+	
 	 if (msg_flag){
 	    	  ROS_INFO ("Position:");
 		  cout << "Current longitude: " << CurrentWaypoint.lon << " Current latitude: " << CurrentWaypoint.lat << endl;
+		  cout << "distance" << pub_data.distance << endl;
+		  cout << "angle" << pub_data.angle << endl;
 	}
 	  else{
 		ROS_INFO("No Fix:"); 
