@@ -39,8 +39,8 @@ static double const EART_RADIUS = 6378.137;
 void startGps(void){
   double lon = 49.262368;
   double lat = -123.248591;
-  off.lon = abs(lon - 49.157263);
-  off.lat = abs(lat - (-123.14894706));
+  off.lon = abs(lon - 49.157463);
+  off.lat = abs(lat - (-123.149175022));
   return;
 }
 
@@ -88,7 +88,7 @@ bool checkGoal (Waypoint CurrentWaypoint, Waypoint TargetWaypoint){
     }
     else
       return false;
-  }
+  }    
   else
     return false;
 }
@@ -217,6 +217,13 @@ sb_msgs::Gps_info createdata(void){
   return data;  
 }
 
+void compassSubHandle (const sb_msgs::compass::ConstPtr& compass){
+
+	angleCompass = compass.compass;
+	return;
+
+}
+
 int main (int argc, char **argv){
 
   ros::init(argc, argv, AI_NODE_NAME); //initialize access point to communicate
@@ -225,6 +232,7 @@ int main (int argc, char **argv){
   ros::Publisher car_pub = nh.advertise<geometry_msgs::Twist>(PUB_TOPIC, 100);
   ros::Publisher gps_pub = nh.advertise<sb_msgs::Gps_info>("GPS_DATA",50);
   ros::Publisher coord_pub = nh.advertise<sb_msgs::Waypoint>("GPS_COORD", 100);
+  ros::Subscriber compass_Sub = nh.subscribe ("COMPASS_DATA", 1, compassSubHandle);
 
   ros::Rate loop_rate(5); //10hz loop rate
 	cout.precision(13);
@@ -235,7 +243,7 @@ int main (int argc, char **argv){
 
 	TargetWaypoint.lon = 49.261928;
 	TargetWaypoint.lat = -123.2487812;
-  startGps();
+  	startGps();
   while (ros::ok()){
 	
 	 if (msg_flag){
@@ -250,7 +258,7 @@ int main (int argc, char **argv){
 	   //twist out 
 	  pub_data = createdata();
 	  gps_pub.publish(pub_data); //a out 
-	  
+	  cout << "angle" << pub_data.angle << endl;
 	  coord_pub.publish(CurrentWaypoint);
 
 	  next_move = NextMoveLogic(pub_data.distance,pub_data.angle);

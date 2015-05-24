@@ -13,6 +13,7 @@ set(MAIN_SOURCE
 	DijkstraController.cpp
 	VisionController.cpp
   LidarController.cpp
+	sb_gps.cpp
 	main.cpp)
 
 set(MODE_LIBRARIES
