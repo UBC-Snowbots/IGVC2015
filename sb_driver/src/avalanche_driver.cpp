@@ -16,7 +16,7 @@
 #include "sb_msgs/RobotState.h"
 #include "sb_msgs/IMU.h"
 #include "SerialCommunication.h"
-#include "arduino_driver.h"
+#include "avalanche_driver.h"
 
 using namespace std;
 using namespace ros;
