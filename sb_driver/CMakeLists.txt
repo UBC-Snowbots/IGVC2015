@@ -30,14 +30,23 @@ include_directories(
    src/SerialCommunication.cpp
  )
 
- add_library(sb_driver_node_headers src/arduino_driver.cpp)
- add_executable(sb_driver_node src/arduino_driver.cpp)
- add_dependencies(sb_driver_node sb_msgs_generate_messages_cpp)
+ add_library(sb_driver_elsa_headers src/avalanche_driver.cpp)
+ add_library(sb_driver_avalanche_headers src/elsa_driver.cpp)
+ add_executable(sb_driver_avalanche src/avalanche_driver.cpp)
+ add_executable(sb_driver_elsa src/elsa_driver.cpp)
+ add_dependencies(sb_driver_avalanche sb_msgs_generate_messages_cpp)
+ add_dependencies(sb_driver_elsa sb_msgs_generate_messages_cpp)
 
  target_link_libraries(
-  sb_driver_node 
+  sb_driver_avalanche
   sb_serial_communication
-  sb_driver_node_headers
+  sb_driver_avalanche_headers
   ${catkin_LIBRARIES}
  )
 
+target_link_libraries(
+  sb_driver_elsa
+  sb_serial_communication
+  sb_driver_elsa_headers
+  ${catkin_LIBRARIES}
+ )
