@@ -170,7 +170,7 @@ void move_pwm()// commands the esc
     //hal.console->printf_P(PSTR("radio"));
     wheels[0]=1500+rc[3].control_in+rc[1].control_in;//+z*(a+b)
     wheels[1]=1500+rc[3].control_in-rc[1].control_in;
-    a_led->write(1);//LED Blinking
+    a_led->write(0);//LED Blinking
     b_led->write(1);
   }
   else//wireless e-stop

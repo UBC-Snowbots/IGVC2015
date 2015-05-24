@@ -35,3 +35,5 @@ To use the sb_gps branch:
 3. >rosrun sb_gps gps_receiver.py 
 
 The node will start streaming data
+=======
+> catkin_make -DCATKIN_WHITELIST_PACKAGES=""
