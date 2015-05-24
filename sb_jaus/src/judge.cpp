@@ -16,7 +16,7 @@ std::thread testing;
 
 class DiscoveryCallback: public JAUS::Discovery::Callback{
 	public:
-	void ProcessMessage(const JAUS::Message* msg) override{
+	void ProcessMessage(const JAUS::Message* msg){
 		JAUS::Discovery::Callback::ProcessMessage(msg);
 		const JAUS::ReportIdentification* report = dynamic_cast<const JAUS::ReportIdentification*>(msg);
 		if(report){
