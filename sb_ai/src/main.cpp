@@ -19,6 +19,8 @@ ai::ControllerBase* get_controller(ros::NodeHandle& nh){
 		return new ai::VisionController;
 	}else if(param=="lidar"){
 		return new ai::LidarController(nh);
+	}else if(param=="gps"){
+		return new ai::sb_gps;
 	}else{
 		std::cout << "Invalid " << MODE_PARAM << " '" << param << "'." << std::endl;
 	}
@@ -26,6 +28,7 @@ ai::ControllerBase* get_controller(ros::NodeHandle& nh){
 	std::cout << "\tdijkstra" << std::endl;
 	std::cout << "\tlidar" << std::endl;
 	std::cout << "\tvision" << std::endl;
+	std::cout << "\tgps" << std::endl;
 	std::cout << "Defaulting to dijkstra" << std::endl;
 	return new ai::DijkstraController(nh);
 }

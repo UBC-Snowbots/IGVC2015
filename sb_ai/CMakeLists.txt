@@ -40,4 +40,3 @@ target_link_libraries(sb_gps ${catkin_LIBRARIES})
 add_dependencies(sb_gps sb_msgs_generate_messages_cpp)
 
 
-

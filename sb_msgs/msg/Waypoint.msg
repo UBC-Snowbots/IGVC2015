@@ -1,5 +1,3 @@
-# A waypoint
-
-int32 lat
-int32 lon
+float64 lon
+float64 lat
 
