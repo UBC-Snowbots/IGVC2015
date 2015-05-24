@@ -8,6 +8,7 @@
 #include "ControllerBase.hpp"
 #include "DijkstraController.hpp"
 #include "VisionController.hpp"
+#include "LidarController.hpp"
 
 ai::ControllerBase* get_controller(ros::NodeHandle& nh){
 	ros::NodeHandle private_nh("~");
