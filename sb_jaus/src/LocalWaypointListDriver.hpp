@@ -3,11 +3,11 @@
 #include <jaus/mobility/drivers/LocalWaypointListDriver.h>
 #include "LocalWaypointDriver.hpp"
 
-class LocalWaypointListDriver: public JAUS::LocaLWaypointListDriver{
+class LocalWaypointListDriver: public JAUS::LocalWaypointListDriver{
 	private:
-	LocalWaypointDriver* driver;
+	JAUS::LocalWaypointDriver* driver;
 	public:
-	LocalWaypointListDriver(LocalWaypointDriver* driver): driver(driver) {}
+	LocalWaypointListDriver(JAUS::LocalWaypointDriver* driver): driver(driver) {}
 	void ExecuteList(const double speedMetersPerSecond);
 };
 

@@ -4,14 +4,14 @@
 #include <jaus/mobility/sensors/LocalPoseSensor.h>
 #include "std_msgs/String.h"
 
-const std::string POSE_TOPIC = "no idea";
+const std::string POSE_TOPIC = "local_pose";
 
 class LocalPoseSensorManager{
 	private:
 	JAUS::LocalPoseSensor* sensor;
 	ros::Subscriber sub;
 	public:
-	bool onPoseChange(const std_msgs::String& msg);
-	LocalPoseSensor(JAUS::LocalPoaseSensor* sensor);
+	void onPoseChange(std_msgs::String msg);
+	LocalPoseSensorManager(ros::NodeHandle& nh, JAUS::LocalPoseSensor* sensor);
 };
 
