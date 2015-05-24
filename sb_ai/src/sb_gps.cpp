@@ -15,6 +15,7 @@
 #include "Controllers/sb_ai.h"
 #include <geometry_msgs/Twist.h>
 #include <math.h>
+#include "sb_msgs/compass.h"
 
 
 using namespace std; 
@@ -217,7 +218,11 @@ sb_msgs::Gps_info createdata(void){
   return data;  
 }
 
+<<<<<<< HEAD
 /*void compassSubHandle (const sb_msgs::compass::ConstPtr& compass){
+=======
+void compassSubHandle (sb_msgs::compass compass){
+>>>>>>> 9b49c75520675742a07c77e2e65093bb929d2cfb
 
 	angleCompass = compass.compass;
 	return;
