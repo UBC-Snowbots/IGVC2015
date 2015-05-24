@@ -50,6 +50,38 @@ sb_msgs::CarCommand car_command;
 int danger = 0;
 int backup = 0;	
 
+/* clamp function sets an upperbound(cap) for the inputs (in)*/
+double clamp (double in, double cap)
+{
+	if      ( in >  cap) return cap;
+	else if ( in < -1 * cap) return (-1 * cap);
+	else                 return in;	
+}
+
+
+
+/*converts car command to twist message*/
+geometry_msgs::Twist twist_converter(sb_msgs::CarCommand cc)
+{
+	geometry_msgs::Twist twist;
+	geometry_msgs::Vector3 Linear;
+	geometry_msgs::Vector3 Angular;
+	
+	
+	twist.linear.x = 0;
+	twist.linear.y = cc.throttle * THROTTLE_CONST;	// the constant allows adjustments to throttle
+	//twist.linear.y = 0;// changed to zero for demos
+	twist.linear.z = 0;
+
+	twist.angular.x = 0;
+	twist.angular.y = 0;
+	twist.angular.z = cc.steering * STEERING_CONST;  // the constant allows adjustments to steering
+
+	return twist;	
+}
+
+
+
 /* Callback function processes the lidar data*/
 void callback(const sensor_msgs::LaserScanConstPtr& msg_ptr)
 {
@@ -206,35 +238,6 @@ void callback(const sensor_msgs::LaserScanConstPtr& msg_ptr)
 }
 
 
-/* clamp function sets an upperbound(cap) for the inputs (in)*/
-double clamp (double in, double cap)
-{
-	if      ( in >  cap) return cap;
-	else if ( in < -1 * cap) return (-1 * cap);
-	else                 return in;	
-}
-
-
-
-/*converts car command to twist message*/
-geometry_msgs::Twist twist_converter(sb_msgs::CarCommand cc)
-{
-	geometry_msgs::Twist twist;
-	geometry_msgs::Vector3 Linear;
-	geometry_msgs::Vector3 Angular;
-	
-	
-	twist.linear.x = 0;
-	twist.linear.y = cc.throttle * THROTTLE_CONST;	// the constant allows adjustments to throttle
-	//twist.linear.y = 0;// changed to zero for demos
-	twist.linear.z = 0;
-
-	twist.angular.x = 0;
-	twist.angular.y = 0;
-	twist.angular.z = cc.steering * STEERING_CONST;  // the constant allows adjustments to steering
-
-	return twist;	
-}
 
 /*
 publisher and subscriber into
