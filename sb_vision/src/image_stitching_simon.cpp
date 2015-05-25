@@ -65,7 +65,7 @@ int main(int argc, char **argv)
 	}
 							
 	Mat image1, image2, image3;
-	Stitcher stitcher = Stitcher::createDefault();
+	Stitcher stitcher = Stitcher::createDefault(true);
 	int counter = 0;
 	namedWindow("Stiching Window");
 
