@@ -53,6 +53,7 @@ int main(int argc, char **argv)
 	namedWindow("Stiching Window");
 
 	ROS_INFO("Entering ros:ok loop");
+	
 	while (ros::ok() && counter < 5){
 		ROS_INFO("Image Stitching Started!");
 		counter++;
