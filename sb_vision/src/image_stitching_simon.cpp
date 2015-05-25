@@ -17,8 +17,8 @@ bool connectCamera(VideoCapture& camera){
 
 	ROS_INFO("Initializing Webcams");
 	camera.set(CV_CAP_PROP_FPS, 30);
-	//camera.set(CV_CAP_PROP_FRAME_WIDTH, 640);
-	//camera.set(CV_CAP_PROP_FRAME_HEIGHT, 480);
+	camera.set(CV_CAP_PROP_FRAME_WIDTH, 640);
+	camera.set(CV_CAP_PROP_FRAME_HEIGHT, 480);
 
 	for (int portNumber = 3; portNumber >= 0; portNumber--){
 		ROS_INFO("Attempting port: %d", portNumber);
@@ -27,9 +27,8 @@ bool connectCamera(VideoCapture& camera){
 			return true;
 		}
 	}
-	//If this error comes on, restart the computer :(
-	ROS_FATAL("Unable to establish connection on ports");
-	
+
+	ROS_FATAL("Unable to establish connection on ports");	
 	return false;
 }
 
@@ -43,6 +42,7 @@ int main(int argc, char **argv)
 									
 	if(!connectCamera(cap1) || !connectCamera(cap2) || !connectCamera(cap3)){
 		ROS_FATAL("Unable to connect to all cameras, exiting now");
+		ROS_FATAL("If this problem continues, restart the computer :(");
 		return 0;
 	}
 							
@@ -50,8 +50,9 @@ int main(int argc, char **argv)
 	Stitcher stitcher = Stitcher::createDefault();
 	int counter = 0;
 	namedWindow("Stiching Window");
-	ROS_INFO("Entering loop");
-	while (ros::ok() && counter < 10){
+
+	ROS_INFO("Entering ros:ok loop");
+	while (ros::ok() && counter < 5){
 		ROS_INFO("Image Stitching Started!");
 		
 		counter++;
@@ -133,7 +134,7 @@ int main(int argc, char **argv)
 	cap1.release();
 	cap2.release();
 	cap3.release();
-	ROS_INFO("All VideoCapture released, goodbye!");
+	ROS_INFO("All VideoCaptures released, proper shutdown complete");
 	
 	return 0;
 	
