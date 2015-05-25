@@ -4,6 +4,26 @@
  using namespace std;
 
  namespace ai{
+ 
+ //Global constatns
+static const double PI		 = 3.1415265;
+static const double IGNORE_ANGLE = PI; 		//ignore rays beyond this angle
+static const int    OFFSET_RAYS = 30;        // offset from central ray
+static const double REDZONE      = 1;			// originally 0.5
+static const double ORANGEZONE   = 1.5;			// originally 1
+static const double SLOW_SPEED	 = 0.15;		// originally 0.1
+static const double NORMAL_SPEED  = 0.25;
+static const double SLOW_TURN	 = 0.15;
+static const double SPEED_LIMIT  = 0.3; 		// originally 0.3
+static const double TURN_LIMIT  = 0.4;
+static const double THROTTLE_CONST = -1;
+static const double STEERING_CONST  = -2;
+static const unsigned int MICROSECOND = 2000000;	// sleep time
+
+//ros related constants
+static const std::string SUBSCRIBE_TOPIC = "scan";
+static const std::string PUBLISH_TOPIC   = "lidar_nav";
+static int LOOP_FREQ = 30;
 
  	// main function
 	LidarController::LidarController(ros::NodeHandle& nh): 
@@ -11,29 +31,11 @@
 	backup(0)
 	{
 		//Subscriber 
-		lidar_state = n.subscribe(SUBSCRIBE_TOPIC,20,&LidarController::callback);
+		lidar_state = nh.subscribe(SUBSCRIBE_TOPIC,20,&LidarController::callback,this);
 		
-		// delete this line??:
-		//Rate loop_rate(LOOP_FREQ);
-		
-		ROS_INFO("ready to go");
-		ROS_INFO("going");
-
-		/*while(ros::ok())
-		{
-			geometry_msgs::Twist twistMsg = twist_converter(car_command);		// convert the car_command into a twistMsg
-			cout<<"Throttle: " <<twistMsg.linear.y<<"   Steering: "<<  twistMsg.angular.z <<endl;
-		//	ROS_INFO("CarCommand {throttle: %0.2f , steering: %0.2f , priority: %0.2f}", car_command.throttle, car_command.steering, car_command.priority); 
-			car_pub.publish(twistMsg);
-			ros::spinOnce();
-			loop_rate.sleep();	
-		}
-		ROS_INFO("shutting down node");
-		
-		return;*/
 	}
 
-	geometry_msgs::Twist LidarController::update()
+	geometry_msgs::Twist LidarController::Update()
 	{
 		//Publisher 
 		//car_pub = n.advertise<geometry_msgs::Twist>(PUBLISH_TOPIC,1);
@@ -51,9 +53,13 @@
 		//count++;
 		return twistMsg;
 	}
+	
+	int LidarController::GetClockSpeed(){
+		return LOOP_FREQ;
+	}
 
 	// callback	function
-	void callback(const sensor_msgs::LaserScanConstPtr& msg_ptr){
+	void LidarController::callback(const sensor_msgs::LaserScanConstPtr& msg_ptr){
 		
 		int num_rays = msg_ptr->ranges.size();
 		double x_total = 0.0;
@@ -191,7 +197,7 @@
 
 
 	/* clamp function sets an upperbound(cap) for the inputs (in)*/
-	double clamp (double in, double cap)
+	double LidarController::clamp (double in, double cap)
 	{
 		if      ( in >  cap) return cap;
 		else if ( in < -1 * cap) return (-1 * cap);
@@ -200,7 +206,7 @@
 
 
 	/*converts car command to twist message*/
-	geometry_msgs::Twist twist_converter(sb_msgs::CarCommand cc)
+	geometry_msgs::Twist LidarController::twist_converter(sb_msgs::CarCommand cc)
 	{
 		geometry_msgs::Twist twist;
 		geometry_msgs::Vector3 Linear;
@@ -217,3 +223,6 @@
 
 		return twist;	
 	}
+	
+}
+

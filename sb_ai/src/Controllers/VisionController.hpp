@@ -25,16 +25,6 @@
 
 namespace ai{
 
-static const std::string NODE_NAME = "LaneDetector";
-static const std::string PUBLISH_TOPIC = "vision_vel";
-static const std::string PUBLISH_TOPIC2 = "vision_nav";
-const int MSG_QUEUE_SIZE = 20;
-
-int const upperBound = 255;
-int const lowerBound = 180;
-int const max_BINARY_value = 255;
-int const threshold_value = 195;
-
 class VisionController: public ControllerBase{
 private:
 cv::Mat image, image_grey, image_filter, image_thresholded, image_canny, image_blur,
@@ -59,7 +49,7 @@ int count;
 geometry_msgs::Twist twist;
 public:
 VisionController();
-geometry_msgs::Twist update();
+geometry_msgs::Twist Update();
 
 void detectLines(void);
 void findcentre(int);

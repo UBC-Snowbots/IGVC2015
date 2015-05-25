@@ -6,9 +6,6 @@
 #include <vector>
 #include <iostream>
 
-#define INFINITY INT_MAX
-#define SQRT2 1.4142135623
-
 class GridWorld{
 
 typedef std::pair<double, double> KeyPair;

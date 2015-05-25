@@ -1,5 +1,8 @@
 #include "GridWorld.h"
 
+#define INFINITY INT_MAX
+#define SQRT2 1.4142135623
+
 GridWorld::GridWorld(unsigned int size){
 	this->size = size;
 	world.reserve(size * size);

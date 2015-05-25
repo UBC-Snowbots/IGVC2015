@@ -22,7 +22,7 @@ geometry_msgs::Twist DSLiteController::GetTwistMsg(int next_move){
 	return twist;
 }
 
-DijkstraController::DijkstraController(ros::NodeHandle& nh):
+DSLiteController::DSLiteController(ros::NodeHandle& nh):
 	map_ptr(NULL),
 	width(100),
 	height(100),
@@ -34,7 +34,7 @@ DijkstraController::DijkstraController(ros::NodeHandle& nh):
 }
 
 //Returns the next twist message to publish (this is called each main loop iteration)
-geometry_msgs::Twist DijkstraController::Update(){
+geometry_msgs::Twist DSLiteController::Update(){
 	if (dijkstras.Init(map_ptr, width, height, start, goal)) {
 		dijkstras.Search(dijkstras.GetStart());
 		dijkstras.ReconstructPath(dijkstras.GetGoal());
