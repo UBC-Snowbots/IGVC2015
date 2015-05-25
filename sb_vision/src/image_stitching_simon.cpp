@@ -10,25 +10,25 @@ using namespace cv;
 using namespace std;
 
 static const string NODE_NAME = "descriptive_name";
+static const unsigned int CAMERA_AMOUNT = 3;
 const int MSG_QUEUE_SIZE = 20;
 
 bool connectCamera(VideoCapture& camera){
-	//TODO: Is there a way to tell which port the webcams auto-connect to?
+	static unsigned int occupiedID = 1;
+	
+	camera.set(CV_CAP_PROP_FPS, 20);
+	camera.set(CV_CAP_PROP_FRAME_WIDTH, 960);
+	camera.set(CV_CAP_PROP_FRAME_HEIGHT, 540);
 
-	ROS_INFO("Initializing Webcams");
-	camera.set(CV_CAP_PROP_FPS, 30);
-	camera.set(CV_CAP_PROP_FRAME_WIDTH, 640);
-	camera.set(CV_CAP_PROP_FRAME_HEIGHT, 480);
-
-	for (int portNumber = 3; portNumber >= 0; portNumber--){
-		ROS_INFO("Attempting port: %d", portNumber);
-		if (camera.open(portNumber)){
-			ROS_INFO("Connection established on port: %d", portNumber);
+	for (int deviceID = occupiedID; deviceID <= CAMERA_AMOUNT; deviceID++){
+		if (camera.open(deviceID)){
+			ROS_INFO("Successfully established conntection to webcam %d", deviceID);
+			occupiedID++;
 			return true;
 		}
 	}
 
-	ROS_FATAL("Unable to establish connection on ports");	
+	ROS_FATAL("Unable to establish connection to webcam %d", occupiedID);	
 	return false;
 }
 
@@ -42,7 +42,8 @@ int main(int argc, char **argv)
 									
 	if(!connectCamera(cap1) || !connectCamera(cap2) || !connectCamera(cap3)){
 		ROS_FATAL("Unable to connect to all cameras, exiting now");
-		ROS_FATAL("If this problem continues, restart the computer :(");
+		ROS_FATAL("If this error persist, please disconnect all webcams");
+		ROS_FATAL("and restart the computer :(");
 		return 0;
 	}
 							
@@ -54,34 +55,37 @@ int main(int argc, char **argv)
 	ROS_INFO("Entering ros:ok loop");
 	while (ros::ok() && counter < 5){
 		ROS_INFO("Image Stitching Started!");
-		
 		counter++;
 		
-		cap1 >> image1;
-		cap2 >> image2;
-		cap3 >> image3;
+		bool cam1, cam2, cam3;
+		try{
+			cam1 = cap1.read(image1);
+			cam2 = cap2.read(image2);
+			cam3 = cap3.read(image3);
+		} catch (cv::Exception& e){
+			ROS_FATAL("OpenCV exception detected, exiting now");
+			break;
+		}	
 
-		if (!cap1.read(image1)){
+
+		if (!cam1){
 			ROS_ERROR("Cannot read image 1 from video stream");
 			//continue;
 		}				
 			 
-		if (!cap2.read(image2)){
+		if (!cam2){
 			ROS_ERROR("Cannot read image 2 from video stream");
 			//continue;
 		}
 			
-		if (!cap3.read(image3)){
+		if (!cam3){
 			ROS_ERROR("Cannot read image 3 from video stream");
 			//continue;
 		}
 		
 		Mat pano;
 		vector<Mat> imgs;
-		/*
-			What is .data() doing?, what about using .empty() to
-			determine if the matrix is empty or not
-		*/	
+
 		if (image1.empty() || image2.empty() || image3.empty()){
 			ROS_WARN("One of the Mat is empty");
 			//continue; 
@@ -122,7 +126,7 @@ int main(int argc, char **argv)
 				
 			*/
 			imshow("Stiching Window", pano);
-			waitKey(25);
+			waitKey(50);
 			destroyWindow("Stiching Window");
 			ROS_INFO("Destroyed stitch image window");
 		}
