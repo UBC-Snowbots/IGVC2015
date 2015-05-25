@@ -95,8 +95,15 @@ int main(int argc, char **argv)
 		imgs.push_back(image2);
 		imgs.push_back(image3);
 
-		Stitcher::Status status = stitcher.stitch(imgs, pano);
-			
+		Stitcher::Status status;
+		try{
+			status = stitcher.stitch(imgs, pano);
+		} catch (cv::Exception& e){
+			ROS_FATAL("OpenCV exception detected while stitching, exiting now");
+			break;
+		}	
+		 
+		//TODO: Test if clear() will have any problems...
 		imgs.pop_back();
 		imgs.pop_back();
 		imgs.pop_back();
