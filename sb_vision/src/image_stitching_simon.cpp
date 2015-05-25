@@ -91,9 +91,12 @@ int main(int argc, char **argv)
 					VIDIOC_DQBUF: No such device
 					Segmentation fault(core dumped)
 			*/
-			cam1 = cap1.read(image1);
-			cam2 = cap2.read(image2);
-			cam3 = cap3.read(image3);
+			//cam1 = cap1.read(image1);
+			//cam2 = cap2.read(image2);
+			//cam3 = cap3.read(image3);
+			cap1 >> image1;
+			cap2 >> image2;
+			cap3 >> image3;
 		} catch (cv::Exception& e){
 			ROS_FATAL("OpenCV exception detected, exiting now");
 			break;
