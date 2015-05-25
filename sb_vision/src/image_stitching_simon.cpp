@@ -10,6 +10,7 @@ using namespace ros;
 using namespace cv; 
 
 static const unsigned int CAMERA_AMOUNT = 3;
+static unsigned int occupied_camera_id=0;
 static const string NODE_NAME = "descriptive_name";
 const int MSG_QUEUE_SIZE = 20;
 
@@ -18,15 +19,16 @@ const int MSG_QUEUE_SIZE = 20;
 bool connectToCamera(VideoCapture& camera){
 	//TODO: Is there a way to tell which port the webcams auto-connect to?
 
-	ROS_INFO("Initializing Webcam");
+	ROS_INFO("Initializing Webcam #%d", occupied_camera_id);
 	camera.set(CV_CAP_PROP_FPS, 30);
 	camera.set(CV_CAP_PROP_FRAME_WIDTH, 640);
 	camera.set(CV_CAP_PROP_FRAME_HEIGHT, 480);
     
     //Is it possible for the device to have greater id?!?
-	for (int deviceID = 0; deviceID < 5; deviceID++){
+	for (int deviceID = occupied_camera_id; deviceID < 5; deviceID++){
 		ROS_INFO("Attempting connection to device: %d", deviceID);
 		if (camera.open(deviceID)){
+			occupied_camera_id++;
 			return true;
 		}
 	}
@@ -41,22 +43,21 @@ int main(int argc, char **argv)
     std::cout << "OpenCV version: " << CV_VERSION_MAJOR << "-" << CV_VERSION_MINOR << std::endl; 
 
 	Stitcher stitcher = Stitcher::createDefault();
-	VideoCapture cameras[CAMERA_AMOUNT];
-
-	Mat images[CAMERA_AMOUNT];
+	std::vector<VideoCapture> cameras(CAMERA_AMOUNT);
+	std::vector<Mat> images(CAMERA_AMOUNT);
 	Mat stitchedImages;
-	std::vector<Mat> inputImages;
-	inputImages.reserve(CAMERA_AMOUNT);
+	//std::vector<Mat> inputImages(3);
+	//inputImages.reserve(CAMERA_AMOUNT);
 
 	for(int i = 0; i < CAMERA_AMOUNT; i++){
         if(!connectToCamera(cameras[i])){
             ROS_FATAL("Unable to connect to webcam %d", i);
-            ROS_FATAL("If this connection problem persist:\n\
-						Please disconnect all devices from the computer and restart :(");
+            ROS_FATAL("If this connection problem persist:");
+						ROS_FATAL("Disconnect all devices from the computer and restart :(");
             return -1;
-        }else{
-			ROS_INFO("Connection established for device: %d", i);
-		}
+        } else {
+						ROS_INFO("Connection established for device: %d", i);
+				}
     }
 	
 	int counter = 0;
@@ -69,21 +70,27 @@ int main(int argc, char **argv)
 		
 
 		for(int i = 0; i < CAMERA_AMOUNT; i++){
-			cameras[i] >> images[i];
-			if(!cameras[i].read(images[i])){
+			ROS_INFO("Reading from camera %d", i);	
+			cameras.at(i) >> images.at(i);
+			ROS_INFO("Read from camera %d", i);	
+			if(!cameras.at(i).read(images.at(i))){
 				ROS_ERROR("Cannot capture image on camera %d", i);
 			}
-			
-			if(images[i].empty()){
+				ROS_INFO("Checking read from camera %d", i);	
+			if(images.at(i).empty()){
 				ROS_ERROR("Capture image on camera %d was empty", i);
 			}
 
-			inputImages.push_back(images[i]);
+			//inputImages.push_back(images.at(i));
+			ROS_INFO("finished from camera %d", i);	
 		}
 
 
-		Stitcher::Status status = stitcher.stitch(inputImages, stitchedImages);
-		inputImages.clear();
+		Stitcher::Status status = stitcher.stitch(images, stitchedImages);
+		//inputImages.clear();
+		images.pop_back();
+		images.pop_back();
+		images.pop_back();
 			
 		if (status != Stitcher::OK) {
 			ROS_FATAL("Unable to stitch images together!, exiting now");
@@ -110,7 +117,7 @@ int main(int argc, char **argv)
 				
 			*/
 			imshow("Stiching Window", stitchedImages);
-			waitKey(25);
+			waitKey(50);
 			destroyWindow("Stiching Window");
 			ROS_INFO("Destroyed stitch image window");
 		}
@@ -121,7 +128,7 @@ int main(int argc, char **argv)
 	ROS_INFO("Releasing VideoCapture objects!");
 	
 	for(int i = 0; i < CAMERA_AMOUNT; i++){
-		cameras[i].release();
+		cameras.at(i).release();
 	}
 	
 	ROS_INFO("All VideoCaptures released, proper shutdown complete");
