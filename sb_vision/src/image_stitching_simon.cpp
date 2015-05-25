@@ -73,49 +73,42 @@ int main(int argc, char **argv)
 		ROS_INFO("Image Stitching Started!");
 		counter++;
 		
-		bool cam1, cam2, cam3;
-		try{
-			/*
-				There is still a possiblity of an error being produced
-				in this section of code. However it seems cv::Exception cannot
-				catch them as they aren't OpenCV errors.
 
-				At random times the following error message can show:
-					libv4l2: error queuing buf 0: No such device
-					libv4l2: error queuing buf 1: No such device
-					libv4l2: error dequeuing buf: No such device
-					VIDIOC_DQBUF: No such device
+		/*
+			There is still a possiblity of an error being produced
+			in this section of code. However it seems cv::Exception cannot
+			catch them as they aren't OpenCV errors.
 
-				In the next iteration will cause the following error messages
-					libv4l2: error dequeuing buf: No such device
-					VIDIOC_DQBUF: No such device
-					Segmentation fault(core dumped)
-			*/
-			cap1 >> image1;
-			cap2 >> image2;
-			cap3 >> image3;
+			At random times the following error message can show:
+				libv4l2: error queuing buf 0: No such device
+				libv4l2: error queuing buf 1: No such device
+				libv4l2: error dequeuing buf: No such device
+				VIDIOC_DQBUF: No such device
 
-			cam1 = cap1.read(image1);
-			cam2 = cap2.read(image2);
-			cam3 = cap3.read(image3);
-
-		} catch (cv::Exception& e){
-			ROS_FATAL("OpenCV exception detected, exiting now");
-			break;
-		}	
+			In the next iteration will cause the following error messages
+				libv4l2: error dequeuing buf: No such device
+				VIDIOC_DQBUF: No such device
+				Segmentation fault(core dumped)
+		*/
+	
+		//According to the doc, >> does the same as .read() BUT
+		//without doing >> first, the first run of this code will always fail
+		cap1 >> image1;
+		cap2 >> image2;
+		cap3 >> image3;
 
 
-		if (!cam1){
+		if (!cap1.read(image1)){
 			ROS_ERROR("Cannot read image 1 from video stream");
 			//continue;
 		}				
 			 
-		if (!cam2){
+		if (!cap2.read(image2)){
 			ROS_ERROR("Cannot read image 2 from video stream");
 			//continue;
 		}
 			
-		if (!cam3){
+		if (!cap3.read(image3)){
 			ROS_ERROR("Cannot read image 3 from video stream");
 			//continue;
 		}
@@ -136,14 +129,13 @@ int main(int argc, char **argv)
 		try{
 			status = stitcher.stitch(imgs, pano);
 		} catch (cv::Exception& e){
+			//Can't seem to catch any exception
 			ROS_FATAL("OpenCV exception detected while stitching, exiting now");
 			break;
 		}	
 		 
 		//TODO: Test if clear() will have any problems...
-		imgs.pop_back();
-		imgs.pop_back();
-		imgs.pop_back();
+		imgs.clear();
 			
 		if (status != Stitcher::OK) {
 			ROS_FATAL("Unable to stitch images together!, exiting now");
