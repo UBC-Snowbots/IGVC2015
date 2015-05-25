@@ -97,49 +97,29 @@ int main(int argc, char **argv)
 		cap2 >> image2;
 		cap3 >> image3;
 
-
-		if (!cap1.read(image1)){
-			ROS_ERROR("Cannot read image 1 from video stream");
-			//continue;
-		}				
-			 
-		if (!cap2.read(image2)){
-			ROS_ERROR("Cannot read image 2 from video stream");
-			//continue;
-		}
-			
-		if (!cap3.read(image3)){
+		if (!cap1.read(image1))
+			ROS_ERROR("Cannot read image 1 from video stream");			 
+		if (!cap2.read(image2))
+			ROS_ERROR("Cannot read image 2 from video stream");	
+		if (!cap3.read(image3))
 			ROS_ERROR("Cannot read image 3 from video stream");
-			//continue;
-		}
 		
 		Mat pano;
 		vector<Mat> imgs;
 
-		if (image1.empty() || image2.empty() || image3.empty()){
+		if (image1.empty() || image2.empty() || image3.empty())
 			ROS_WARN("One of the Mat is empty");
-			//continue; 
-		}
+
 
 		imgs.push_back(image1);
 		imgs.push_back(image2);
 		imgs.push_back(image3);
 
-		Stitcher::Status status;
-		try{
-			status = stitcher.stitch(imgs, pano);
-		} catch (cv::Exception& e){
-			//Can't seem to catch any exception
-			ROS_FATAL("OpenCV exception detected while stitching, exiting now");
-			break;
-		}	
-		 
-		//TODO: Test if clear() will have any problems...
+		Stitcher::Status status= stitcher.stitch(imgs, pano);
 		imgs.clear();
 			
 		if (status != Stitcher::OK) {
 			ROS_FATAL("Unable to stitch images together!, exiting now");
-			ROS_FATAL("If this is your first time running, try again!");
 			break;
 		} else {			    
 			ROS_INFO("Awaiting for stiched image to display");
