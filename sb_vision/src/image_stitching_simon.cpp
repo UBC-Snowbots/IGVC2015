@@ -4,98 +4,86 @@
 #include <opencv2/stitching/stitcher.hpp>
 #include <iostream> 
 #include <vector>
+#include <iterator>
 
 using namespace ros;
 using namespace cv; 
-using namespace std;
 
+static const unsigned int CAMERA_AMOUNT = 3;
 static const string NODE_NAME = "descriptive_name";
 const int MSG_QUEUE_SIZE = 20;
 
-bool connectCamera(VideoCapture& camera){
+//THE FOLLOWING CODE WAS MODIFIED AND STILL UNTESTED AT RUNTIME
+
+bool connectToCamera(VideoCapture& camera){
 	//TODO: Is there a way to tell which port the webcams auto-connect to?
 
-	ROS_INFO("Initializing Webcams");
+	ROS_INFO("Initializing Webcam");
 	camera.set(CV_CAP_PROP_FPS, 30);
 	camera.set(CV_CAP_PROP_FRAME_WIDTH, 640);
 	camera.set(CV_CAP_PROP_FRAME_HEIGHT, 480);
-
-	for (int portNumber = 3; portNumber >= 0; portNumber--){
-		ROS_INFO("Attempting port: %d", portNumber);
-		if (camera.open(portNumber)){
-			ROS_INFO("Connection established on port: %d", portNumber);
+    
+    //Is it possible for the device to have greater id?!?
+	for (int deviceID = 0; deviceID < 5; deviceID++){
+		ROS_INFO("Attempting connection to device: %d", deviceID);
+		if (camera.open(deviceID)){
 			return true;
 		}
 	}
 
-	ROS_FATAL("Unable to establish connection on ports");	
 	return false;
 }
 
 int main(int argc, char **argv)	
 {
 	init(argc, argv, NODE_NAME);
+    
+    std::cout << "OpenCV version: " << CV_VERSION_MAJOR << "-" << CV_VERSION_MINOR << std::endl; 
 
-	VideoCapture cap1;
-	VideoCapture cap2;
-	VideoCapture cap3;
-									
-	if(!connectCamera(cap1) || !connectCamera(cap2) || !connectCamera(cap3)){
-		ROS_FATAL("Unable to connect to all cameras, exiting now");
-		ROS_FATAL("If this problem continues, restart the computer :(");
-		return 0;
-	}
-							
-	Mat image1, image2, image3;
 	Stitcher stitcher = Stitcher::createDefault();
+	VideoCapture cameras[CAMERA_AMOUNT];
+
+	Mat images[CAMERA_AMOUNT];
+	Mat stitchedImages;
+	std::vector<Mat> inputImages;
+	inputImages.reserve(CAMERA_AMOUNT);
+
+	for(int i = 0; i < CAMERA_AMOUNT; i++){
+        if(!connectToCamera(cameras[i])){
+            ROS_FATAL("Unable to connect to webcam %d", i);
+            ROS_FATAL("If this connection problem persist:\n\
+						Please disconnect all devices from the computer and restart :(");
+            return -1;
+        }else{
+			ROS_INFO("Connection established for device: %d", i);
+		}
+    }
+	
 	int counter = 0;
 	namedWindow("Stiching Window");
 
-	ROS_INFO("Entering ros:ok loop");
+	ROS_INFO("Entering ROS loop...");
 	while (ros::ok() && counter < 5){
-		ROS_INFO("Image Stitching Started!");
-		
+		ROS_INFO("Image Stitching Started!");	
 		counter++;
 		
-		cap1 >> image1;
-		cap2 >> image2;
-		cap3 >> image3;
 
-		if (!cap1.read(image1)){
-			ROS_ERROR("Cannot read image 1 from video stream");
-			//continue;
-		}				
-			 
-		if (!cap2.read(image2)){
-			ROS_ERROR("Cannot read image 2 from video stream");
-			//continue;
-		}
+		for(int i = 0; i < CAMERA_AMOUNT; i++){
+			cameras[i] >> images[i];
+			if(!cameras[i].read(images[i])){
+				ROS_ERROR("Cannot capture image on camera %d", i);
+			}
 			
-		if (!cap3.read(image3)){
-			ROS_ERROR("Cannot read image 3 from video stream");
-			//continue;
-		}
-		
-		Mat pano;
-		vector<Mat> imgs;
-		/*
-			What is .data() doing?, what about using .empty() to
-			determine if the matrix is empty or not
-		*/	
-		if (image1.empty() || image2.empty() || image3.empty()){
-			ROS_WARN("One of the Mat is empty");
-			//continue; 
+			if(images[i].empty()){
+				ROS_ERROR("Capture image on camera %d was empty", i);
+			}
+
+			inputImages.push_back(images[i]);
 		}
 
-		imgs.push_back(image1);
-		imgs.push_back(image2);
-		imgs.push_back(image3);
 
-		Stitcher::Status status = stitcher.stitch(imgs, pano);
-			
-		imgs.pop_back();
-		imgs.pop_back();
-		imgs.pop_back();
+		Stitcher::Status status = stitcher.stitch(inputImages, stitchedImages);
+		inputImages.clear();
 			
 		if (status != Stitcher::OK) {
 			ROS_FATAL("Unable to stitch images together!, exiting now");
@@ -105,7 +93,7 @@ int main(int argc, char **argv)
 			/*
 				At this point the stiched image is ready in the Mat object
 				If you want to process the Mat directly without displaying
-			  the image then there's no problem.
+				the image then there's no problem.
 
 				HOWEVER... if you need to display the image continously				
 				things will start to go wrong
@@ -113,15 +101,15 @@ int main(int argc, char **argv)
 				We are using ros::ok to continously run this program
 				and imshow() displays the stitched image to the window
 				Therefore closing the window via the 'x' button will 
-				not stop the program since we're in a loop
+				not stop the program since we're in a ros loop
 				
-			  Only ctrl+c will stop the loop, but this is terrible because the code
+				Only ctrl+c will stop the loop, but this is terrible because the code
 				is forced to quit and it will never be able to release the webcams
-				with .release() - This causes the webcam to not connect the next time
-				this program is executed, without having to manually re-connected it again
+				with .release() - This causes the webcams to not connect the next time
+				this program is executed, without having to physically re-connected it again
 				
 			*/
-			imshow("Stiching Window", pano);
+			imshow("Stiching Window", stitchedImages);
 			waitKey(25);
 			destroyWindow("Stiching Window");
 			ROS_INFO("Destroyed stitch image window");
@@ -131,9 +119,11 @@ int main(int argc, char **argv)
 	
 	//If you Ctrl+C while inside the ros::ok loop, this part will never get executed
 	ROS_INFO("Releasing VideoCapture objects!");
-	cap1.release();
-	cap2.release();
-	cap3.release();
+	
+	for(int i = 0; i < CAMERA_AMOUNT; i++){
+		cameras[i].release();
+	}
+	
 	ROS_INFO("All VideoCaptures released, proper shutdown complete");
 	
 	return 0;
