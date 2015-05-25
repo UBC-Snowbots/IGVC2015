@@ -10,29 +10,41 @@ using namespace ros;
 using namespace cv; 
 
 static const unsigned int CAMERA_AMOUNT = 3;
-static unsigned int occupied_camera_id=0;
+static unsigned int occupiedID = 0;
 static const string NODE_NAME = "descriptive_name";
 const int MSG_QUEUE_SIZE = 20;
 
 //THE FOLLOWING CODE WAS MODIFIED AND STILL UNTESTED AT RUNTIME
+bool readFromCamera(VideoCapture& camera, Mat& image, std::vector<Mat>& storage){
+	ROS_INFO("Reading from camera...");	
+	camera >> image;
+	ROS_INFO("Read from camera");	
+	if(!camera.read(image)){
+		ROS_ERROR("Cannot capture image on camera");
+	}
+	ROS_INFO("Checking read from camera");
+	if(image.empty()){
+		ROS_ERROR("Capture image on camera empty");
+	}
+
+	storage.push_back(image);
+	ROS_INFO("finished from camera");	
+	
+}
 
 bool connectToCamera(VideoCapture& camera){
-	//TODO: Is there a way to tell which port the webcams auto-connect to?
-
-	ROS_INFO("Initializing Webcam #%d", occupied_camera_id);
 	camera.set(CV_CAP_PROP_FPS, 30);
 	camera.set(CV_CAP_PROP_FRAME_WIDTH, 640);
 	camera.set(CV_CAP_PROP_FRAME_HEIGHT, 480);
-    
-    //Is it possible for the device to have greater id?!?
-	for (int deviceID = occupied_camera_id; deviceID < 5; deviceID++){
+
+	for (int deviceID = occupiedID; deviceID < 5; deviceID++){
 		ROS_INFO("Attempting connection to device: %d", deviceID);
 		if (camera.open(deviceID)){
-			occupied_camera_id++;
+			occupiedID++;
 			return true;
 		}
 	}
-
+	ROS_FATAL("Unable to connect to Webcam #%d", occupiedID);
 	return false;
 }
 
@@ -43,22 +55,15 @@ int main(int argc, char **argv)
     std::cout << "OpenCV version: " << CV_VERSION_MAJOR << "-" << CV_VERSION_MINOR << std::endl; 
 
 	Stitcher stitcher = Stitcher::createDefault();
-	std::vector<VideoCapture> cameras(CAMERA_AMOUNT);
-	std::vector<Mat> images(CAMERA_AMOUNT);
+	VideoCapture camera1, camera2, camera3;
+	Mat image1, image2, image3;
 	Mat stitchedImages;
-	//std::vector<Mat> inputImages(3);
-	//inputImages.reserve(CAMERA_AMOUNT);
+	
+	std::vector<Mat> inputImages(3);
 
-	for(int i = 0; i < CAMERA_AMOUNT; i++){
-        if(!connectToCamera(cameras[i])){
-            ROS_FATAL("Unable to connect to webcam %d", i);
-            ROS_FATAL("If this connection problem persist:");
-						ROS_FATAL("Disconnect all devices from the computer and restart :(");
-            return -1;
-        } else {
-						ROS_INFO("Connection established for device: %d", i);
-				}
-    }
+	connectToCamera(camera1);
+	connectToCamera(camera2);
+	connectToCamera(camera3);
 	
 	int counter = 0;
 	namedWindow("Stiching Window");
@@ -69,29 +74,13 @@ int main(int argc, char **argv)
 		counter++;
 		
 
-		for(int i = 0; i < CAMERA_AMOUNT; i++){
-			ROS_INFO("Reading from camera %d", i);	
-			cameras.at(i) >> images.at(i);
-			ROS_INFO("Read from camera %d", i);	
-			if(!cameras.at(i).read(images.at(i))){
-				ROS_ERROR("Cannot capture image on camera %d", i);
-			}
-				ROS_INFO("Checking read from camera %d", i);	
-			if(images.at(i).empty()){
-				ROS_ERROR("Capture image on camera %d was empty", i);
-			}
+		readFromCamera(camera1, image1, inputImages);
+		readFromCamera(camera2, image2, inputImages);
+		readFromCamera(camera3, image3, inputImages);
 
-			//inputImages.push_back(images.at(i));
-			ROS_INFO("finished from camera %d", i);	
-		}
-
-
-		Stitcher::Status status = stitcher.stitch(images, stitchedImages);
-		//inputImages.clear();
-		images.pop_back();
-		images.pop_back();
-		images.pop_back();
-			
+		Stitcher::Status status = stitcher.stitch(inputImages, stitchedImages);
+		inputImages.clear();
+	
 		if (status != Stitcher::OK) {
 			ROS_FATAL("Unable to stitch images together!, exiting now");
 			break;
@@ -126,11 +115,9 @@ int main(int argc, char **argv)
 	
 	//If you Ctrl+C while inside the ros::ok loop, this part will never get executed
 	ROS_INFO("Releasing VideoCapture objects!");
-	
-	for(int i = 0; i < CAMERA_AMOUNT; i++){
-		cameras.at(i).release();
-	}
-	
+	camera1.release();	
+	camera2.release();
+	camera3.release();
 	ROS_INFO("All VideoCaptures released, proper shutdown complete");
 	
 	return 0;
