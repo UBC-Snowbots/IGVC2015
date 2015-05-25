@@ -13,13 +13,20 @@ static const string NODE_NAME = "descriptive_name";
 static const unsigned int CAMERA_AMOUNT = 3;
 const int MSG_QUEUE_SIZE = 20;
 
+/*
+	Assigns a VideoCapture object to an active webcam.
+	The deviceID for all three webcams will be between [1,3]
+	Once a connection is made, the lowest ID will be occupied
+*/
 bool connectCamera(VideoCapture& camera){
+	//Keeps track of the lowest deviceID to save time
 	static unsigned int occupiedID = 1;
 	
 	camera.set(CV_CAP_PROP_FPS, 20);
 	camera.set(CV_CAP_PROP_FRAME_WIDTH, 960);
 	camera.set(CV_CAP_PROP_FRAME_HEIGHT, 540);
 
+	//deviceIDs shouldn't go pass 3...there's not enough unit testing to confirm this
 	for (int deviceID = occupiedID; deviceID <= CAMERA_AMOUNT; deviceID++){
 		if (camera.open(deviceID)){
 			ROS_INFO("Successfully established conntection to webcam %d", deviceID);
@@ -28,13 +35,23 @@ bool connectCamera(VideoCapture& camera){
 		}
 	}
 
-	ROS_FATAL("Unable to establish connection to webcam %d", occupiedID);	
+	ROS_FATAL("Unable to establish connection to webcam %d", occupiedID);
 	return false;
 }
 
 int main(int argc, char **argv)	
 {
 	init(argc, argv, NODE_NAME);
+
+	/*
+		When I tried putting the VideoCapture and Mat objects inside
+		an array/vector, the program kept losing connection frequently.
+		Once connection is lost the device cannot is release() regardless
+		and a hard restart will be required to re-execute the program again
+
+		An internal error message will be printed out whenever this happens, 
+		but there are no ways to catch the error as far as I'm aware
+	*/
 
 	VideoCapture cap1;
 	VideoCapture cap2;
@@ -101,6 +118,7 @@ int main(int argc, char **argv)
 			status = stitcher.stitch(imgs, pano);
 		} catch (cv::Exception& e){
 			ROS_FATAL("OpenCV exception detected while stitching, exiting now");
+			ROS_FATAL("If this is your first time running, try again!");
 			break;
 		}	
 		 
