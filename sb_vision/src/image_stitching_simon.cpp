@@ -59,24 +59,38 @@ int main(int argc, char **argv)
 									
 	if(!connectCamera(cap1) || !connectCamera(cap2) || !connectCamera(cap3)){
 		ROS_FATAL("Unable to connect to all cameras, exiting now");
-		ROS_FATAL("If this error persist, please disconnect all webcams");
-		ROS_FATAL("and restart the computer :(");
+		ROS_FATAL("If this error persist, please disconnect all webcams or restart computer");
 		return 0;
 	}
 							
 	Mat image1, image2, image3;
 	Stitcher stitcher = Stitcher::createDefault(true);
+
 	int counter = 0;
 	namedWindow("Stiching Window");
 
-	ROS_INFO("Entering ros:ok loop");
-	
 	while (ros::ok() && counter < 5){
 		ROS_INFO("Image Stitching Started!");
 		counter++;
 		
 		bool cam1, cam2, cam3;
 		try{
+			/*
+				There is still a possiblity of an error being produced
+				in this section of code. However it seems cv::Exception cannot
+				catch them as they aren't OpenCV errors.
+
+				At random times the following error message can show:
+					libv4l2: error queuing buf 0: No such device
+					libv4l2: error queuing buf 1: No such device
+					libv4l2: error dequeuing buf: No such device
+					VIDIOC_DQBUF: No such device
+
+				In the next iteration will cause the following error messages
+					libv4l2: error dequeuing buf: No such device
+					VIDIOC_DQBUF: No such device
+					Segmentation fault(core dumped)
+			*/
 			cam1 = cap1.read(image1);
 			cam2 = cap2.read(image2);
 			cam3 = cap3.read(image3);
@@ -118,7 +132,6 @@ int main(int argc, char **argv)
 			status = stitcher.stitch(imgs, pano);
 		} catch (cv::Exception& e){
 			ROS_FATAL("OpenCV exception detected while stitching, exiting now");
-			ROS_FATAL("If this is your first time running, try again!");
 			break;
 		}	
 		 
@@ -129,6 +142,7 @@ int main(int argc, char **argv)
 			
 		if (status != Stitcher::OK) {
 			ROS_FATAL("Unable to stitch images together!, exiting now");
+			ROS_FATAL("If this is your first time running, try again!");
 			break;
 		} else {			    
 			ROS_INFO("Awaiting for stiched image to display");
