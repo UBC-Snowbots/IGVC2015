@@ -14,8 +14,9 @@ const int MSG_QUEUE_SIZE = 20;
 
 bool connectCamera(VideoCapture& camera){
 	//TODO: Is there a way to tell which port the webcams auto-connect to?
+
 	ROS_INFO("Initializing Webcams");
-	//camera.set(CV_CAP_PROP_FPS,15);
+	camera.set(CV_CAP_PROP_FPS, 30);
 	//camera.set(CV_CAP_PROP_FRAME_WIDTH, 640);
 	//camera.set(CV_CAP_PROP_FRAME_HEIGHT, 480);
 
@@ -26,7 +27,7 @@ bool connectCamera(VideoCapture& camera){
 			return true;
 		}
 	}
-
+	//If this error comes on, restart the computer :(
 	ROS_FATAL("Unable to establish connection on ports");
 	
 	return false;
@@ -49,8 +50,8 @@ int main(int argc, char **argv)
 	Stitcher stitcher = Stitcher::createDefault();
 	int counter = 0;
 	namedWindow("Stiching Window");
-
-	while (ros::ok() && counter < 10 && getchar() == -1){
+	ROS_INFO("Entering loop");
+	while (ros::ok() && counter < 10){
 		ROS_INFO("Image Stitching Started!");
 		
 		counter++;
@@ -122,7 +123,7 @@ int main(int argc, char **argv)
 			imshow("Stiching Window", pano);
 			waitKey(25);
 			destroyWindow("Stiching Window");
-			ROS_INFO("Destroyed stitech image window");
+			ROS_INFO("Destroyed stitch image window");
 		}
 		ROS_INFO("Counter: %d", counter);
 	}
