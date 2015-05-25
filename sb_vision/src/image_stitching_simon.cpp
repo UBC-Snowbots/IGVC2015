@@ -14,12 +14,12 @@ const int MSG_QUEUE_SIZE = 20;
 
 bool connectCamera(VideoCapture& camera){
 	//TODO: Is there a way to tell which port the webcams auto-connect to?
-	ROS_INFO("Init webcam");
+	ROS_INFO("Initializing Webcams");
 	//camera.set(CV_CAP_PROP_FPS,15);
 	//camera.set(CV_CAP_PROP_FRAME_WIDTH, 640);
 	//camera.set(CV_CAP_PROP_FRAME_HEIGHT, 480);
 
-	for (int portNumber = 10; portNumber >= 0; portNumber--){
+	for (int portNumber = 3; portNumber >= 0; portNumber--){
 		ROS_INFO("Attempting port: %d", portNumber);
 		if (camera.open(portNumber)){
 			ROS_INFO("Connection established on port: %d", portNumber);
@@ -27,7 +27,7 @@ bool connectCamera(VideoCapture& camera){
 		}
 	}
 
-	ROS_INFO("Unable to establish connection on ports");
+	ROS_FATAL("Unable to establish connection on ports");
 	
 	return false;
 }
@@ -41,7 +41,7 @@ int main(int argc, char **argv)
 	VideoCapture cap3;
 									
 	if(!connectCamera(cap1) || !connectCamera(cap2) || !connectCamera(cap3)){
-		ROS_INFO("Unable to connect to all cameras, exiting now");
+		ROS_FATAL("Unable to connect to all cameras, exiting now");
 		return 0;
 	}
 							
@@ -50,7 +50,7 @@ int main(int argc, char **argv)
 	int counter = 0;
 	namedWindow("Stiching Window");
 
-	while (ros::ok() && counter < 5){
+	while (ros::ok() && counter < 10 && getchar() == -1){
 		ROS_INFO("Image Stitching Started!");
 		
 		counter++;
@@ -60,17 +60,17 @@ int main(int argc, char **argv)
 		cap3 >> image3;
 
 		if (!cap1.read(image1)){
-			ROS_INFO("Cannot read image 1 from video stream");
+			ROS_ERROR("Cannot read image 1 from video stream");
 			//continue;
 		}				
 			 
 		if (!cap2.read(image2)){
-			ROS_INFO("Cannot read image 2 from video stream");
+			ROS_ERROR("Cannot read image 2 from video stream");
 			//continue;
 		}
 			
 		if (!cap3.read(image3)){
-			ROS_INFO("Cannot read image 3 from video stream");
+			ROS_ERROR("Cannot read image 3 from video stream");
 			//continue;
 		}
 		
@@ -81,7 +81,7 @@ int main(int argc, char **argv)
 			determine if the matrix is empty or not
 		*/	
 		if (image1.empty() || image2.empty() || image3.empty()){
-			ROS_INFO("One of the Mat is empty");
+			ROS_WARN("One of the Mat is empty");
 			//continue; 
 		}
 
@@ -96,7 +96,7 @@ int main(int argc, char **argv)
 		imgs.pop_back();
 			
 		if (status != Stitcher::OK) {
-			ROS_INFO("Unable to stitch images together!, exiting now");
+			ROS_FATAL("Unable to stitch images together!, exiting now");
 			break;
 		} else {			    
 			ROS_INFO("Awaiting for stiched image to display");
@@ -121,7 +121,6 @@ int main(int argc, char **argv)
 			*/
 			imshow("Stiching Window", pano);
 			waitKey(25);
-			
 			destroyWindow("Stiching Window");
 			ROS_INFO("Destroyed stitech image window");
 		}
