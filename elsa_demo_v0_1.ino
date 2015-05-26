@@ -128,17 +128,27 @@ void setup()
   
   //set up encoders
   hal.i2c->writeRegister(Encoder,0x00,0x00);
+  //hal.console->printf_P(PSTR("done setup"));
 }
 
 void loop()
 {
+  //hal.console->printf_P(PSTR("1"));
   hal.scheduler->delay(10);
+  //hal.console->printf_P(PSTR("2"));
   read_radio();
+  //hal.console->printf_P(PSTR("3"));
   talk();//send and receive serial messages
+  //hal.console->printf_P(PSTR("4"));
   move_pwm();
+  //hal.console->printf_P(PSTR("5"));
   run_compass();
+  //hal.console->printf_P(PSTR("6"));
   velocity();
+  //hal.console->printf_P(PSTR("7"));
   motor_calibration();
+  
+  //hal.console->printf_P(PSTR("looped"));
 }
 
 void read_radio()//reads the pwm input for rc receiver
@@ -293,7 +303,7 @@ void talk()
     while(hal.console->available() >=10)
     {
       Byte[0]= hal.console->read();
-      //hal.console->println(Byte[0]);
+      ///hal.console->println(Byte[0]);
       if(Byte[0]=='B')// make sure all data begains with a zero
       {
         Byte[1]= hal.console->read();
@@ -364,7 +374,7 @@ void setup_compass()
 			 AP_InertialSensor::RATE_100HZ);
 
     if (!compass.init()) {
-        hal.console->println("compass initialisation failed!");
+        //hal.console->println("compass initialisation failed!");
         while (1) ;
     }
 
@@ -390,8 +400,6 @@ void run_compass()//compass function, remove prints and console reads
     // clear out any existing samples from ins
     ins.update();
 
-    // loop as long as user does not press a key
-    while( !hal.console->available() ) {
 
       
 
@@ -401,7 +409,7 @@ void run_compass()//compass function, remove prints and console reads
         float heading;
 
         if (!compass.healthy()) {
-            hal.console->println("not healthy");
+            //hal.console->println("not healthy");
             return;
         }
 	Matrix3f dcm_matrix;
@@ -451,8 +459,10 @@ void run_compass()//compass function, remove prints and console reads
 
 	compdeg=ToDeg(heading);
 
+//hal.console->println(compdeg);
 
-}
+
+
 }
 
 void velocity()
