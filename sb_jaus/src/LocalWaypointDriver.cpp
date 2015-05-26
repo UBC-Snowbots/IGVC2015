@@ -1,6 +1,6 @@
 #include "LocalWaypointDriver.hpp"
 
-JAUS::Message* LocalWaypointDriver::GenerateDriveCommand(const JAUS::Byte status) override {
+JAUS::Message* LocalWaypointDriver::GenerateDriveCommand(const JAUS::Byte status) {
     if(status==JAUS::Management::Status::Ready || status == JAUS::Management::Status::Standby) {
         sb_msgs::MoveCommand com;
         JAUS::SetLocalWaypoint wp = GetLocalWaypoint();
@@ -26,5 +26,8 @@ void LocalWaypointDriver::WaypointAchieved(const JAUS::SetLocalWaypoint& waypoin
     if(wpts.size()>0){
     	SetLocalWaypoint(&wpts[0]);
     }
+}
+void LocalWaypointDriver::setListDriver(JAUS::LocalWaypointListDriver* listDriver){
+	this->listDriver = listDriver;
 }
 

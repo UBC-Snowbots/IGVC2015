@@ -1,6 +1,6 @@
 #include "LocalPoseSensorManager.hpp"
 
-bool LocalPoseSensorManager::onPoseChange(const std_msgs::String& msg) {
+void LocalPoseSensorManager::onPoseChange(std_msgs::String msg) {
 
     JAUS::SetLocalPose localPose;
 
@@ -23,8 +23,7 @@ bool LocalPoseSensorManager::onPoseChange(const std_msgs::String& msg) {
     sensor->SetLocalPose(localPose);
 
 }
-LocalPoseSensorManager::LocalPoseSensorManager(JAUS::LocalPoseSensor* sensor): sensor(sensor) {
-    ros::NodeHandle nh;
+LocalPoseSensorManager::LocalPoseSensorManager(ros::NodeHandle& nh, JAUS::LocalPoseSensor* sensor): sensor(sensor) {
     sub = nh.subscribe<std_msgs::String>(POSE_TOPIC,100,&LocalPoseSensorManager::onPoseChange,this);
 }
 

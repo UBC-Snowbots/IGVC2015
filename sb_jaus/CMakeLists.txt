@@ -45,7 +45,7 @@ add_executable(jaus_server
 	src/server.cpp
 	src/LocalPoseSensorManager.cpp
 	src/LocalWaypointListDriver.cpp
-	src/WaypointDriver.cpp)
+	src/LocalWaypointDriver.cpp)
 
 add_executable(jaus_judge src/judge.cpp)
 

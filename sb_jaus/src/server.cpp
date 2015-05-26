@@ -10,7 +10,7 @@ const std::string MOVE_COMMAND_TOPIC = "move_command";
 
 
 int main(int argc, char* argv[]) {
-    ros::init(argc, argv, "jaus");
+    ros::init(argc, argv, std::string("jaus"), ros::init_options::AnonymousName);
 
     ros::NodeHandle self;
 
@@ -19,15 +19,15 @@ int main(int argc, char* argv[]) {
     JAUS::Transport* transportService = nullptr;
     JAUS::LocalPoseSensor* localPoseSensor = nullptr;
     localPoseSensor = new JAUS::LocalPoseSensor();
-    LocalWaypointDriver* localWaypointDriver = new LocalWaypointDriver(self.advertise<sb_msgs::MoveCommand>(MOVE_COMMAND_TOPIC,100),localPoseSensor);
+    LocalWaypointDriver* localWaypointDriver = new LocalWaypointDriver(self.advertise<sb_msgs::MoveCommand>(MOVE_COMMAND_TOPIC,100),localPoseSensor,nullptr);
+    LocalWaypointListDriver* localWaypointListDriver = new LocalWaypointListDriver(localWaypointDriver);
+    localWaypointDriver->setListDriver(localWaypointListDriver);
 
-    LocalPoseSensor manager(localPoseSensor);
+    LocalPoseSensorManager manager(self,localPoseSensor);
 
     component.AddService(localPoseSensor);
     component.AddService(localWaypointDriver);
 
-    
-    
     discoveryService = (JAUS::Discovery*)component.GetService(JAUS::Discovery::Name);
     discoveryService->SetSubsystemIdentification(JAUS::Subsystem::Vehicle,"Snowbots");
     discoveryService->SetNodeIdentification("Main");
@@ -45,7 +45,7 @@ int main(int argc, char* argv[]) {
 
     transportService = (JAUS::Transport*) component.GetService(JAUS::Transport::Name);
     transportService->LoadSettings("services.xml");
-
+	
     const JAUS::Address comp_address_id = component.GetComponentID();
     if(!transportService->IsInitialized()) {
         transportService->Initialize(comp_address_id);
