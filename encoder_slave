@@ -105,9 +105,9 @@ void requestEvent(){
   output += Lstr;
   output += ".";
   
-  char carray[51];
+  char carray[25];
   
-  output.toCharArray(carray,51);
+  output.toCharArray(carray,25);
   Wire.write(carray);
   
 }
