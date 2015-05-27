@@ -19,10 +19,13 @@ ai::ControllerBase* GetController(ros::NodeHandle& nh)
 	
 	if (param == "dijkstra")
 	{
+	  std::cout << "Running Dijkstra!" << std::endl;
 		return new ai::DijkstraController(nh);
 	}else if(param=="vision"){
+	  std::cout << "Running Vision!" << std::endl;
 		return new ai::VisionController();
 	}else if(param=="lidar"){
+	  std::cout << "Running Lidar!" << std::endl;
 		return new ai::LidarController(nh);
 	//}else if(param=="dslite"){ // this one is pretty broken - its implementation is basically a copy-paste of DijkstraController's...
 	//	return new ai::DSLiteController(nh);
