@@ -1,4 +1,5 @@
 add_subdirectory(Controllers/AI)
+add_subdirectory(Controllers/PathSmoothing)
 
 find_package(OpenCV REQUIRED)
 

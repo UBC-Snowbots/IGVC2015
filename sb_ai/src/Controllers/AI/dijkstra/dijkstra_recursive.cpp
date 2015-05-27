@@ -77,6 +77,31 @@ int Dijkstra::GetNextStep()
 	return 0;	
 }
 
+
+void Dijkstra::GetPathIndex(int &firstIndex, int &fourthIndex, int location)
+{
+
+	if (destination == -1) { return; }
+	
+	else {
+		// make sure the parent of location is valid
+		assert(parent[location] >= 0 && parent[location] < map_size);
+
+		if (location != start) 
+		{
+			// get next 3 locations after start
+			fourth = third;
+			third = second;
+			second = first;
+			first = location;
+		}
+	}
+
+  firstIndex = first;
+  fourthIndex = fourth;
+}
+
+
 bool Dijkstra::Init(int * main_map, int width, int height, int start_loc, int goal_loc)		// Executes the algorithm
 {	
 	map_size = width * height;
@@ -107,6 +132,7 @@ bool Dijkstra::Init(int * main_map, int width, int height, int start_loc, int go
 	first = -1;
 	second = -1;
 	third = -1;
+	fourth = -1;
 	
 	return true;
 }	

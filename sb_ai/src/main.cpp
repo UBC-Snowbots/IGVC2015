@@ -21,15 +21,24 @@ ai::ControllerBase* GetController(ros::NodeHandle& nh)
 	{
 	  std::cout << "Running Dijkstra!" << std::endl;
 		return new ai::DijkstraController(nh);
-	}else if(param=="vision"){
+	}
+	else if (param=="vision")
+	{
 	  std::cout << "Running Vision!" << std::endl;
 		return new ai::VisionController();
-	}else if(param=="lidar"){
+	}
+	else if (param=="lidar")
+	{
 	  std::cout << "Running Lidar!" << std::endl;
 		return new ai::LidarController(nh);
-	//}else if(param=="dslite"){ // this one is pretty broken - its implementation is basically a copy-paste of DijkstraController's...
+	}
+	//else if (param=="dslite")
+	//{ 
+	//  std::cout << "Running D* Lite!" << std::endl;
 	//	return new ai::DSLiteController(nh);
-	}else{
+	//}
+	else
+	{
 		std::cout << "Invalid " << MODE_PARAM << " '" << param << "'." << std::endl;
 	}
 	
@@ -44,34 +53,20 @@ ai::ControllerBase* GetController(ros::NodeHandle& nh)
 // main function that runs this node
 int main(int argc, char **argv)
 {
-
-	// Initializes this node. 
-	// First 2 arguments are for ROS arguments and name remapping.
-	// Last argument is for the name of this node.
 	ros::init(argc, argv, AI_NODE_NAME);
-	
-	// Main access point to communication with ROS system.
 	ros::NodeHandle nh;
-	
-	// Initialize publisher to PUB_TOPIC.
-	// Second argument for advertise is the buffer size.
 	ros::Publisher car_pub = nh.advertise<geometry_msgs::Twist>(PUB_TOPIC, 10);	
 	
 	ai::ControllerBase* controller = GetController(nh);
-	if(!controller) return EXIT_FAILURE;
-	
-	// Frequency of the loop. 
-	// eg. 10 = 10hz
+	if (!controller) return EXIT_FAILURE;
+
 	ros::Rate loop_rate(controller->GetClockSpeed());
 
 	while (ros::ok()) {
 
-		car_pub.publish(controller->Update());	// this is where we publish twist output
-		
-		ros::spinOnce();	// required for subscriptions
-		
-		loop_rate.sleep();	// sleep for the time remaining to hit frequency loop rate
-	
+		car_pub.publish(controller->Update());	
+		ros::spinOnce();	
+		loop_rate.sleep();	
 	}
 
 	return 0;
