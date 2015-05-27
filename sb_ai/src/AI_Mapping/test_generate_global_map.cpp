@@ -5,7 +5,7 @@ int main() {
 
   std::cout << "hello world" << std::endl;
 
-  //GenerateGlobalMap generateGlobalMap;
+  GenerateGlobalMap generateGlobalMap;
 
   //  generateGlobalMap.testDoSomething();
 
