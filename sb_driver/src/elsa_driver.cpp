@@ -147,7 +147,7 @@ int main(int argc, char** argv)
 			ss << (char)IDENTIFIER_BYTE<< twist_y[0] << twist_y[1] << twist_y[2] << twist_z[0] << twist_z[1] << twist_z[2];
 
 	    }
-	    link.writeData(ss.str(), 10);
+	    link.writeData(ss.str(), 7);
 	    
 	    //delay for sync
 	    usleep(20000);
