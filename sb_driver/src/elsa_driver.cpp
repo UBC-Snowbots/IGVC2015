@@ -153,7 +153,7 @@ int main(int argc, char** argv)
 	    usleep(20000);
 	    
 	    //publish data
-	    processData(link.readData(10),state);
+	    processData(link.readData(21),state);//" -19,      0,      0."
 	    robot_state.publish(state);
      
 	    
@@ -229,9 +229,13 @@ int main(int argc, char** argv)
 void processData(string data,sb_msgs::RobotState &state)
 {
 //	state.compass.push_back(data[0] << 8|data[1]);
-	state.compass=data[0] << 8|data[1];//Replaced push_back
+	/*state.compass=data[0] << 8|data[1];//Replaced push_back
 	long right=(data[2] << 24|data[3] << 16|data[4] << 8|data[5]);
-	long left=(data[6] << 24|data[7] << 16|data[8] << 8|data[9]);
+	long left=(data[6] << 24|data[7] << 16|data[8] << 8|data[9]);*/
+	
+	state.compass=stoi(data.substr(0,4));/" -19,      0,      0."
+	long right=stoi(data.substr(5,7));
+	long left=stoi(data.substr(13,7));
 	
 	state.RightVelo = float(right)/1000;
 	state.LeftVelo = float(left)/1000;
