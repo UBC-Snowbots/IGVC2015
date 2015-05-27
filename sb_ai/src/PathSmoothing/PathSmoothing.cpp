@@ -1,6 +1,7 @@
 #include <ros/ros.h>
 #include <geometry_msgs/Twist.h>
 #include <cmath>
+#include <iostream>
 
 #define MAX_ANG_VEL 0.3f
 #define MAX_LIN_VEL 0.3f
@@ -9,8 +10,8 @@
 
 struct Points
 {
-  int x;
-  int y;
+  float x;
+  float y;
 };
 
 Points next_points[2];
@@ -23,11 +24,12 @@ void GetVelocity(float robot_yaw, int robot_x, int robot_y, Points* next_targets
 {
   // Check for null 
   if (!next_targets) return; 
-
-  int dist_x, dist_y, ang_dist_sign;
+  
+  float dist_x, dist_y, ang_dist_sign;
   float target_yaw, ang_dist;
   dist_x = next_targets[1].x - next_targets[0].x;
   dist_y = next_targets[1].y - next_targets[0].y;
+
   target_yaw = atan(dist_y/dist_x);
   ang_dist = target_yaw - robot_yaw; // need to fix negatives
   ang_dist_sign = (int) ang_dist;
@@ -63,7 +65,6 @@ void GetVelocity(float robot_yaw, int robot_x, int robot_y, Points* next_targets
     elsa_command.angular.z = 0;
     elsa_command.linear.y = 0.3;
   }
-  
 }
                    
 
@@ -76,6 +77,14 @@ int main (int argc, char** argv)
   elsa_command.angular.y = 0;
   elsa_command.angular.z = 0;
 
+  Points first, second;
+  first.x = 0;
+  first.y = 0;
+  second.x = 0;
+  second.y = 0;
+  next_points[0] = first;
+  next_points[1] = second;
+
   ros::init(argc, argv, NODE_NAME);
   ros::NodeHandle nh;
   
@@ -85,7 +94,7 @@ int main (int argc, char** argv)
   
   while (ros::ok())
   {
-    GetVelocity(0.0f, 0, 0, next_points, 0.0f);
+    GetVelocity(0, 0, 0, next_points, 0);
     elsa_pub.publish(elsa_command);
     ros::spinOnce();
     loop_rate.sleep();
