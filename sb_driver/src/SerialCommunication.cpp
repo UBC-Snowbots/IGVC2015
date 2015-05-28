@@ -67,11 +67,10 @@ SerialCommunication::~SerialCommunication()
 	close (fd);
 }
 
-string SerialCommunication::readData(int n)
+ void SerialCommunication::readData(int n, char *buf)
 {
-	char buf[n];
 	read(fd, buf, n);
-	return buf;
+	return;
 }
 
 int SerialCommunication::writeData(string output, unsigned int n)

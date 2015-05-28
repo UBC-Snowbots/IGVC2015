@@ -126,9 +126,9 @@ int main(int argc, char** argv)
 	    //publish data
 	    robot_state.publish(state);
 	    
-	    gps_data.data = link.readData(38);
+	    /*gps_data.data = link.readData(38);
 	    cout << "GPS DATA " << gps_data.data << endl; // print out gps datas
-	    gps_state.publish(gps_data);
+	    gps_state.publish(gps_data);*/
 	    
 	    //clear buffer (MAY NOT WORK)
 	    link.clearBuffer();

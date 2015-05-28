@@ -43,7 +43,7 @@ public:
 	
 	//reads n byte of data from serial buffer
 	//returns string
-	string readData(int n=100);
+	void readData(int n, char* buf);
 	
 	//writes data to serial buffer
 	//returns bytes written
