@@ -66,7 +66,6 @@ int main(int argc, char **argv)	{
 		return 0;
 	}
 							
-	Mat image1, image2, image3;
 	vector<Mat> imgs;
 	Stitcher stitcher = Stitcher::createDefault(true);
 
@@ -75,6 +74,9 @@ int main(int argc, char **argv)	{
 	int errorCounter = 0;
 
 	while (ros::ok() && counter < 6 && errorCounter < 5){
+		//Testing to see if having the mat obj recreated every loop would
+		//decrease the chances of encountering the error again...
+		Mat image1, image2, image3;
 		ROS_INFO("Image Stitching Started!");
 		counter++;
 		
@@ -163,10 +165,6 @@ int main(int argc, char **argv)	{
 			//ROS_INFO("Destroyed stitch image window");
 		}
 		ROS_INFO("Counter: %d", counter);
-		image1.release();
-		image2.release();
-		image3.release();
-		pano.release();
 	}
 	
 	//If you CTRL + C while inside the ros::ok loop, this part will never get executed
