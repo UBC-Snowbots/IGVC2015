@@ -9,7 +9,7 @@ using namespace ros;
 using namespace cv; 
 using namespace std;
 
-static const string NODE_NAME = "Image stitching - Simon";
+static const string NODE_NAME = "ImageStitch";
 static const unsigned int CAMERA_AMOUNT = 3;
 
 /*
@@ -71,8 +71,9 @@ int main(int argc, char **argv)	{
 
 	int counter = 0;
 	namedWindow("Stiching Window");
+	int errorCounter = 0;
 
-	while (ros::ok() && counter < 5){
+	while (ros::ok() && counter < 6 && errorCounter < 5){
 		ROS_INFO("Image Stitching Started!");
 		counter++;
 		
@@ -98,12 +99,21 @@ int main(int argc, char **argv)	{
 		cap2 >> image2;
 		cap3 >> image3;
 
-		if (!cap1.read(image1))
-			ROS_ERROR("Cannot read image 1 from video stream");			 
-		if (!cap2.read(image2))
-			ROS_ERROR("Cannot read image 2 from video stream");	
-		if (!cap3.read(image3))
+		if (!cap1.read(image1)){
+			ROS_ERROR("Cannot read image 1 from video stream");
+			errorCounter++;
+			continue;
+		}
+		if (!cap2.read(image2)){
+			ROS_ERROR("Cannot read image 2 from video stream");
+			errorCounter++;
+			continue;
+		}
+		if (!cap3.read(image3)){
 			ROS_ERROR("Cannot read image 3 from video stream");
+			errorCounter++;
+			continue;
+		}
 		
 		Mat pano;
 		vector<Mat> imgs;
@@ -119,8 +129,9 @@ int main(int argc, char **argv)	{
 		imgs.clear();
 			
 		if (status != Stitcher::OK) {
-			ROS_FATAL("Unable to stitch images together!, exiting now");
-			break;
+			ROS_FATAL("Unable to stitch images together!, trying again...");
+			continue;
+
 		} else {			    
 			ROS_INFO("Awaiting for stiched image to display");
 			/*
@@ -142,9 +153,12 @@ int main(int argc, char **argv)	{
 			this program is executed, without having to manually re-connected it again
 			*/
 			imshow("Stiching Window", pano);
-			waitKey(50);
+			if(waitKey(50) == 27){
+				ROS_INFO("ESC key pressed! Exiting loop now");
+				break; 
+	       	}
 			destroyWindow("Stiching Window");
-			ROS_INFO("Destroyed stitch image window");
+			//ROS_INFO("Destroyed stitch image window");
 		}
 		ROS_INFO("Counter: %d", counter);
 	}

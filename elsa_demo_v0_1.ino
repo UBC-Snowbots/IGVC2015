@@ -66,7 +66,8 @@ long Lspeed, Rspeed;
 
 int compdeg;//compass heading in degrees
 
-float left_motor_cal, right_motor_cal =1; //calibration variables
+float left_motor_cal = 1;
+float right_motor_cal = 0.85; //calibration variables
 float voltage1, voltage2 = 0;
 float batt_mon1_vol, batt_mon2_vol = 0;
 int voltage_count = 0;
@@ -157,8 +158,8 @@ void loop()
   //hal.console->printf_P(PSTR("6"));
   velocity();
   //hal.console->printf_P(PSTR("7"));
-  motor_calibration();
-  PID_calibration();
+  //motor_calibration();
+  //PID_calibration();
   hal.console->println(leftE);
     hal.console->println(rightE);
  // hal.console->printf_P(PSTR("looped"));
@@ -183,16 +184,16 @@ void move_pwm()// commands the esc
   if(rc[2].control_in < 300)//manual control
   {
     //hal.console->printf_P(PSTR("twist"));
-    wheels[0]=1500+(twist_z-twist_y);//*right_motor_cal; //double check left vs right
-    wheels[1]=1500+(twist_z+twist_y);//*left_motor_cal;
+    wheels[0]=1500+(twist_z-twist_y)*right_motor_cal; //double check left vs right
+    wheels[1]=1500+(twist_z+twist_y)*left_motor_cal;
     a_led->write(0);//LED solid
     b_led->write(1);
   }
   else if(rc[2].control_in < 650)//autonomous
   {
     //hal.console->printf_P(PSTR("radio"));
-    wheels[0]=1500+(rc[3].control_in-rc[1].control_in);//*right_motor_cal;
-    wheels[1]=1500+(rc[3].control_in+rc[1].control_in);//*left_motor_cal;
+    wheels[0]=1500+(rc[3].control_in-rc[1].control_in)*right_motor_cal;
+    wheels[1]=1500+(rc[3].control_in+rc[1].control_in)*left_motor_cal+30;
     a_led->write(0);//LED Blinking
     b_led->write(1);
   }
@@ -253,33 +254,33 @@ void move_pwm()// commands the esc
 
 void setup_radio(void)
 {	
-  rc_1.radio_min = 1050;//sets up the minimum value from reciver
-  rc_2.radio_min = 1076;
-  rc_3.radio_min = 1051;
-  rc_4.radio_min = 1055;
+  rc_1.radio_min = 1057;//sets up the minimum value from reciver
+  rc_2.radio_min = 1084;
+  rc_3.radio_min = 1056;
+  rc_4.radio_min = 1030;
   rc_5.radio_min = 1085;
   rc_6.radio_min = 1085;
   rc_7.radio_min = 1085;
   rc_8.radio_min = 1085;
   
-  rc_1.radio_max = 1888;//setup maximum value from reciver
-  rc_2.radio_max = 1893;
-  rc_3.radio_max = 1883;
-  rc_4.radio_max = 1886;
+  rc_1.radio_max = 1892;//setup maximum value from reciver
+  rc_2.radio_max = 1895;
+  rc_3.radio_max = 1884;
+  rc_4.radio_max = 1866;
   rc_5.radio_max = 1915;
   rc_6.radio_max = 1915;
   rc_7.radio_max = 1915;
   rc_8.radio_max = 1915;
 
   // 3 is not trimed
-  rc_1.radio_trim = 1472;//setup netral value
-  rc_2.radio_trim = 1496;
-  rc_3.radio_trim = 1500;
-  rc_4.radio_trim = 1471;
+  rc_1.radio_trim = 1479;//setup netral value
+  rc_2.radio_trim = 1501;
+  rc_3.radio_trim = 1474;
+  rc_4.radio_trim = 1452;
   rc_5.radio_trim = 1553;
-  rc_6.radio_trim = 1499;
-  rc_7.radio_trim = 1498;
-  rc_8.radio_trim = 1500;
+  rc_6.radio_trim = 1498;
+  rc_7.radio_trim = 1499;
+  rc_8.radio_trim = 1498;
 
   rc_1.set_range(-500,500);//set the range the revicer values are converted to
   rc_1.set_default_dead_zone(50);
@@ -351,7 +352,9 @@ void talk()
         Otwist_z=twist_z;
         //TODO: send compass information to the laptop
         //TODO: send Rspeed, Lspeed
-        char outbytes[10];
+        hal.console->printf("%04d,%07d,%07d.", compdeg, Rspeed, Lspeed);
+        hal.scheduler->delay(2);
+        /*char outbytes[10];
         outbytes[0]=compdeg>>8;
         outbytes[1]=compdeg;
         outbytes[2]=Rspeed>>24;
@@ -363,7 +366,7 @@ void talk()
         outbytes[8]=Lspeed>>8;
         outbytes[9]=Lspeed;
         
-        hal.console->printf("%c", outbytes[10]);
+        hal.console->printf("%c", outbytes[10]);*/
       }
     }
   }

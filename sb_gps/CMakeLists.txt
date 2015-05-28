@@ -23,7 +23,7 @@ CATKIN_DEPENDS roscpp rospy std_msgs sb_msgs message_runtime
 
 include_directories(${catkin_INCLUDE_DIRS})
 
-install(PROGRAMS scripts/gps_receiver.py DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
+install(PROGRAMS scripts/gps_receiver.py scripts/gps_plot.py DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 
 ## To add package paths:
 ## source ~/catkin_ws/devel/setup.bash
