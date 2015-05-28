@@ -72,7 +72,8 @@ int main(int argc, char **argv)	{
 	int counter = 0;
 	namedWindow("Stiching Window");
 	int errorCounter = 0;
-	while (ros::ok() && (counter < 5 || errorCounter < 5)){
+
+	while (ros::ok() && counter < 6 && errorCounter < 5){
 		ROS_INFO("Image Stitching Started!");
 		counter++;
 		
@@ -128,9 +129,9 @@ int main(int argc, char **argv)	{
 		imgs.clear();
 			
 		if (status != Stitcher::OK) {
-			ROS_FATAL("Unable to stitch images together!, exiting now");
-			//break;
+			ROS_FATAL("Unable to stitch images together!, trying again...");
 			continue;
+
 		} else {			    
 			ROS_INFO("Awaiting for stiched image to display");
 			/*
@@ -154,7 +155,7 @@ int main(int argc, char **argv)	{
 			imshow("Stiching Window", pano);
 			waitKey(50);
 			destroyWindow("Stiching Window");
-			ROS_INFO("Destroyed stitch image window");
+			//ROS_INFO("Destroyed stitch image window");
 		}
 		ROS_INFO("Counter: %d", counter);
 	}
