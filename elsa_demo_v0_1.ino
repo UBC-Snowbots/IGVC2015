@@ -352,7 +352,9 @@ void talk()
         Otwist_z=twist_z;
         //TODO: send compass information to the laptop
         //TODO: send Rspeed, Lspeed
-        char outbytes[10];
+        hal.console->printf("%04d,%07d,%07d.", compdeg, Rspeed, Lspeed);
+        hal.scheduler->delay(2);
+        /*char outbytes[10];
         outbytes[0]=compdeg>>8;
         outbytes[1]=compdeg;
         outbytes[2]=Rspeed>>24;
@@ -364,7 +366,7 @@ void talk()
         outbytes[8]=Lspeed>>8;
         outbytes[9]=Lspeed;
         
-        hal.console->printf("%c", outbytes[10]);
+        hal.console->printf("%c", outbytes[10]);*/
       }
     }
   }
