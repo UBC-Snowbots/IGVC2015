@@ -101,11 +101,13 @@ void requestEvent(){
   String Rstr=String(_RightEncoderTicks);
   String Lstr=String(_LeftEncoderTicks);
   String output = Rstr;
+   output += ",";
   output += Lstr;
+  output += ".";
   
-  char carray[9];
+  char carray[25];
   
-  output.toCharArray(carray,9);
+  output.toCharArray(carray,25);
   Wire.write(carray);
   
 }
