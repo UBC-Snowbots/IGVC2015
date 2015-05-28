@@ -3,28 +3,22 @@ add_subdirectory(Controllers/AI)
 find_package(OpenCV REQUIRED)
 
 set(MAIN_HEADERS
-<<<<<<< HEAD
 	Controllers/ControllerBase.hpp
 	Controllers/DijkstraController.hpp
-#	ControllerBase.hpp
-#	DijkstraController.hpp
-	VisionController.hpp
-	LidarController.hpp
+	Controllers/ControllerBase.hpp
+	Controllers/VisionController.hpp
+	Controllers/LidarController.hpp
+	#Controllers/DSLiteController.hpp
 	Controllers/sb_ai.h
-#	sb_ai.h
-	)
+)
 
 set(MAIN_SOURCE
 	Controllers/DijkstraController.cpp
-#	DijkstraController.cpp
-	VisionController.cpp
-<<<<<<< HEAD
-  LidarController.cpp
-	sb_gps.cpp
-=======
-	LidarController.cpp
->>>>>>> 096c6d06cb28d11c3ffe97fe3f6802d78e3aab71
-	main.cpp)
+	Controllers/VisionController.cpp
+	Controllers/LidarController.cpp
+	#Controllers/DSLiteController.cpp
+	main.cpp
+)
 
 set(MODE_LIBRARIES
 	ai_dijkstra

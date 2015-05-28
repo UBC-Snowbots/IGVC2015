@@ -16,6 +16,7 @@ include_directories(
   ${catkin_INCLUDE_DIRS}
 )
 
+add_subdirectory(src)
 
 add_executable(simple_mapping src/AI_Mapping/simple_mapping.cpp)
 target_link_libraries(simple_mapping ${catkin_LIBRARIES})
@@ -34,5 +35,9 @@ add_dependencies(test_generate_global_map ${PROJECT_NAME}_gencpp)
 add_executable(sb_gps src/sb_gps.cpp)
 target_link_libraries(sb_gps ${catkin_LIBRARIES})
 add_dependencies(sb_gps sb_msgs_generate_messages_cpp)
+
+add_executable(path_smoothing src/PathSmoothing/PathSmoothing.cpp)
+target_link_libraries(path_smoothing ${catkin_LIBRARIES})
+add_dependencies(path_smoothing sb_msgs_generate_messages_cpp)
 
 

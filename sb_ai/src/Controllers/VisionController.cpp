@@ -6,6 +6,15 @@ using namespace ros;
 
 namespace ai{
 
+static const std::string PUBLISH_TOPIC = "vision_vel";
+static const std::string PUBLISH_TOPIC2 = "vision_nav";
+const int MSG_QUEUE_SIZE = 20;
+
+int const upperBound = 255;
+int const lowerBound = 180;
+int const max_BINARY_value = 255;
+int const threshold_value = 195;
+
 VisionController::VisionController():
 	blur_value(8),
 	dx(0),
@@ -26,7 +35,7 @@ VisionController::VisionController():
 	//imwrite( "/home/jannicke/Pictures/Image2.jpg", image_direction);
 }
 
-geometry_msgs::Twist VisionController::update(){
+geometry_msgs::Twist VisionController::Update(){
 	detectLines();
 	getDirection();
 	twist.angular.z = steeringOut;

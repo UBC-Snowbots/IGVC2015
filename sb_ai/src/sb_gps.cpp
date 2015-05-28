@@ -227,12 +227,16 @@ sb_msgs::Gps_info createdata(void){
   return data;  
 }
 
+
+/*void compassSubHandle (const sb_msgs::compass::ConstPtr& compass){
+=======
 void compassSubHandle (sb_msgs::compass compass){
+>>>>>>> 9b49c75520675742a07c77e2e65093bb929d2cfb
 
 	angleCompass = compass.compass;
 	return;
 
-}
+}*/
 
 int main (int argc, char **argv){
 
@@ -242,7 +246,7 @@ int main (int argc, char **argv){
   ros::Publisher car_pub = nh.advertise<geometry_msgs::Twist>(PUB_TOPIC, 100);
   ros::Publisher gps_pub = nh.advertise<sb_msgs::Gps_info>("GPS_DATA",50);
   ros::Publisher coord_pub = nh.advertise<sb_msgs::Waypoint>("GPS_COORD", 100);
-  ros::Subscriber compass_Sub = nh.subscribe ("COMPASS_DATA", 1, compassSubHandle);
+  /*ros::Subscriber compass_Sub = nh.subscribe ("COMPASS_DATA", 1, compassSubHandle);*/
 
   ros::Rate loop_rate(10); //10hz loop rate
 	cout.precision(13);

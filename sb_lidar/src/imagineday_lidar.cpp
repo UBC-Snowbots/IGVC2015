@@ -80,10 +80,13 @@ int main (int argc, char** argv)
 	ROS_INFO("ready to go");
 	
 	ROS_INFO("going");
-
+			car_command.linear.y = SPEED_LIMIT;
+			car_command.angular.z = 0;
 
 	while(ros::ok())
 	{
+			car_command.linear.y = SPEED_LIMIT;
+			car_command.angular.z = 0;
 		car_pub.publish(car_command);
 		ROS_INFO("Throttle: %0.2f, Steering: %0.2f", car_command.linear.y, car_command.angular.z);
 	  	ros::spinOnce();

@@ -9,6 +9,7 @@ find_package(catkin REQUIRED COMPONENTS
   rospy
   std_msgs
   sb_msgs
+  message_runtime
   tf
 )
 
@@ -17,12 +18,7 @@ catkin_package()
 include_directories(${catkin_INCLUDE_DIRS})
 
 catkin_package(
-   CATKIN_DEPENDS roscpp rospy std_msgs sb_msgs
-)
-
-
-include_directories(
-  ${catkin_INCLUDE_DIRS}
+   CATKIN_DEPENDS roscpp rospy std_msgs sb_msgs message_runtime
 )
 
 
