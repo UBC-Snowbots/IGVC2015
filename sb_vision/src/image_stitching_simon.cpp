@@ -5,11 +5,9 @@
 #include <iostream> 
 #include <vector>
 
-using namespace ros;
-using namespace cv; 
-using namespace std;
+using namespace cv;
 
-static const string NODE_NAME = "ImageStitch";
+static const cv::string NODE_NAME = "ImageStitcher";
 static const unsigned int CAMERA_AMOUNT = 3;
 
 /*
@@ -19,7 +17,7 @@ The deviceID for all three webcams will be between [1,3]
 Once a connection is established, the connected camera will occupied 
 the lowest deviceID avalible, making the next connection ID predictable
 */
-bool connectCamera(VideoCapture& camera){
+bool connectToCamera(VideoCapture& camera){
 	static unsigned int occupiedID = 1;
 	
 	camera.set(CV_CAP_PROP_FPS, 20);
@@ -44,36 +42,30 @@ bool connectCamera(VideoCapture& camera){
 
 
 int main(int argc, char **argv)	{
-	init(argc, argv, NODE_NAME);
-
-	/*
-	When I tried putting the VideoCapture and Mat objects inside
-	an array/vector, the program kept losing connection frequently.
-	Once connection is lost the device cannot is release() regardless
-	and a hard restart will be required to re-execute the program again
-
-	An internal error message will be printed out whenever this happens, 
-	but there are no ways to catch the error as far as I'm aware
-	*/
+	ros::init(argc, argv, NODE_NAME);
 
 	VideoCapture cap1;
 	VideoCapture cap2;
 	VideoCapture cap3;
 									
-	if(!connectCamera(cap1) || !connectCamera(cap2) || !connectCamera(cap3)){
+	if(!connectToCamera(cap1) || !connectToCamera(cap2) || !connectToCamera(cap3)){
 		ROS_FATAL("Unable to connect to all cameras, exiting now");
 		ROS_FATAL("If this error persist, please disconnect all webcams or restart the computer");
 		return 0;
 	}
 							
-	Mat image1, image2, image3;
+	std::vector<Mat> imgs;
 	Stitcher stitcher = Stitcher::createDefault(true);
 
 	int counter = 0;
-	namedWindow("Stiching Window");
 	int errorCounter = 0;
+	namedWindow("Stiching Window");	
 
-	while (ros::ok() && counter < 6 && errorCounter < 5){
+	while (ros::ok() && counter < 5 && errorCounter < 5){
+		//Testing to see if having the mat obj recreated every loop would
+		//decrease the chances of encountering the error again...
+		Mat image1, image2, image3;
+
 		ROS_INFO("Image Stitching Started!");
 		counter++;
 		
@@ -115,19 +107,19 @@ int main(int argc, char **argv)	{
 			continue;
 		}
 		
-		Mat pano;
-		vector<Mat> imgs;
-
+		
 		if (image1.empty() || image2.empty() || image3.empty())
 			ROS_WARN("One of the Mat is empty");
 
+		//Stitching the images now
+		Mat pano;
 		imgs.push_back(image1);
 		imgs.push_back(image2);
 		imgs.push_back(image3);
 
 		Stitcher::Status status= stitcher.stitch(imgs, pano);
 		imgs.clear();
-			
+		
 		if (status != Stitcher::OK) {
 			ROS_FATAL("Unable to stitch images together!, trying again...");
 			continue;
@@ -155,7 +147,8 @@ int main(int argc, char **argv)	{
 			imshow("Stiching Window", pano);
 			if(waitKey(50) == 27){
 				ROS_INFO("ESC key pressed! Exiting loop now");
-				break; 
+				ROS_WARN("The next run has a high chance of crashing for unknown reasons");
+				break;
 	       	}
 			destroyWindow("Stiching Window");
 			//ROS_INFO("Destroyed stitch image window");
@@ -170,7 +163,7 @@ int main(int argc, char **argv)	{
 	cap1.release();
 	cap2.release();
 	cap3.release();
-	ROS_INFO("All VideoCaptures released, proper shutdown complete");
+	ROS_INFO("All VideoCaptures should have been released, proper shutdown complete");
 	
 	return 0;
 }
