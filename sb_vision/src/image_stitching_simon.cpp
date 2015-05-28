@@ -9,7 +9,7 @@ using namespace ros;
 using namespace cv; 
 using namespace std;
 
-static const string NODE_NAME = "Image stitching - Simon";
+static const string NODE_NAME = "ImageStitch";
 static const unsigned int CAMERA_AMOUNT = 3;
 
 /*
