@@ -71,8 +71,8 @@ int main(int argc, char **argv)	{
 
 	int counter = 0;
 	namedWindow("Stiching Window");
-
-	while (ros::ok() && counter < 5){
+	int errorCounter = 0;
+	while (ros::ok() && (counter < 5 || errorCounter < 5)){
 		ROS_INFO("Image Stitching Started!");
 		counter++;
 		
@@ -98,12 +98,21 @@ int main(int argc, char **argv)	{
 		cap2 >> image2;
 		cap3 >> image3;
 
-		if (!cap1.read(image1))
-			ROS_ERROR("Cannot read image 1 from video stream");			 
-		if (!cap2.read(image2))
-			ROS_ERROR("Cannot read image 2 from video stream");	
-		if (!cap3.read(image3))
+		if (!cap1.read(image1)){
+			ROS_ERROR("Cannot read image 1 from video stream");
+			errorCounter++;
+			continue;
+		}
+		if (!cap2.read(image2)){
+			ROS_ERROR("Cannot read image 2 from video stream");
+			errorCounter++;
+			continue;
+		}
+		if (!cap3.read(image3)){
 			ROS_ERROR("Cannot read image 3 from video stream");
+			errorCounter++;
+			continue;
+		}
 		
 		Mat pano;
 		vector<Mat> imgs;
@@ -120,7 +129,8 @@ int main(int argc, char **argv)	{
 			
 		if (status != Stitcher::OK) {
 			ROS_FATAL("Unable to stitch images together!, exiting now");
-			break;
+			//break;
+			continue;
 		} else {			    
 			ROS_INFO("Awaiting for stiched image to display");
 			/*
