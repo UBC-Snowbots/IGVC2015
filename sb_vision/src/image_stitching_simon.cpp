@@ -67,6 +67,7 @@ int main(int argc, char **argv)	{
 	}
 							
 	Mat image1, image2, image3;
+	vector<Mat> imgs;
 	Stitcher stitcher = Stitcher::createDefault(true);
 
 	int counter = 0;
@@ -116,7 +117,7 @@ int main(int argc, char **argv)	{
 		}
 		
 		Mat pano;
-		vector<Mat> imgs;
+		
 
 		if (image1.empty() || image2.empty() || image3.empty())
 			ROS_WARN("One of the Mat is empty");
@@ -127,7 +128,7 @@ int main(int argc, char **argv)	{
 
 		Stitcher::Status status= stitcher.stitch(imgs, pano);
 		imgs.clear();
-			
+		
 		if (status != Stitcher::OK) {
 			ROS_FATAL("Unable to stitch images together!, trying again...");
 			continue;
@@ -155,12 +156,17 @@ int main(int argc, char **argv)	{
 			imshow("Stiching Window", pano);
 			if(waitKey(50) == 27){
 				ROS_INFO("ESC key pressed! Exiting loop now");
-				break; 
+				ROS_WARN("The next run has a high chance of crashing for unknown reasons");
+				break;
 	       	}
 			destroyWindow("Stiching Window");
 			//ROS_INFO("Destroyed stitch image window");
 		}
 		ROS_INFO("Counter: %d", counter);
+		image1.release();
+		image2.release();
+		image3.release();
+		pano.release();
 	}
 	
 	//If you CTRL + C while inside the ros::ok loop, this part will never get executed
