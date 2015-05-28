@@ -30,18 +30,19 @@ bool goal;
 bool msg_flag = false;
 double d = 0; //distance in metres from currentWaypoint to targetWaypoint
 double theta = 0; //theta is the angle the robot needs to turn from currentWaypoint to targetWaypoint
-sb_msgs::Waypoint CurrentWaypoint,LastWaypoint,off;
+sb_msgs::Waypoint CurrentWaypoint,LastWaypoint,off, bufferWaypoint;
 geometry_msgs::Twist twist_msg;
 sb_msgs::Gps_info pub_data; //Angle and distance are being published
 int next_move, prev_move = 0;
 sb_msgs::Waypoint TargetWaypoint;
-static double const EART_RADIUS = 6378.137;
+static double const EARTH_RADIUS = 6378.137;
+long double buffer [10];
 
 void startGps(void){
-  double lon = 49.262368;
-  double lat = -123.248591;
-  off.lon = abs(lon - 49.157463);
-  off.lat = abs(lat - (-123.149175022));
+  //double lon = 49.262368;
+  //double lat = -123.248591;
+  off.lon = (49.157435497 - 49.26231834);
+  off.lat = (-123.149139703 - (-123.24871396));
   return;
 }
 
@@ -63,17 +64,17 @@ void gpsSubHandle(const std_msgs::String::ConstPtr& msg){
 		lon_dir = a[31];
 		//cout << lon_dir << endl;
 		if (lon_dir == 'N')
-			CurrentWaypoint.lon = atof(temp)/100 + off.lon;
+			CurrentWaypoint.lon = atof(temp)/100 - off.lon;
 		else if (lon_dir == 'S')
-			CurrentWaypoint.lon = (-1)*(atof(temp)/100 + off.lon);
+			CurrentWaypoint.lon = (-1)*(atof(temp)/100) - off.lon;
 		for (i = 33; i < 45; i++)
 			temp [i-33] = a[i];
 		lat_dir = a[47];
 		//cout << lat_dir << endl;
 		if (lat_dir == 'E')
-			CurrentWaypoint.lat = atof(temp)/100 + off.lat;
+			CurrentWaypoint.lat = atof(temp)/100 - off.lat;
 		else if (lat_dir == 'W')
-			CurrentWaypoint.lat = (-1)*(atof(temp)/100 + off.lat);
+			CurrentWaypoint.lat = (-1)*(atof(temp)/100) - off.lat;
 	}
 	else{
 		msg_flag = false;
@@ -82,9 +83,12 @@ void gpsSubHandle(const std_msgs::String::ConstPtr& msg){
 		
   return;
  }
-bool checkGoal (Waypoint CurrentWaypoint, Waypoint TargetWaypoint){
-  if (CurrentWaypoint.lon == TargetWaypoint.lon){
-    if (CurrentWaypoint.lat == TargetWaypoint.lat){
+bool checkGoal (void){
+cout<<fabs(CurrentWaypoint.lon - TargetWaypoint.lon)*100000 <<endl;
+  if ((int)fabs(CurrentWaypoint.lon - TargetWaypoint.lon)*100000 < 2 && (int)fabs(CurrentWaypoint.lon - TargetWaypoint.lon)*100000 > 0){	
+	cout<<fabs(CurrentWaypoint.lat - TargetWaypoint.lat)*100000 <<endl;
+    if ((int)fabs(CurrentWaypoint.lat - TargetWaypoint.lat)*100000 < 2 && (int)fabs(CurrentWaypoint.lon - TargetWaypoint.lon)*100000 > 0){
+	
       return true;
     }
     else
@@ -96,26 +100,31 @@ bool checkGoal (Waypoint CurrentWaypoint, Waypoint TargetWaypoint){
 
 int NextMoveLogic (double distance, double angle){
 	int next_move; 
-	if (checkGoal) 
-		return 0;
+	if (checkGoal()) {
+	cout << "Arrived at waypoint" << endl;
+		return 0;}
 	else{
 		if (angle < 0.0){
+			cout << "turn right" << endl;
 			return 2; 
-			cout << "turn right" << endl;}
+			}
 		else if (angle > 0.0){
+			cout << "turn left" << endl;	
 			return -2;
-			cout << "turn left" << endl;}
+			}
 		else{
 			if (distance > 100){
+				cout << "forward quickly" << endl;
 				return 50;
-				cout << "forward quickly" << endl;}
+			}
 			else if (distance < 100){
-				return 20; 
-				cout << "forward slowly" << endl;}
+				cout << "forward slowly" << endl;
+				return 20;
+			}
 			else 
 				cout << "Error in NextMoveLogic: " << distance << endl;
-			}	
-}
+		    }	
+		}
 }
 geometry_msgs::Twist GetTwistMsg(int next_move) 
 {
@@ -159,9 +168,9 @@ double createDistance (void){
 	double lat2 = TargetWaypoint.lat * toRad;
 	double lon2 = TargetWaypoint.lon * toRad;
 	//from http://www.movable-type.co.uk/scripts/latlong.html, Distance formula (using haversine)
-	double a = sin((lat2 - lat1) / 2)*sin((lat2 - lat1) / 2) + cos(lat1) * cos(lat2) * sin((lon2 - lon1) / 2)*sin((lon2 - lon1) / 2);
+	double a = sin((long double)((lat2 - lat1) / 2))*sin(((lat2 - lat1) / 2)) + cos(lat1) * cos(lat2) * sin((lon2 - lon1) / 2)*sin((lon2 - lon1) / 2);
 	double c = 2 * atan2(sqrt(a), sqrt(1 - a));
-	double d = 6371000 * c;
+	double d = EARTH_RADIUS * c;
 	return d;
 }
 
@@ -235,15 +244,15 @@ int main (int argc, char **argv){
   ros::Publisher coord_pub = nh.advertise<sb_msgs::Waypoint>("GPS_COORD", 100);
   ros::Subscriber compass_Sub = nh.subscribe ("COMPASS_DATA", 1, compassSubHandle);
 
-  ros::Rate loop_rate(5); //10hz loop rate
+  ros::Rate loop_rate(10); //10hz loop rate
 	cout.precision(13);
 /*  while (!msg_flag){
 		cout << "Waiting for GPS Fix" << endl;	
 		loop_rate.sleep();
 	}*/
 
-	TargetWaypoint.lon = 49.261928;
-	TargetWaypoint.lat = -123.2487812;
+	TargetWaypoint.lon = 49.26238123;
+	TargetWaypoint.lat = -123.24871402;
   	startGps();
   while (ros::ok()){
 	
@@ -252,20 +261,20 @@ int main (int argc, char **argv){
 		  cout << "Current longitude: " << CurrentWaypoint.lon << " Current latitude: " << CurrentWaypoint.lat << endl;
 		  cout << "distance" << pub_data.distance << endl;
 		  cout << "angle" << pub_data.angle << endl;
+		  pub_data = createdata();
+	  	  gps_pub.publish(pub_data); //a out 
+	 	  cout << "angle" << pub_data.angle << endl;
+		  coord_pub.publish(CurrentWaypoint);
+	  	  next_move = NextMoveLogic(pub_data.distance,pub_data.angle);
+	  	  twist_msg = GetTwistMsg(next_move);
+	  	  car_pub.publish(twist_msg);
+	 	  cout << off.lon << " and " << off.lat << endl;
 	}
 	  else{
-		ROS_INFO("No Fix:"); 
+		  ROS_INFO("No Fix:"); 
   	}
 	   //twist out 
-	  pub_data = createdata();
-	  gps_pub.publish(pub_data); //a out 
-	  cout << "angle" << pub_data.angle << endl;
-	  coord_pub.publish(CurrentWaypoint);
-
-	  next_move = NextMoveLogic(pub_data.distance,pub_data.angle);
-	  twist_msg = GetTwistMsg(next_move);
-	  car_pub.publish(twist_msg);
-
+	  
 	  ros::spinOnce(); //ros spin is to ensure that ros threading does not leave suscribes un processed
 	  loop_rate.sleep();
 }
