@@ -66,9 +66,8 @@ int main(int argc, char **argv)	{
 		return 0;
 	}
 							
-	Mat image1, image2, image3, pano;
-	Stitcher stitcher = Stitcher::createDefault(true);	
-	vector<Mat> imgs;
+	Mat image1, image2, image3;
+	Stitcher stitcher = Stitcher::createDefault(true);
 
 	int counter = 0;
 	namedWindow("Stiching Window");
@@ -116,6 +115,8 @@ int main(int argc, char **argv)	{
 			continue;
 		}
 		
+		Mat pano;
+		vector<Mat> imgs;
 
 		if (image1.empty() || image2.empty() || image3.empty())
 			ROS_WARN("One of the Mat is empty");
@@ -153,7 +154,7 @@ int main(int argc, char **argv)	{
 			*/
 			imshow("Stiching Window", pano);
 			if(waitKey(50) == 27){
-				ROS_INFO("Manual override to exit loop, shuting down now");
+				ROS_INFO("ESC key pressed! Exiting loop now");
 				break; 
 	       	}
 			destroyWindow("Stiching Window");
