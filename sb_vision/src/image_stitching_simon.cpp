@@ -53,7 +53,8 @@ int main(int argc, char **argv)	{
 		ROS_FATAL("If this error persist, please disconnect all webcams or restart the computer");
 		return 0;
 	}
-							
+	
+	Mat image1, image2, image3;			
 	std::vector<Mat> imgs;
 	Stitcher stitcher = Stitcher::createDefault(true);
 
@@ -64,7 +65,7 @@ int main(int argc, char **argv)	{
 	while (ros::ok() && counter < 5 && errorCounter < 5){
 		//Testing to see if having the mat obj recreated every loop would
 		//decrease the chances of encountering the error again...
-		Mat image1, image2, image3;
+		
 
 		ROS_INFO("Image Stitching Started!");
 		counter++;
