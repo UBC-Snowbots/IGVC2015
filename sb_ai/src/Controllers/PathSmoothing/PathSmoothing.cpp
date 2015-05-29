@@ -2,7 +2,7 @@
 #include <iostream>
 #include "PathSmoothing.h"
 
-geometry_msgs::Twist GetVelocity(Points* next_targets, float elsa_yaw)
+geometry_msgs::Twist GetVelocity(Location* next_targets, float elsa_yaw)
 {
   geometry_msgs::Twist elsa_command;
   elsa_command.linear.x = 0;

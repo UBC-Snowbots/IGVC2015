@@ -22,20 +22,12 @@ namespace ai
 	  int goal;
 	  geometry_msgs::Twist twist_msg;
 	  Dijkstra dijkstras;
-	  int next_movement;
 	  ros::Subscriber map_sub;
-	  
-  protected:
-	  geometry_msgs::Twist GetTwistMsg(int next_move);
+	  int first, fourth;
 	  
   public:
 	  DijkstraController(ros::NodeHandle& nh);
-	
-	  /** callback to receive data from subscription
-	   *  this is where you do what you need to do with the map data
-	   **/
 	  void MapCallback(const sb_msgs::AISimMap::ConstPtr& msg);
-	  
 	  geometry_msgs::Twist Update();
   };
 }

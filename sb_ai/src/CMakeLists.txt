@@ -23,6 +23,7 @@ set(MAIN_SOURCE
 
 set(MODE_LIBRARIES
 	ai_dijkstra
+	path_smoothing
 	${OpenCV_LIBS})
 
 set(MODE_INCLUDE_DIRS

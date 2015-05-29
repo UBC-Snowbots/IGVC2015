@@ -1,8 +1,72 @@
 #include <iostream>
+#include <cmath>
 #include "dijkstra_recursive.h"
 #include <assert.h>
 
 using namespace std;
+
+geometry_msgs::Twist Dijkstra::GetVelocity(Location* next_targets, float elsa_yaw, geometry_msgs::Twist &elsa_command)
+{
+  elsa_command.linear.x = 0;
+  elsa_command.linear.y = 0;
+  elsa_command.linear.z = 0;
+  elsa_command.angular.x = 0;
+  elsa_command.angular.y = 0;
+  elsa_command.angular.z = 0;
+  
+  // Check for null 
+  if (!next_targets) return elsa_command; 
+  
+  float dist_x, dist_y, ang_dist_sign;
+  float ang_dist;
+  float target_yaw = 0.0f;
+  
+  dist_x = next_targets[1].x - next_targets[0].x;
+  dist_y = next_targets[1].y - next_targets[0].y;
+
+  if (dist_y == 0 || dist_x == 0) { ang_dist = 0; }
+  else { ang_dist = dist_y / dist_x; }
+  target_yaw = atan(ang_dist);
+  ang_dist = target_yaw - elsa_yaw; // need to fix negatives
+  ang_dist_sign = (int) ang_dist;
+  ang_dist_sign /= abs(ang_dist_sign);  // check that this actually works
+  ang_dist = abs(ang_dist);
+
+  std::cout << "Ang dist: " << ang_dist << std::endl;
+
+  if (ang_dist > 120.0f)
+  {
+    elsa_command.angular.z = 0.1 * ang_dist_sign;
+    elsa_command.linear.y = 0.03;
+  }
+
+  else if (ang_dist > 80.0f)
+  {
+    elsa_command.angular.z = 0.08 * ang_dist_sign;
+    elsa_command.linear.y = 0.06;
+  }
+  
+   else if (ang_dist > 40.0f)
+  {
+    elsa_command.angular.z = 0.06 * ang_dist_sign;
+    elsa_command.linear.y = 0.08;
+  }
+  
+  else if (ang_dist > 10.0f)
+  {
+    elsa_command.angular.z = 0.03 * ang_dist_sign;
+    elsa_command.linear.y = 0.09;
+  }
+  
+  else
+  {
+    elsa_command.angular.z = 0.01;
+    elsa_command.linear.y = 0.1;
+  }
+  
+  return elsa_command;
+}
+
 
 // PRIVATE
 
@@ -80,8 +144,12 @@ int Dijkstra::GetNextStep()
 
 void Dijkstra::GetPathIndex(int &firstIndex, int &fourthIndex, int location)
 {
-
-	if (destination == -1) { return; }
+	if (destination == -1) 
+	{ 
+	  firstIndex = 0;
+    fourthIndex = 0;
+	  return; 
+	}
 	
 	else {
 		// make sure the parent of location is valid
@@ -95,10 +163,10 @@ void Dijkstra::GetPathIndex(int &firstIndex, int &fourthIndex, int location)
 			second = first;
 			first = location;
 		}
+		
+		firstIndex = first;
+    fourthIndex = second;
 	}
-
-  firstIndex = first;
-  fourthIndex = fourth;
 }
 
 
@@ -218,6 +286,7 @@ void Dijkstra::ReconstructPath(int location)
 
 		else {
 			// get next 3 locations after start
+			fourth = third;
 			third = second;
 			second = first;
 			first = location;
@@ -228,6 +297,12 @@ void Dijkstra::ReconstructPath(int location)
 	}
 
 	return;
+}
+
+void Dijkstra::SetFirstAndThird(int &first_index, int &third_index)
+{
+  first_index = first;
+  third_index = fourth;
 }
 
 
