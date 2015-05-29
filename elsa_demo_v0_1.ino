@@ -67,7 +67,7 @@ long Lspeed, Rspeed;
 int compdeg;//compass heading in degrees
 
 float left_motor_cal = 1;
-float right_motor_cal = 0.85; //calibration variables
+float right_motor_cal = 0.825; //calibration variables
 float voltage1, voltage2 = 0;
 float batt_mon1_vol, batt_mon2_vol = 0;
 int voltage_count = 0;
@@ -117,10 +117,10 @@ void setup()
   hal.rcout->set_freq(0xFF, 490);
 
   hal.rcout->enable_ch(0);
-  hal.rcout->enable_ch(1);
+  hal.rcout->enable_ch(3);
 
   hal.rcout->write(0, 1500);//write neutral throttle to esc
-  hal.rcout->write(1, 1500);
+  hal.rcout->write(3, 1500);
 
   //battery monitor
   battery_mon1.init();
