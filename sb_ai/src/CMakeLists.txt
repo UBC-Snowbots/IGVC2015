@@ -1,5 +1,6 @@
 add_subdirectory(Controllers/AI)
 add_subdirectory(Controllers/PathSmoothing)
+add_subdirectory(AI_Mapping)
 
 find_package(OpenCV REQUIRED)
 
@@ -24,6 +25,8 @@ set(MAIN_SOURCE
 set(MODE_LIBRARIES
 	ai_dijkstra
 	path_smoothing
+	ai_map
+	ai_map_test
 	${OpenCV_LIBS})
 
 set(MODE_INCLUDE_DIRS
@@ -33,6 +36,5 @@ include_directories( ${MODE_INCLUDE_DIRS} )
 
 add_executable(sb_ai ${MAIN_HEADERS} ${MAIN_SOURCE})
 add_dependencies(sb_ai sb_msgs_generate_messages_cpp)
-add_library(dijkstra_rec Controllers/AI/dijkstra/dijkstra_recursive.cpp)
-target_link_libraries(sb_ai ${catkin_LIBRARIES} ${MODE_LIBRARIES} dijkstra_rec)
+target_link_libraries(sb_ai ${catkin_LIBRARIES} ${MODE_LIBRARIES})
 

@@ -1,7 +1,6 @@
 #pragma once
 
 #include "stdint.h"
-
 #include "ros/ros.h"
 #include "nav_msgs/OccupancyGrid.h"
 #include "geometry_msgs/Pose2D.h"
@@ -32,12 +31,16 @@ class GenerateGlobalMap {
     nav_msgs::OccupancyGrid _globalMap;
 
     uint32_t _localMapSize;
+    
+    int _mapSize;
+    
+    void TransformLocalToGlobal();
 
   public:
 
-    GenerateGlobalMap();
+    //GenerateGlobalMap();
 
-    ~GenerateGlobalMap();
+   // ~GenerateGlobalMap();
 
     void testDoSomething();
 
