@@ -100,7 +100,6 @@ int main(int argc, char** argv)
 	        return 0;
 	    }
 	}
-	
 	usleep(3*SECOND);
 		
 	//subscribers and publishers
@@ -154,8 +153,8 @@ int main(int argc, char** argv)
 	    usleep(20000);
 	    
 	    //publish data
-			char test[21];
-	 link.readData(21, test);
+			char test[24];
+	 link.readData(24, test);
 			cout << "OMFG WFT: " << test << endl;
 	    processData(test,state);//" -19,      0,      0."
 	    robot_state.publish(state);
