@@ -25,21 +25,17 @@ GenerateGlobalMap::~GenerateGlobalMap(){
 
 void GenerateGlobalMap::TransformLocalToGlobal(){
 
-  float  xGlobalVisionCoord, yGlobalVisionCoord;
-  
+  uint8_t xGlobalVisionCoord;
+  uint8_t yGlobalVisionCoord;
+
   // Loop through the vision map
-  for(int index = 0; index < _visionMapSize; index++) {
+  for(int index = 0; index < _localMapSize; index++) {
 
-    // If there is an obstacle, then update the global map
-    if(_imageMsg.data[index] == 1) {
+      xGlobalVisionCoord = cos(_compassAngle) * ConvertIndexToXCoord(index) - sin(_compassAngle) * ConvertIndexToYCoord(index) +            _globalMap.info.origin.position.x;
+      yGlobalVisionCoord = sin(_compassAngle) * ConvertIndexToXCoord(index) + cos(_compassAngle) * ConvertIndexToYCoord(index) + _globalMap.info.origin.position.y;
 
-      xGlobalVisionCoord = cos(_poseMsg.theta) * ConvertIndexToXCoord(index) - sin(_poseMsg.theta) * ConvertIndexToYCoord(index) +            _globalMap.info.origin.position.x;
-      yGlobalVisionCoord = sin(_poseMsg.theta) * ConvertIndexToXCoord(index) + cos(_poseMsg.theta) * ConvertIndexToYCoord(index) + _globalMap.info.origin.position.y;
-
-    }
-
-    // Update global map with 1 to show that an obstacle exists
-    _globalMap.data[ConvertXYCoordToIndex(xGlobalVisionCoord, yGlobalVisionCoord, _globalMap.info.width)] = 1;
+    // Update global map with 0/1 to show that an obstacle dne/exists
+    _globalMap.data[ConvertXYCoordToIndex(xGlobalVisionCoord, yGlobalVisionCoord, _globalMap.info.width)] = _imageMsg.data[index];
 
   }
 
@@ -50,9 +46,9 @@ void GenerateGlobalMap::LocalMapSubscriberCallback(const sensor_msgs::Image::Con
   _imageMsg.height = imageMsg->height; // Number of rows
   _imageMsg.width = imageMsg->width; // Number of columns
   _imageMsg.step = imageMsg->step;
-  _mapSize = imageMsg->step * imageMsg->height; // no clue if this is right, according to the documentation it is... wtf, row * col makes more sense to me
+  _localMapSize = imageMsg->width * imageMsg->height;
 
-  for(int index = 0; index < _mapSize; index++){
+  for(int index = 0; index < _localMapSize; index++){
 
     _imageMsg.data[index] = imageMsg->data[index];
 
@@ -86,10 +82,9 @@ void GenerateGlobalMap::WaypointSubscriberCallback(const sb_msgs::Waypoint::Cons
 }
 
 
-void GenerateGlobalMap::GPSInfoSubscriberCallback(const sb_msgs::Gps_info::ConstPtr& gpsInfoMsg)
-{
+void GenerateGlobalMap::GPSInfoSubscriberCallback(const sb_msgs::Gps_info::ConstPtr& gpsInfoMsg){
   
-  _poseMsg.theta = gpsInfoMsg->angle;
+  _compassAngle = gpsInfoMsg->angle;
 
 }
 

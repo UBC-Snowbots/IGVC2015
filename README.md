@@ -35,10 +35,5 @@ To use the sb_gps branch:
 3. >rosrun sb_gps gps_receiver.py 
 
 The node will start streaming data
-
-Whitelisting and Blacklisting Packages 
 =======
-> catkin_make -DCATKIN_WHITELIST_PACKAGES="package_name"
-> catkin_make -DCATKIN_BLACKLIST_PACKAGES="package_name"
-
-Change "package_name" to "" if you want to clear the blacklist or whitelist.
+> catkin_make -DCATKIN_WHITELIST_PACKAGES=""
