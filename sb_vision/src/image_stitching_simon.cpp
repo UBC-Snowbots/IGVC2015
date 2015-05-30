@@ -4,11 +4,27 @@
 #include <opencv2/stitching/stitcher.hpp>
 #include <iostream> 
 #include <vector>
+#include <signal.h>
 
 using namespace cv;
 
-static const string NODE_NAME = "ImageStitcher";
+static const std::string NODE_NAME = "ImageStitcher";
+static const std::string CVWINDOW = "Sticher Window";
 static const unsigned int CAMERA_AMOUNT = 3;
+
+VideoCapture cap1;
+VideoCapture cap2;
+VideoCapture cap3;
+
+void onShutdown(int sig){
+	ROS_INFO("Releasing VideoCapture objects!");
+	destroyWindow(CVWINDOW);//SHOULD BE OUTSIDE OF LOOP?
+	cap1.release();
+	cap2.release();
+	cap3.release();
+	ROS_INFO("All VideoCaptures should have been released, proper shutdown complete");
+	ros::shutdown();
+}
 
 /*
 This function intialize the connection to each webcam
@@ -36,32 +52,31 @@ bool connectToCamera(VideoCapture& camera){
 		}
 	}
 
-	ROS_FATAL("Unable to establish connection to webcam %d, exiting now", occupiedID);
+	ROS_FATAL("Unable to establish connection to webcam %d", occupiedID);
 	return false;
 }
 
 
 int main(int argc, char **argv)	{
-	ros::init(argc, argv, NODE_NAME);
-
-	VideoCapture cameras[CAMERA_AMOUNT];
-	Mat images[CAMERA_AMOUNT];
+	ros::init(argc, argv, NODE_NAME, ros::init_options::NoSigintHandler);
+	signal(SIGINT, onShutdown);
+	
+									
+	if(!connectToCamera(cap1) || !connectToCamera(cap2) || !connectToCamera(cap3)){
+		ROS_FATAL("Unable to connect to all cameras, exiting now");
+		ROS_FATAL("If this error persist, run the usb-reset.sh in the home directory");
+		return 0;
+	}
+	
+	Mat image1, image2, image3;			
 	std::vector<Mat> imgs;
 	Stitcher stitcher = Stitcher::createDefault(true);
 
-	for (int i = 0; i < CAMERA_AMOUNT; ++i){
-		if(!connectToCamera(cameras[i])){
-			ROS_FATAL("If this error persist, run the usb-reset.sh and retry");
-			return 0;
-		}
-	}
-
 	int counter = 0;
 	int errorCounter = 0;
-	bool retry = false;
-	namedWindow("Stiching Window");	
+	namedWindow(CVWINDOW);	
 
-	while (ros::ok() && counter < 5 && errorCounter < 5){
+	while (ros::ok() && errorCounter < 5){
 		//Testing to see if having the mat obj recreated every loop would
 		//decrease the chances of encountering the error again...
 		
@@ -87,32 +102,37 @@ int main(int argc, char **argv)	{
 		//According to the OpenCV documentation: >> does the same as .read()
 		//However from testing the code, if I attempt to read without doing >> first, 
 		//the initial run of this program will always fail, while all subsequent ones run fine...
-		for (int i = 0; i < CAMERA_AMOUNT; ++i){
-			cameras[i] >> images[i];
-			if (!cameras[i].read(images[i]) || images[i].empty()){
-				ROS_ERROR("Failed to read proper image from camera %d", i);
-				errorCounter++;
-				retry = true;
-				break;
-			}
-			imgs.push_back(images[i]);
-		}
-
-		if(retry){
-			ROS_ERROR("Images incomplete, trying again...");
-			imgs.clear();
-			retry = false;
+		cap1 >> image1;
+		cap2 >> image2;
+		cap3 >> image3;
+		
+		if (!cap1.read(image1)){
+			ROS_WARN("Cannot read image 1 from video stream");
+			errorCounter++;
 			continue;
 		}
+		if (!cap2.read(image2)){
+			ROS_WARN("Cannot read image 2 from video stream");
+			errorCounter++;
+			continue;
+		}
+		if (!cap3.read(image3)){
+			ROS_WARN("Cannot read image 3 from video stream");
+			errorCounter++;
+			continue;
+		}
+		
+		
+		if (image1.empty() || image2.empty() || image3.empty())
+			ROS_WARN("One of the Mat is empty");
 
-
-		//For some reason, declaring the matrix which will hold
-		//the stitched image INSIDE the loop significantly reduces
-		//the chance of the error happening. Perhaps the Mat needs to
-		//be cleared or re-created for better quality
+		//Stitching the images now
 		Mat pano;
+		imgs.push_back(image1);
+		imgs.push_back(image2);
+		imgs.push_back(image3);
 
-		Stitcher::Status status = stitcher.stitch(imgs, pano);
+		Stitcher::Status status= stitcher.stitch(imgs, pano);
 		imgs.clear();
 		
 		if (status != Stitcher::OK) {
@@ -139,26 +159,22 @@ int main(int argc, char **argv)	{
 			with .release() - This causes the webcam to not connect the next time
 			this program is executed, without having to manually re-connected it again
 			*/
-			imshow("Stiching Window", pano);
+			imshow(CVWINDOW, pano);
 			if(waitKey(50) == 27){
 				ROS_INFO("ESC key pressed! Exiting loop now");
-				ROS_WARN("The next run has a high chance of crashing for unknown reasons");
+				ROS_WARN("The next run has a higher chance of crashing for unknown reasons");
 				break;
 	       	}
-			destroyWindow("Stiching Window");
+			
 			//ROS_INFO("Destroyed stitch image window");
 		}
 		ROS_INFO("Counter: %d", counter);
 	}
-	
+
 	//If you CTRL + C while inside the ros::ok loop, this part will never get executed
 	//causing a re-connection problem to the webcams in any subsequent execution.
-	
-	ROS_INFO("Releasing VideoCapture objects!");
-	for (int i = 0; i < CAMERA_AMOUNT; ++i){
-		cameras[i].release();
-	}
-	ROS_INFO("All VideoCaptures should have been released, proper shutdown complete");
+	onShutdown(0);
 	
 	return 0;
 }
+
