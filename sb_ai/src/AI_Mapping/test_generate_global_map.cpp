@@ -7,10 +7,11 @@ int main() {
 
   GenerateGlobalMap generateGlobalMap;
 
-  //  generateGlobalMap.testDoSomething();
+  generateGlobalMap.testDoSomething();
 
   system("PAUSE");
 
   return 0;
+
 }
 
