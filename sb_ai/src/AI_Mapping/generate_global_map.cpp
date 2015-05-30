@@ -2,16 +2,17 @@
 #include "math.h"
 
 static const std::string VISION_TOPIC = "vision_topic";
-static const std::string GEO_POINT_TOPIC = "geo_point_topic";
-static const std::string ANGLE_TOPIC = "angle_topic";
+static const std::string WAYPOINT_TOPIC = "warpoint_topic";
+static const std::string GPS_INFO_TOPIC = "gps_info_topic";
 
-/*
+
 GenerateGlobalMap::GenerateGlobalMap()
 {
 
+  // Initialize subscribers
   _imageSubscriber = _n.subscribe(VISION_TOPIC, 1000, LocalMapSubscriberCallback);
-  _geoPointSubscriber = _n.subscribe(GPS_TOPIC, 1000, GeoPointSubscriberCallback);
-  _angleSubscriber = _n.subscribe(GPS_TOPIC, 1000, AngleSubscriberCallback);
+  _waypointSubscriber = _n.subscribe(WAYPOINT_TOPIC, 1000, WaypointSubscriberCallback);
+  _gpsInfoSubscriber = _n.subscribe(GPS_INFO_TOPIC, 1000, GPSInfoSubscriberCallback);
 
   // Initialize global map
   _globalMap.data.info.width = 100;
@@ -44,7 +45,21 @@ void GenerateGlobalMap::TransformLocalToGlobal(){
   }
 
 }
-*/
+
+void GenerateGlobalMap::LocalMapSubscriberCallback(const sensor_msgs::Image::ConstPtr& imageMsg){
+
+  _imageMsg.height = imageMsg->height; // Number of rows
+  _imageMsg.width = imageMsg->width; // Number of columns
+  _imageMsg.step = imageMsg->step;
+  _mapSize = imageMsg->step * imageMsg->height; // no clue if this is right, according to the documentation it is... wtf, row * col makes more sense to me
+
+  for(int index = 0; index < _mapSize; index++){
+
+    _imageMsg.data[index] = imageMsg->data[index];
+
+  }
+
+}
 
 uint8_t GenerateGlobalMap::ConvertIndexToXCoord(uint8_t index){
 
@@ -64,36 +79,19 @@ uint8_t GenerateGlobalMap::ConvertXYCoordToIndex(uint8_t x, uint8_t y, uint8_t w
 
 }
 
-void GenerateGlobalMap::LocalMapSubscriberCallback(const sensor_msgs::Image::ConstPtr& imageMsg){
+void GenerateGlobalMap::WaypointSubscriberCallback(const sb_msgs::ConstPtr&  waypointMsg){
 
-  _imageMsg.height = imageMsg->height; // Number of rows
-  _imageMsg.width = imageMsg->width; // Number of columns
-  _imageMsg.step = imageMsg->step;
-  _mapSize = imageMsg->step * imageMsg->height; // no clue if this is right, according to the documentation it is... wtf, row * col makes more sense to me
-
-  for(int index = 0; index < _mapSize; index++){
-
-    _imageMsg.data[index] = imageMsg->data[index];
-
-  }
-
-}
-
-/*
-void GenerateGlobalMap::GeoPointSubscriberCallback(const geographic_msgs::GeoPoint::ConstPtr& geoPointMsg){
-
-  _globalMap.info.origin.position.x = pose2DMsg->x; // FIXME CONVERT STUFF TO X AND Y
-  _globalMap.info.origin.position.y = pose2DMsg->y;
+  _globalMap.info.origin.position.x = waypointMsg->lon; // FIXME CONVERT STUFF TO X AND Y
+  _globalMap.info.origin.position.y = waypointMsg->lat;
 
 }
 
 
-void GenerateGlobalMap::AngleSubscriberCallback(const std_msgs::Float32::ConstPtr& angleMsg){
+void GenerateGlobalMap::GPSInfoSubscriberCallback(const std_msgs::Float32::ConstPtr& gpsInfoMsg){
   
-  _poseMsg.theta = angleMsg.data;
+  _poseMsg.theta = gpsInfoMsg.angle;
 
 }
-*/
 
 void GenerateGlobalMap::testDoSomething() {
 
