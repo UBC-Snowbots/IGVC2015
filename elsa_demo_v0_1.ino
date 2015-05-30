@@ -128,10 +128,10 @@ void setup()
   battery_mon2.init();
   battery_mon2.set_monitoring(AP_BATT_MONITOR_VOLTAGE_AND_CURRENT);
   //LED control
-  a_led = hal.gpio->channel(54);//A10 output for LEDs
+  a_led = hal.gpio->channel(54);//A10 output for LEDs solid
   a_led->mode(GPIO_OUTPUT);
   a_led->write(0);
-  b_led = hal.gpio->channel(53);//A9 output for LEDs
+  b_led = hal.gpio->channel(53);//A9 output for LEDs blinking
   b_led->mode(GPIO_OUTPUT);
   b_led->write(0);
   
@@ -186,7 +186,7 @@ void move_pwm()// commands the esc
     //hal.console->printf_P(PSTR("twist"));
     wheels[0]=1500+(twist_z-twist_y)*right_motor_cal; //double check left vs right
     wheels[1]=1500+(twist_z+twist_y)*left_motor_cal;
-    a_led->write(0);//LED solid
+    a_led->write(0);//LED blinking
     b_led->write(1);
   }
   else if(rc[2].control_in < 650)//autonomous
@@ -194,8 +194,8 @@ void move_pwm()// commands the esc
     //hal.console->printf_P(PSTR("radio"));
     wheels[0]=1500+(rc[3].control_in-rc[1].control_in)*right_motor_cal;
     wheels[1]=1500+(rc[3].control_in+rc[1].control_in)*left_motor_cal+30;
-    a_led->write(0);//LED Blinking
-    b_led->write(1);
+    a_led->write(1);//LED solid
+    b_led->write(0);
   }
   else//wireless e-stop
   {
