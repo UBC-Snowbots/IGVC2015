@@ -23,11 +23,12 @@ generate_messages(
   DEPENDENCIES
   std_msgs 
   sb_msgs
+  cv_bridge
 )
 
 catkin_package(
    CATKIN_DEPENDS
-   message_runtime roscpp rospy std_msgs
+   message_runtime roscpp rospy std_msgs cv_bridge image_transport 
 )
 
 include_directories(
