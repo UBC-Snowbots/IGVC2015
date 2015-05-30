@@ -26,7 +26,6 @@ set(MODE_LIBRARIES
 	ai_dijkstra
 	path_smoothing
 	ai_map
-	ai_map_test
 	${OpenCV_LIBS})
 
 set(MODE_INCLUDE_DIRS

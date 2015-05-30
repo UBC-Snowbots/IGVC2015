@@ -1,2 +1,1 @@
-add_library(ai_map generate_global_map.cpp generate_global_map.hpp)
-add_library(ai_map_test test_generate_global_map.cpp generate_global_map.hpp)
+add_library(ai_map generate_global_map.hpp generate_global_map.cpp)

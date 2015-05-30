@@ -28,12 +28,6 @@ target_link_libraries(simple_ai ${catkin_LIBRARIES})
 # catkin_make should work without the -j1 flag with this
 add_dependencies(simple_ai ${PROJECT_NAME}_gencpp sb_msgs_generate_messages_cpp)
 
-add_executable(test_generate_global_map src/AI_Mapping/test_generate_global_map.cpp)
-target_link_libraries(test_generate_global_map ${catkin_LIBRARIES})
-add_dependencies(test_generate_global_map ${PROJECT_NAME}_gencpp)
 
-add_executable(sb_gps src/sb_gps.cpp)
-target_link_libraries(sb_gps ${catkin_LIBRARIES})
-add_dependencies(sb_gps sb_msgs_generate_messages_cpp)
 
 
