@@ -22,7 +22,7 @@ Every time catkin_make is called it will only build the sb_ai package
 
 To revert back to building all the packages:
 
-> catkin_make _DCATKIN_WHITELIST_PACKAGES=""
+> catkin_make -DCATKIN_WHITELIST_PACKAGES=""
 
 -----------------------------------------
 
@@ -35,5 +35,10 @@ To use the sb_gps branch:
 3. >rosrun sb_gps gps_receiver.py 
 
 The node will start streaming data
+
+Whitelisting and Blacklisting Packages 
 =======
-> catkin_make -DCATKIN_WHITELIST_PACKAGES=""
+> catkin_make -DCATKIN_WHITELIST_PACKAGES="package_name"
+> catkin_make -DCATKIN_BLACKLIST_PACKAGES="package_name"
+
+Change "package_name" to "" if you want to clear the blacklist or whitelist.

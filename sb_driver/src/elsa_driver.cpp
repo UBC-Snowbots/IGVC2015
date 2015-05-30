@@ -238,17 +238,28 @@ void processData(string data,sb_msgs::RobotState &state)
 
 	cout << "data: " << data << endl;
 	
-	cout << "1: " << data.substr(0,4) << endl;
-	state.compass=atoi(data.substr(0,4).c_str());//" -19,      0,      0."
-
-	cout << "2: " << data.substr(5,7) << endl;
-	long right=atoi(data.substr(5,7).c_str());
-
-	cout << "3: " << data.substr(13,7) << endl;
-	long left=atoi(data.substr(13,7).c_str());
+	long right, left;
 	
-	state.RightVelo = float(right)/1000;
-	state.LeftVelo = float(left)/1000;
+	if (data.size() >= 5) 
+	{
+		cout << "1: " << data.substr(0,4) << endl;
+	  state.compass=atoi(data.substr(0,4).c_str());//" -19,      0,      0."
+	}
+	
+  if (data.size() >= 6)
+  {
+    cout << "2: " << data.substr(5,7) << endl;
+	  right=atoi(data.substr(5,7).c_str());
+  }
+
+  if (data.size() >= 14)
+  {
+    cout << "3: " << data.substr(13,7) << endl;
+	  left=atoi(data.substr(13,7).c_str());
+  }
+  
+	state.RightVelo = (float) (right/1000);
+	state.LeftVelo = (float) (left/1000);
 
 //	state.RightVelo.push_back(float(right)/1000);
 //	state.LeftVelo.push_back(float(left)/1000);

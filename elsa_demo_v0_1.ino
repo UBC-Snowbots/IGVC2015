@@ -67,7 +67,7 @@ long Lspeed, Rspeed;
 int compdeg;//compass heading in degrees
 
 float left_motor_cal = 1;
-float right_motor_cal = 0.85; //calibration variables
+float right_motor_cal = 0.825; //calibration variables
 float voltage1, voltage2 = 0;
 float batt_mon1_vol, batt_mon2_vol = 0;
 int voltage_count = 0;
@@ -117,10 +117,10 @@ void setup()
   hal.rcout->set_freq(0xFF, 490);
 
   hal.rcout->enable_ch(0);
-  hal.rcout->enable_ch(1);
+  hal.rcout->enable_ch(3);
 
   hal.rcout->write(0, 1500);//write neutral throttle to esc
-  hal.rcout->write(1, 1500);
+  hal.rcout->write(3, 1500);
 
   //battery monitor
   battery_mon1.init();
@@ -260,8 +260,8 @@ void setup_radio(void)
   rc_4.radio_min = 1030;
   rc_5.radio_min = 1085;
   rc_6.radio_min = 1085;
-  rc_7.radio_min = 1085;
-  rc_8.radio_min = 1085;
+  rc_7.radio_min = 1000;
+  rc_8.radio_min = 1000;
   
   rc_1.radio_max = 1892;//setup maximum value from reciver
   rc_2.radio_max = 1895;
@@ -269,8 +269,8 @@ void setup_radio(void)
   rc_4.radio_max = 1866;
   rc_5.radio_max = 1915;
   rc_6.radio_max = 1915;
-  rc_7.radio_max = 1915;
-  rc_8.radio_max = 1915;
+  rc_7.radio_max = 2000;
+  rc_8.radio_max = 2000;
 
   // 3 is not trimed
   rc_1.radio_trim = 1479;//setup netral value
@@ -279,8 +279,8 @@ void setup_radio(void)
   rc_4.radio_trim = 1452;
   rc_5.radio_trim = 1553;
   rc_6.radio_trim = 1498;
-  rc_7.radio_trim = 1499;
-  rc_8.radio_trim = 1498;
+  rc_7.radio_trim = 1500;
+  rc_8.radio_trim = 1500;
 
   rc_1.set_range(-500,500);//set the range the revicer values are converted to
   rc_1.set_default_dead_zone(50);
@@ -296,9 +296,9 @@ void setup_radio(void)
   rc_6.set_range(1000,2000);
   rc_6.set_default_dead_zone(20);
   rc_7.set_range(1000,2000);
-  rc_7.set_default_dead_zone(20);
+  rc_7.set_default_dead_zone(0);
   rc_8.set_range(1000,2000);
-  rc_8.set_default_dead_zone(20);
+  rc_8.set_default_dead_zone(0);
 
   return;
 }
@@ -352,6 +352,9 @@ void talk()
         Otwist_z=twist_z;
         //TODO: send compass information to the laptop
         //TODO: send Rspeed, Lspeed
+        Rspeed=rc[6].control_in-1500;
+        Lspeed=rc[7].control_in-1500;
+        
         hal.console->printf("%04d,%07d,%07d.", compdeg, Rspeed, Lspeed);
         hal.scheduler->delay(2);
         /*char outbytes[10];

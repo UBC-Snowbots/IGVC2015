@@ -1,15 +1,18 @@
-#include "generate_vision_map.hpp"
+#include "generate_global_map.hpp"
 #include "math.h"
 
-static const string VISION_TOPIC = "vision_topic";
-static const string GEO_POINT_TOPIC = "geo_point_topic";
-static const string ANGLE_TOPIC = "angle_topic";
+static const std::string VISION_TOPIC = "vision_topic";
+static const std::string WAYPOINT_TOPIC = "warpoint_topic";
+static const std::string GPS_INFO_TOPIC = "gps_info_topic";
 
-GenerateGlobalMap::GenerateGlobalMap(){
 
+GenerateGlobalMap::GenerateGlobalMap()
+{
+
+  // Initialize subscribers
   _imageSubscriber = _n.subscribe(VISION_TOPIC, 1000, LocalMapSubscriberCallback);
-  _geoPointSubscriber = _n.subscribe(GPS_TOPIC, 1000, GeoPointSubscriberCallback);
-  _angleSubscriber = _n.subscribe(GPS_TOPIC, 1000, AngleSubscriberCallback);
+  _waypointSubscriber = _n.subscribe(WAYPOINT_TOPIC, 1000, WaypointSubscriberCallback);
+  _gpsInfoSubscriber = _n.subscribe(GPS_INFO_TOPIC, 1000, GPSInfoSubscriberCallback);
 
   // Initialize global map
   _globalMap.data.info.width = 100;
@@ -22,6 +25,7 @@ GenerateGlobalMap::~GenerateGlobalMap(){
 
 }
 
+
 void GenerateGlobalMap::TransformLocalToGlobal(){
 
   // Loop through the vision map
@@ -30,8 +34,8 @@ void GenerateGlobalMap::TransformLocalToGlobal(){
     // If there is an obstacle, then update the global map
     if(_imageMsg.data[index] == 1) {
 
-      xGlobalVisionCoord = cos(_poseMsg.angle) * ConvertIndexToXCoord(index) - sin(_poseMsg.angle) * ConvertIndexToYCoord(index) +            _globalMap.info.origin.position.x;
-      yGlobalVisionCoord = sin(_poseMsg.angle) * ConvertIndexToXCoord(index) + cos(_poseMsg.angle) * ConvertIndexToYCoord(index) + _globalMap.info.origin.position.y;
+      float  xGlobalVisionCoord = cos(_poseMsg.angle) * ConvertIndexToXCoord(index) - sin(_poseMsg.angle) * ConvertIndexToYCoord(index) +            _globalMap.info.origin.position.x;
+      float yGlobalVisionCoord = sin(_poseMsg.angle) * ConvertIndexToXCoord(index) + cos(_poseMsg.angle) * ConvertIndexToYCoord(index) + _globalMap.info.origin.position.y;
 
     }
 
@@ -39,24 +43,6 @@ void GenerateGlobalMap::TransformLocalToGlobal(){
     _globalMap.data[ConvertXYCoordToIndex(xGlobalVisionCoord, yGlobalVisionCoord, _globalMap.data.info.width)] = 1;
 
   }
-
-}
-
-uint8_t GenerateGlobalMap::ConvertIndexToXCoord(uint8_t index){
-
-   return index % _imageMsg->width;
-
-}
-
-uint8_t GenerateGlobalMap::ConvertIndexToXCoord(uint8_t index){
-
-   return index / _imageMsg->width;
-
-}
-
-uint8_t GenerateGlobalMap::ConvertXYCoordToIndex(uint8_t x, uint8_t y, uint8_t width) {
-
-  return y * width + x;
 
 }
 
@@ -69,22 +55,41 @@ void GenerateGlobalMap::LocalMapSubscriberCallback(const sensor_msgs::Image::Con
 
   for(int index = 0; index < _mapSize; index++){
 
-    _imageMsg.data[index] = imageMsg.data[index];
+    _imageMsg.data[index] = imageMsg->data[index];
 
   }
 
 }
 
-void GenerateGlobalMap::GeoPointSubscriberCallback(const geographic_msgs::GeoPoint::ConstPtr& geoPointMsg){
+uint8_t GenerateGlobalMap::ConvertIndexToXCoord(uint8_t index){
 
-  _globalMap.info.origin.position.x = pose2DMsg->x; // FIXME CONVERT STUFF TO X AND Y
-  _globalMap.info.origin.position.y = pose2DMsg->y;
+   return index % _imageMsg.width;
 
 }
 
-void GenerateGlobalMap::AngleSubscriberCallback(const std_msgs::Float32::ConstPtr& angleMsg){
+uint8_t GenerateGlobalMap::ConvertIndexToYCoord(uint8_t index){
+
+   return index / _imageMsg.width;
+
+}
+
+uint8_t GenerateGlobalMap::ConvertXYCoordToIndex(uint8_t x, uint8_t y, uint8_t width) {
+
+  return y * width + x;
+
+}
+
+void GenerateGlobalMap::WaypointSubscriberCallback(const sb_msgs::ConstPtr&  waypointMsg){
+
+  _globalMap.info.origin.position.x = waypointMsg->lon; // FIXME CONVERT STUFF TO X AND Y
+  _globalMap.info.origin.position.y = waypointMsg->lat;
+
+}
+
+
+void GenerateGlobalMap::GPSInfoSubscriberCallback(const std_msgs::Float32::ConstPtr& gpsInfoMsg){
   
-  _poseMsg.theta = angleMsg.data;
+  _poseMsg.theta = gpsInfoMsg.angle;
 
 }
 

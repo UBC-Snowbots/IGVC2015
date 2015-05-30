@@ -16,7 +16,7 @@ static const int    OFFSET_RAYS = 30;        // offset from central ray
 static const double REDZONE      = 3.0; // only rotate, do not go
 static const double ORANGEZONE   = 6.0; // turn 
 static const double SLOW_SPEED	 = 0.1;
-static const double SPEED_LIMIT  = 0.3;
+static const double SPEED_LIMIT  = 0.1;
 
 //ros related constants
 static const string NODE_NAME       = "imagine_lidar";
@@ -72,7 +72,7 @@ int main (int argc, char** argv)
 	init(argc, argv,NODE_NAME);
 	NodeHandle n;
 
-	Subscriber lidar_state = n.subscribe(SUBSCRIBE_TOPIC,20,lidar_callback);
+	//Subscriber lidar_state = n.subscribe(SUBSCRIBE_TOPIC,20,lidar_callback);
 	
 	Publisher car_pub = n.advertise<geometry_msgs::Twist>(PUBLISH_TOPIC,1);
 	

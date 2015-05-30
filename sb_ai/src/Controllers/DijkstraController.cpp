@@ -1,36 +1,20 @@
 #include "DijkstraController.hpp"
+#include "PathSmoothing/PathSmoothing.h"
 
 namespace ai
 {
-  geometry_msgs::Twist DijkstraController::GetTwistMsg(int next_move)
-  {
-	  geometry_msgs::Twist twist;
-
-	  twist.linear.x = 0;
-	  twist.linear.y = 0;
-	  twist.linear.z = 0;
-		
-	  twist.angular.x = 0;
-	  twist.angular.y = 0;
-	  twist.angular.z = 0;
-
-	  if (next_move == -1 || next_move == 1) 
-	    { twist.linear.y = 0.1; twist.angular.z = next_move * 0.3; }
-	  if (next_move == -2 || next_move == 2) 
-	    { twist.linear.y = 0.3; }
-	    
-	  return twist;
-  }
-
   DijkstraController::DijkstraController(ros::NodeHandle& nh):
-	  map_ptr(NULL),
-	  width(100),
-	  height(100),
-	  start(90),
-	  goal(11),
-	  next_movement(0)
+	  width(10),
+	  height(10),
+	  start(10),
+	  goal(95)
   {
 	  //map_sub = nh.subscribe(MAP_SUB_TOPIC, 10, &DijkstraController::MapCallback, this);
+	  map_ptr = new int[width*height];
+	  for (int i = 0; i < width*height; i++)
+	  {
+	    map_ptr[i] = 0;
+	  }
   }
 
   //Returns the next twist message to publish (this is called each main loop iteration)
@@ -40,9 +24,20 @@ namespace ai
 	  {
 		  dijkstras.Search(dijkstras.GetStart());
 		  dijkstras.ReconstructPath(dijkstras.GetGoal());
-		  next_movement = dijkstras.GetNextStep();
+		  dijkstras.SetFirstAndThird(first, fourth);
+		  Location targets[2];
+		  Location target_one, target_two;
+		  target_one = dijkstras.ConvertToLocation(first);
+		  target_two = dijkstras.ConvertToLocation(fourth);
+		  std::cout << "Fourth: " << fourth << std::endl;
+		  std::cout << "Goal: " << dijkstras.GetGoal() << std::endl;
+		  dijkstras.GetVelocity(targets, 0.0f, twist_msg);
+		  std::cout << "T_one: " << target_one.x << ", " << target_one.y << std::endl;
+		  std::cout << "T_two: " << target_two.x << ", " << target_two.y << std::endl;
 	  }
 	  
-	  return GetTwistMsg(next_movement);
+	  std::cout << "Linear y = " << twist_msg.linear.y << std::endl;
+	  std::cout << "Angular z = " << twist_msg.angular.z << std::endl;
+	  return twist_msg;
   }
 }
