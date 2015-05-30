@@ -1,1 +1,5 @@
 add_library(ai_map generate_global_map.hpp generate_global_map.cpp)
+
+add_executable(test_generate_global_map test_generate_global_map.cpp)
+target_link_libraries(test_generate_global_map ${catkin_LIBRARIES})
+#add_dependencies(test_generate_global_map test_generate_global_map_cpp)
