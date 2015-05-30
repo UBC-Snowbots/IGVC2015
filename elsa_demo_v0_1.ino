@@ -128,10 +128,10 @@ void setup()
   battery_mon2.init();
   battery_mon2.set_monitoring(AP_BATT_MONITOR_VOLTAGE_AND_CURRENT);
   //LED control
-  a_led = hal.gpio->channel(54);//A10 output for LEDs solid
+  a_led = hal.gpio->channel(64);//A10 output for LEDs solid
   a_led->mode(GPIO_OUTPUT);
   a_led->write(0);
-  b_led = hal.gpio->channel(53);//A9 output for LEDs blinking
+  b_led = hal.gpio->channel(63);//A9 output for LEDs blinking
   b_led->mode(GPIO_OUTPUT);
   b_led->write(0);
   
