@@ -8,6 +8,10 @@
 #include "sb_msgs/Gps_info.h"
 #include "sb_msgs/Waypoint.h"
 
+static const std::string VISION_TOPIC = "vision_topic";
+static const std::string WAYPOINT_TOPIC = "warpoint_topic";
+static const std::string GPS_INFO_TOPIC = "gps_info_topic";
+
 class GenerateGlobalMap {
 
   private:
@@ -22,10 +26,10 @@ class GenerateGlobalMap {
     void LocalMapSubscriberCallback(const sensor_msgs::Image::ConstPtr& imageMsg);
 
     // Gets the longitude and latitude and converts to global x and y coords
-    void WaypointSubscriberCallback(const sb_msgs::ConstPtr& waypointMsg){
+    void WaypointSubscriberCallback(const sb_msgs::Waypoint::ConstPtr& waypointMsg);
  
     // Gets the real world angle
-    void GPSInfoSubscriberCallback(const sb_msgs::ConstPtr& gpsInfoMsg);
+    void GPSInfoSubscriberCallback(const sb_msgs::Gps_info::ConstPtr& gpsInfoMsg);
 
     ros::NodeHandle _n;
 
@@ -46,6 +50,8 @@ class GenerateGlobalMap {
 
     // Stores the global map of the robot along with it's position in the global map
     nav_msgs::OccupancyGrid _globalMap;
+    
+    uint32_t _visionMapSize;
 
     uint32_t _localMapSize;
     
@@ -55,7 +61,7 @@ class GenerateGlobalMap {
 
     GenerateGlobalMap();
 
-     ~GenerateGlobalMap();
+    ~GenerateGlobalMap();
 
     void TransformLocalToGlobal();
 
