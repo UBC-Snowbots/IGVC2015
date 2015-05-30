@@ -355,7 +355,7 @@ void talk()
         Rspeed=rc[6].control_in-1500;
         Lspeed=rc[7].control_in-1500;
         
-        hal.console->printf("%04d,%07d,%07d.", compdeg, Rspeed, Lspeed);
+        hal.console->printf("%04d,%07d,%07d.\n", compdeg, Rspeed, Lspeed);
         hal.scheduler->delay(2);
         /*char outbytes[10];
         outbytes[0]=compdeg>>8;
