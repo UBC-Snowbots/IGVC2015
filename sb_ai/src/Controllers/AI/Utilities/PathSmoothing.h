@@ -1,6 +1,6 @@
 #include <ros/ros.h>
 #include <geometry_msgs/Twist.h>
-#include "../AI/structures.h"
+#include "../structures.h"
 
 #define MAX_ANG_VEL 0.3f
 #define MAX_LIN_VEL 0.3f

@@ -1,5 +1,5 @@
 #include "DijkstraController.hpp"
-#include "PathSmoothing/PathSmoothing.h"
+#include "AI/Utilities/PathSmoothing.h"
 
 namespace ai
 {

@@ -1,5 +1,4 @@
 add_subdirectory(Controllers/AI)
-add_subdirectory(Controllers/PathSmoothing)
 add_subdirectory(AI_Mapping)
 
 find_package(OpenCV REQUIRED)
@@ -24,7 +23,7 @@ set(MAIN_SOURCE
 
 set(MODE_LIBRARIES
 	ai_dijkstra
-	path_smoothing
+	ai_utilities
 	ai_map
 	${OpenCV_LIBS})
 
