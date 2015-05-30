@@ -21,7 +21,7 @@ def handle_gps_service(req,res):
 	lon1 = CurrentWaypoint[1] * toRad;
 	lat2 = TargetWaypoint[0] * toRad;
 	lon2 = TargetWaypoint[1] * toRad;
-	
+
 	a = math.sin((lat2 - lat1) / 2)*math.sin((lat2 - lat1) / 2) + math.cos(lat1) * math.cos(lat2) * math.sin((lon2 - lon1) / 2)*math.sin((lon2 - lon1) / 2);
 	c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a));
 	res.d = 6371000 * c;
