@@ -56,6 +56,7 @@ void LocalLidarMap::LidarCallback(const sensor_msgs::LaserScan::ConstPtr& scan)
   }
 }
 
+/*
 int main(int argc, char **argv)
 {
   // Initialize lidar map 
@@ -84,3 +85,4 @@ int main(int argc, char **argv)
   
   return 0;
 }
+*/
