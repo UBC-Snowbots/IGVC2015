@@ -3,7 +3,6 @@
 #include "stdint.h"
 #include "ros/ros.h"
 #include "nav_msgs/OccupancyGrid.h"
-#include "sensor_msgs/Image.h"
 #include "sb_msgs/Gps_info.h"
 #include "sb_msgs/Waypoint.h"
 
@@ -22,7 +21,7 @@ class GenerateGlobalMap {
     uint8_t ConvertXYCoordToIndex(uint8_t x, uint8_t y, uint8_t width);
 
     // Gets the local map from vision
-    void LocalMapSubscriberCallback(const sensor_msgs::Image::ConstPtr& imageMsg);
+    void LocalMapSubscriberCallback(const nav_msgs::OccupancyGrid::ConstPtr& localMap);
 
     // Gets the longitude and latitude and converts to global x and y coords
     void WaypointSubscriberCallback(const sb_msgs::Waypoint::ConstPtr& waypointMsg);
@@ -42,7 +41,7 @@ class GenerateGlobalMap {
     ros::Subscriber _gpsInfoSubscriber;
 
     // Stores the local map of the robot
-    sensor_msgs::Image _imageMsg;
+    nav_msgs::OccupancyGrid _localMap;
 
     // Stores the global map of the robot along with it's position in the global map
     nav_msgs::OccupancyGrid _globalMap;

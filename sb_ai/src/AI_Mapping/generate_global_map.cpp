@@ -35,23 +35,22 @@ void GenerateGlobalMap::TransformLocalToGlobal(){
       yGlobalVisionCoord = sin(_compassAngle - _globalMapAngle) * ConvertIndexToXCoord(index) + cos(_compassAngle - _globalMapAngle) * ConvertIndexToYCoord(index) + _globalMap.info.origin.position.y;
 
     // Update global map with 0/1 to show that an obstacle dne/exists
-    _globalMap.data[ConvertXYCoordToIndex(xGlobalVisionCoord, yGlobalVisionCoord, _globalMap.info.width)] = _imageMsg.data[index];
+    _globalMap.data[ConvertXYCoordToIndex(xGlobalVisionCoord, yGlobalVisionCoord, _globalMap.info.width)] = _localMap.data[index];
 
   }
 
 }
 
-void GenerateGlobalMap::LocalMapSubscriberCallback(const sensor_msgs::Image::ConstPtr& imageMsg){
+void GenerateGlobalMap::LocalMapSubscriberCallback(const nav_msgs::OccupanyGrid::ConstPtr& localMap){
 
   ROS_INFO("LocalMapSubscriberCallback doing stuff");
-  _imageMsg.height = imageMsg->height; // Number of rows
-  _imageMsg.width = imageMsg->width; // Number of columns
-  _imageMsg.step = imageMsg->step;
-  _localMapSize = imageMsg->width * imageMsg->height;
+  _localMap.height = localMap->height; // Number of rows
+  _localMap.width = localMap->width; // Number of columns
+  _localMapSize = localMap->width * occupancyGridMsg->height;
 
   for(int index = 0; index < _localMapSize; index++){
 
-    _imageMsg.data[index] = imageMsg->data[index];
+    _localMap.data[index] = localMap->data[index];
 
   }
 
@@ -59,13 +58,13 @@ void GenerateGlobalMap::LocalMapSubscriberCallback(const sensor_msgs::Image::Con
 
 uint8_t GenerateGlobalMap::ConvertIndexToXCoord(uint8_t index){
 
-   return index % _imageMsg.width;
+   return index % _occupancyGridMsg.width;
 
 }
 
 uint8_t GenerateGlobalMap::ConvertIndexToYCoord(uint8_t index){
 
-   return index / _imageMsg.width;
+   return index / _occupancyGridMsg.width;
 
 }
 
