@@ -14,9 +14,9 @@ class GenerateGlobalMap {
 
   private:
 
-    uint8_t ConvertIndexToXCoord(uint8_t index);
+    uint8_t ConvertIndexToLocalXCoord(uint8_t index);
 
-    uint8_t ConvertIndexToYCoord(uint8_t index);
+    uint8_t ConvertIndexToLocalYCoord(uint8_t index);
 
     uint8_t ConvertXYCoordToIndex(uint8_t x, uint8_t y, uint8_t width);
 
@@ -46,7 +46,7 @@ class GenerateGlobalMap {
     // Stores the global map of the robot along with it's position in the global map
     nav_msgs::OccupancyGrid _globalMap;
     
-    uint32_t _visionMapSize;
+    uint32_t _globalMapSize;
 
     // Real world angle of robot
     uint8_t _compassAngle;

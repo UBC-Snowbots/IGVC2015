@@ -13,7 +13,7 @@ GenerateGlobalMap::GenerateGlobalMap()
   // Initialize global map
   _globalMap.info.width = 100;
   _globalMap.info.height = 100;
-  _visionMapSize = 100*100;
+  _globalMapSize = 100*100;
   // _globalMap.data.data[_globalMap.data.info.width * _globalMap.data.info.height]; // Not sure about this...
 
 }
@@ -31,8 +31,8 @@ void GenerateGlobalMap::TransformLocalToGlobal(){
   // Loop through the vision map
   for(int index = 0; index < _localMapSize; index++) {
 
-      xGlobalVisionCoord = cos(_compassAngle - _globalMapAngle) * ConvertIndexToXCoord(index) - sin(_compassAngle - _globalMapAngle) * ConvertIndexToYCoord(index) +            _globalMap.info.origin.position.x;
-      yGlobalVisionCoord = sin(_compassAngle - _globalMapAngle) * ConvertIndexToXCoord(index) + cos(_compassAngle - _globalMapAngle) * ConvertIndexToYCoord(index) + _globalMap.info.origin.position.y;
+      xGlobalVisionCoord = cos(_compassAngle - _globalMapAngle) * ConvertIndexToLocalXCoord(index) - sin(_compassAngle - _globalMapAngle) * ConvertIndexToLocalYCoord(index) +            _globalMap.info.origin.position.x;
+      yGlobalVisionCoord = sin(_compassAngle - _globalMapAngle) * ConvertIndexToLocalXCoord(index) + cos(_compassAngle - _globalMapAngle) * ConvertIndexToLocalYCoord(index) + _globalMap.info.origin.position.y;
 
     // Update global map with 0/1 to show that an obstacle dne/exists
     _globalMap.data[ConvertXYCoordToIndex(xGlobalVisionCoord, yGlobalVisionCoord, _globalMap.info.width)] = _localMap.data[index];
@@ -41,12 +41,12 @@ void GenerateGlobalMap::TransformLocalToGlobal(){
 
 }
 
-void GenerateGlobalMap::LocalMapSubscriberCallback(const nav_msgs::OccupanyGrid::ConstPtr& localMap){
+void GenerateGlobalMap::LocalMapSubscriberCallback(const nav_msgs::OccupancyGrid::ConstPtr& localMap){
 
   ROS_INFO("LocalMapSubscriberCallback doing stuff");
-  _localMap.height = localMap->height; // Number of rows
-  _localMap.width = localMap->width; // Number of columns
-  _localMapSize = localMap->width * occupancyGridMsg->height;
+  _localMap.info.height = localMap->info.height; // Number of rows
+  _localMap.info.width = localMap->info.width; // Number of columns
+  _localMapSize = localMap->info.width * localMap->info.height;
 
   for(int index = 0; index < _localMapSize; index++){
 
@@ -56,15 +56,15 @@ void GenerateGlobalMap::LocalMapSubscriberCallback(const nav_msgs::OccupanyGrid:
 
 }
 
-uint8_t GenerateGlobalMap::ConvertIndexToXCoord(uint8_t index){
+uint8_t GenerateGlobalMap::ConvertIndexToLocalXCoord(uint8_t index){
 
-   return index % _occupancyGridMsg.width;
+   return index % _localMap.info.width;
 
 }
 
-uint8_t GenerateGlobalMap::ConvertIndexToYCoord(uint8_t index){
+uint8_t GenerateGlobalMap::ConvertIndexToLocalYCoord(uint8_t index){
 
-   return index / _occupancyGridMsg.width;
+   return index / _localMap.info.width;
 
 }
 
