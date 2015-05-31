@@ -185,9 +185,13 @@ int main(int argc, char **argv)
 		ipm.applyHomography( frame, outputImg);		 
 		ipm.drawPoints(origPoints, frame );
         
+        Size size(80,60);//the dst image size,e.g.100x100
+        Mat dst;
+        resize(outputImg,dst,size);//resize image
+
         // Publish Image
         if(!outputImg.empty()) {
-            msg = cv_bridge::CvImage(std_msgs::Header(), "mono8", outputImg).toImageMsg();
+            msg = cv_bridge::CvImage(std_msgs::Header(), "mono8", dst).toImageMsg();
             pub.publish(msg);
             ROS_INFO("Vision published an image");
             cv::waitKey(1);
