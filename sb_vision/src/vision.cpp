@@ -44,6 +44,7 @@ static const unsigned int CAMERA_AMOUNT = 1;
 
 void onShutdown(int sig);
 bool connectToCamera(VideoCapture& camera);
+int sum_cam(bool camera_status[]);
 
 int main(int argc, char **argv)
 {
@@ -54,12 +55,9 @@ int main(int argc, char **argv)
     image_transport::Publisher pub = it.advertise("image", 1);
     sensor_msgs::ImagePtr msg;
 	 
-    signal(SIGINT, onShutdown);  
-    if(!connectToCamera(cap1) && !connectToCamera(cap2) && !connectToCamera(cap3)){
-        ROS_FATAL("Unable to connect to all cameras, exiting now");
-        ROS_FATAL("If this error persist, run the usb-reset.sh in the home directory");
-        return 0;
-    }
+    //signal(SIGINT, onShutdown);  
+
+
 
     Mat image1, image2, image3;         
     std::vector<Mat> imgs;
@@ -71,19 +69,24 @@ int main(int argc, char **argv)
     Mat inputImg, inputImgGray;
 	Mat outputImg;
     Mat frame;
+    Mat pano;
     Mat image_pano;
+    bool camera_status[3]; //false means off, true means on
         
     //IPM Set-up, will put into class itself soon
+    //int width = 1920;
+    //int height = 1080;
     int width = 1920;
     int height = 1080;
-
+    int wf = width/1920; //width scale factor
+    int hf = height/1080; //height scale factor
     vector<Point2f> origPoints;
     origPoints.push_back( Point2f(0, height) );
     origPoints.push_back( Point2f(width, height) );
     //origPoints.push_back( Point2f(width/2+450, 580) );
     //origPoints.push_back( Point2f(width/2-250, 580) );
-    origPoints.push_back( Point2f(width/2+450, 620) );
-    origPoints.push_back( Point2f(width/2-250, 620) );
+    origPoints.push_back( Point2f(width/2+450*wf, 620*hf) );
+    origPoints.push_back( Point2f(width/2-250*wf, 620*hf) );
 
     // The 4-points correspondences in the destination image
     vector<Point2f> dstPoints;
@@ -92,59 +95,34 @@ int main(int argc, char **argv)
     dstPoints.push_back( Point2f(width, 0) );
     dstPoints.push_back( Point2f(0, 0) );
 	
+    
+    //create camera status array
+    camera_status[0] = connectToCamera(cap1);
+    camera_status[1] = connectToCamera(cap2);
+    camera_status[2] = connectToCamera(cap3);
 
-    /*
-    //Initialize camera
-    VideoCapture cap; // open the default camera
-        //VideoCapture cap("sample-course.avi");
-        //VideoCapture cap("roadsample.mov");
-        //VideoCapture cap("fieldsample.mov");
-        
-        for (int i=5; i>=-1; i--)
-        {
-            cout << "trying port: " << i << endl;
-            cap.open(i);
-            if (cap.isOpened())
-            {
-                cout << "YAY!" << endl;
-                break;
-            }
-
-            if (i ==-1)
-            {
-                cout << "failed to connect to camera" << endl;
-                return -1;
-            }
-        }
-    	
-*/
-	while(ros::ok() && errorCounter<5)
+    if(!connectToCamera(cap1) && !connectToCamera(cap2) && !connectToCamera(cap3))
+    ROS_INFO("Unable to connect to any camera, using file as input");
+    
+    
+	while(ros::ok())
     {
         //TODO: add camera capture allowance for any amount of cameras
         // Read in image from video camera, or other source
-        cap1 >> image1;
-        cap2 >> image2;
-        cap3 >> image3;
         
-        if (!cap1.read(image1)){
-            ROS_WARN("Cannot read image 1 from video stream");
-            errorCounter++;
-            continue;
-        }
-        if (!cap2.read(image2)){
-            ROS_WARN("Cannot read image 2 from video stream");
-            errorCounter++;
-            continue;
-        }
-        if (!cap3.read(image3)){
-            ROS_WARN("Cannot read image 3 from video stream");
-            errorCounter++;
-            continue;
-        }
+        if(camera_status[0]) cap1 >> image1;
+        if(camera_status[1]) cap2 >> image2;
+        if(camera_status[2]) cap3 >> image3;
+        
+        if (!cap1.read(image1)) ROS_WARN("Cannot read image 1 from video stream");
+        if (!cap2.read(image2)) ROS_WARN("Cannot read image 2 from video stream");
+        if (!cap3.read(image3))ROS_WARN("Cannot read image 3 from video stream");
         
         
-        if (image1.empty() || image2.empty() || image3.empty())
-            ROS_WARN("One of the Mat is empty");
+        if (image1.empty() || image2.empty() || image3.empty()) {
+         ROS_WARN("One of the Mats is empty");   
+        }
+      
 	    
 
         // Static image for debugging purposes, seem to need an absolute
@@ -155,44 +133,56 @@ int main(int argc, char **argv)
         //std::cout<<"image read"<<std::endl;
 
         //Image Stitching
-        ROS_INFO("Image Stitching Started!");
-        counter++;
-        Mat pano;
-        imgs.push_back(image1);
-        imgs.push_back(image2);
-        imgs.push_back(image3);
+        // If 2 arrays have values
+        if(sum_cam(camera_status)>=2)
+        {
+            ROS_INFO("Image Stitching Started!");
+            counter++;
+            
+            if(camera_status[0])imgs.push_back(image1);
+            if(camera_status[1])imgs.push_back(image2);
+            if(camera_status[2])imgs.push_back(image3);
 
-        Stitcher::Status status= stitcher.stitch(imgs, pano);
-        imgs.clear();
-        
-        if (status != Stitcher::OK) {
-            ROS_FATAL("Unable to stitch images together!, trying again...");
-            continue;
-        } else {                
-            ROS_INFO("Awaiting for stiched image to display");
-            imshow(CVWINDOW, pano);
-            if(waitKey(50) == 27){
-                ROS_INFO("ESC key pressed! Exiting loop now");
-                ROS_WARN("The next run has a higher chance of crashing for unknown reasons");
-                break;
+            Stitcher::Status status= stitcher.stitch(imgs, pano);
+            imgs.clear();
+            
+            if (status != Stitcher::OK) {
+                ROS_FATAL("Unable to stitch images together!, trying again...");
+                continue;
+            }
+            else {                
+                ROS_INFO("Awaiting for stiched image to display");
+                imshow(CVWINDOW, pano);
+                if(waitKey(50) == 27){
+                    ROS_INFO("ESC key pressed! Exiting loop now");
+                    ROS_WARN("The next run has a higher chance of crashing for unknown reasons");
+                    //break;
+                    }
             }
         }
+        else if(camera_status[0]) pano = image1;
+        else if(camera_status[1]) pano = image2;
+        else if(camera_status[2]) pano = image3;
+        else pano = imread("/home/jannicke/Pictures/Image1.jpg", 1);
 
         //Apply filter to stitched image
         filter myfilter; //create filter
         image_pano = myfilter.getUpdate(pano);
-        myfilter.displayImages(image_pano);
+        myfilter.displayImages(pano);
         
      
 	    // Transform image
 	    IPM ipm( Size(width, height), Size(width, height), origPoints, dstPoints );
 		frame = image_pano;
-		if( frame.empty() ) break;
+		if( frame.empty() )
+        {
+            cout<<"frame empty" <<endl;
+        } 
 		// Color Conversion
 		if(frame.channels() == 3)cvtColor(frame, inputImgGray, CV_BGR2GRAY);				 		 
 		else frame.copyTo(inputImgGray);			 		 
 		// Process
-		ipm.applyHomography( frame, outputImg );		 
+		ipm.applyHomography( frame, outputImg);		 
 		ipm.drawPoints(origPoints, frame );
         
         // Publish Image
@@ -202,8 +192,6 @@ int main(int argc, char **argv)
             ROS_INFO("Vision published an image");
             cv::waitKey(1);
         }
-	    
-
         ros::spinOnce();
         loop_rate.sleep();
 
@@ -257,5 +245,12 @@ bool connectToCamera(VideoCapture& camera){
     return false;
 }
 
-
-   
+int sum_cam(bool camera_status[])
+{
+    int count = 0;
+    for (int i=0;i<3;i++)
+    {
+        if(camera_status[i]) count++;
+    }
+    return count;
+}

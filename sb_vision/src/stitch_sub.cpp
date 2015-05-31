@@ -25,7 +25,7 @@ int main(int argc, char **argv){
 	cv::namedWindow(CV_WINDOW);
 	//cv::startWindowThread();
 	image_transport::ImageTransport it(nh);
-	image_transport::Subscriber sub = it.subscribe("stitcher", 1, imageCallback);
+	image_transport::Subscriber sub = it.subscribe("image", 1, imageCallback);
 	
 	ros::spin();
 	cv::destroyWindow(CV_WINDOW);
