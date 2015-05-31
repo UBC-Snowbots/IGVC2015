@@ -16,8 +16,7 @@ namespace ai
   {
     // Subscribers
     gps_Sub = nh.subscribe(GPS_SUB_TOPIC, 20, &GpsController::GpsCallback, this);
-    compass_Sub = nh.subscribe (COMPASS_SUB_TOPIC, 1, &GpsController::CompassCallback, this);
-    
+    state_Sub = nh.subscribe (COMPASS_SUB_TOPIC, 1, &GpsController::CompassCallback, this);
     // Publishers
     gps_pub = nh.advertise<sb_msgs::Gps_info>(GPS_PUB_TOPIC,50);
     coord_pub = nh.advertise<sb_msgs::Waypoint>(WAYPOINT_PUB_TOPIC, 100);
@@ -31,14 +30,16 @@ namespace ai
     theta = 0;
     prev_move = 0;
     avg_count = 0;
-    calibrate = false;
     TargetWaypoint.lon = 49.26238123;
 	  TargetWaypoint.lat = -123.24871402;
 	  buffWaypoint.lon = 0.0;
 	  buffWaypoint.lat = 0.0;	
+		calibration.lon = 49.26231834;
+		calibration.lat = -123.24871396; //The point we are calibrating on
 	  
 	  // Set precision of the numbers we print
 	  cout.precision(13);
+		GpsController::calibrate();
   }
   
   
@@ -52,23 +53,8 @@ namespace ai
 	  }
 	  else { cout << "\033[1;31m" << "Service Failed" << "\033[0m" << endl; }
 	*/
-	  if (calibrate)
-	  {	 
-		  if (msg_flag)
-		  {
-			  if (avg_count = 10)
-			  {
-		      avgWaypoint.lon = buffWaypoint.lon/10.0;
-				  avgWaypoint.lat = buffWaypoint.lat/10.0;
-				  avg_count = 0;
-			  }
-			  else
-			  {
-				  buffWaypoint.lon = CurrentWaypoint.lon;
-				  buffWaypoint.lat = CurrentWaypoint.lat;
-				  avg_count++;
-			  }
-			  
+
+		    GpsController::calcwaypoint();
 			  ROS_INFO ("Position:");
 			  cout << "Current longitude: " << avgWaypoint.lon << " Current latitude: " << avgWaypoint.lat << endl;
 			  pub_data = Createdata();
@@ -82,36 +68,11 @@ namespace ai
 			  twist_msg = GetTwistMsg(next_move);
 			  return twist_msg;
 				//Published Data
-		  }
-		  else { ROS_INFO("No Fix:"); }
-	  }
-	  else 
-	  {	
-	    cout << "\033[1;31m calibrating \033[0m" << endl;;
-			if (msg_flag)
-			{
-				if (avg_count = 10)
-				{ 
-				  avgWaypoint.lon = buffWaypoint.lon/10.0;
-				  avgWaypoint.lat = buffWaypoint.lat/10.0;
-				  calibrate = true;
-				  avg_count = 0;
-				  StartGps();	
-			 	  cout <<"\x1b[1;31m" << off.lon << " and " << off.lat<< "\x1b[0m" << endl;
-				}			  
-				else
-				{
-				  buffWaypoint.lon = CurrentWaypoint.lon;
-				  buffWaypoint.lat = CurrentWaypoint.lat;
-				  avg_count ++;
-				}
-			}
-			else
-			{ 
-			  ROS_INFO("No Fix:");
-				cout <<"\x1b[1;31m Waiting for fix for calibration \x1b[0m" << endl;
-		  }
-    }
+		  
+
+	  
+	  
+	//dont include sleep, loop, spin 
   }
 
 
@@ -119,8 +80,8 @@ namespace ai
   {
   //double lon = 49.262368;
   //double lat = -123.248591;
-  off.lon = (49.157435497 - 49.26231834);
-  off.lat = (-123.149139703 - (-123.24871396));
+  offWaypoint.lon = (49.157435497 - 49.26231834);
+  offWaypoint.lat = (-123.149139703 - (-123.24871396));
   }
 
   void GpsController::GpsCallback(const std_msgs::String::ConstPtr& msg)
@@ -142,17 +103,17 @@ namespace ai
 		  lon_dir = a[31];
 		  //cout << lon_dir << endl;
 		  if (lon_dir == 'N')
-			  CurrentWaypoint.lon = atof(temp)/100 - off.lon;
+			  CurrentWaypoint.lon = atof(temp)/100 - offWaypoint.lon;
 		  else if (lon_dir == 'S')
-			  CurrentWaypoint.lon = (-1)*(atof(temp)/100) - off.lon;
+			  CurrentWaypoint.lon = (-1)*(atof(temp)/100) - offWaypoint.lon;
 		  for (i = 33; i < 45; i++)
 			  temp [i-33] = a[i];
 		  lat_dir = a[47];
 		  //cout << lat_dir << endl;
 		  if (lat_dir == 'E')
-			  CurrentWaypoint.lat = atof(temp)/100 - off.lat;
+			  CurrentWaypoint.lat = atof(temp)/100 - offWaypoint.lat;
 		  else if (lat_dir == 'W')
-			  CurrentWaypoint.lat = (-1)*(atof(temp)/100) - off.lat;
+			  CurrentWaypoint.lat = (-1)*(atof(temp)/100) - offWaypoint.lat;
 	  }
 	  else{
 		  msg_flag = false;
@@ -256,67 +217,110 @@ namespace ai
 	  return d;
   }
 
-  double GpsController::CreateAngle()
-  {
-	  /*
-	  Input Parameter:
-	  1. direction of robot from North (0-359 degrees)
-	  ??
-	  2. x cordinates of TargetWaypoint in metres
-	  3. y cordinates of TargetWaypoint in metres
-	  Output: the direction the robot needs to turn (-180 < theta < 180) 
-	  Purpose: calculates angle of robot to target waypoint ((-180) to 180 degrees)
-	  Author: Nick Wu
-	  */
-	  double x = 1, y = 1; //x and y cordinates in metres, this needs to be calculated or passed in a paramaters
+  double GpsController::CreateAngle(void){
+		double dx = (TargetWaypoint.lon - CurrentWaypoint.lon)*111302.62;
+		double dy = (TargetWaypoint.lat - CurrentWaypoint.lat)*110574.61;
+		long double theta, GeoNorth;
+		int quad; 
+		//1.converting magnetic north to geo north 
+		GeoNorth = angleCompass - MAG_DECL;
+		if (GeoNorth < -179)
+				GeoNorth = 180 + (GeoNorth + 179);
+		//2.Move 0 to north of robot
+		GeoNorth = GeoNorth - 90;
+		if (GeoNorth < 180) 
+				GeoNorth = 180 + (GeoNorth + 179);
+		//3.Decide Qudrant using deltalon, deltalat
+		if (dx > 0 && dy > 0) quad = 1;
+		else if (dx > 0 && dy < 0) quad = 2; 
+		else if (dx < 0 && dy < 0) quad = 3; 
+		else quad = 4; 
+		//4.Arctan dy/dx to find angle from "x-axis" (E-W)
+		if (quad == 1 || quad == 4)
+		theta = atan(dx/dy);
+		else 
+		theta = 90 + atan(dy/dx);
+		//5.How much GeoNorth needs to rotate left or right to get to theta
+		if (GeoNorth > theta) 
+			theta = theta - GeoNorth; 
+		else theta = GeoNorth - theta;
 
-	  double theta = 0, angleWaypoint = 180; //theta: angle robot needs to turn, angleWaypoint goal angle from North
-	  double r = sqrt(x*x + y*y); //r = distance from the robot to waypoint
-	  double angleGoal = 180/PI * (acos(abs(y) / r)); //reference angle with respect to y-axis
-
-	  if (x > 0 && y >= 0) //goal angle in quad 1
-		  angleWaypoint = angleGoal;
-	  else if (x >= 0 && y < 0) //goal angle in quad 4
-		  angleWaypoint = (180 - angleGoal);
-	  //checking special condition under quad 1 and 4
-	  if (angleCompass > angleWaypoint + 180)
-		  theta = 360 - angleCompass + angleWaypoint;
-
-	  if (x < 0 && y <= 0) //goal angle in quad 3
-		  angleWaypoint = angleGoal + 180;
-	  else if (x < 0 && y > 0) //goal angle in quad 2 
-		  angleWaypoint = 360 - angleGoal;
-	  //checking special condition under quad 3 and 2 
-	  if (angleCompass <= angleWaypoint - 180){
-		  if (x < 0 && y <= 0) //checks for quad 3 
-			  theta = angleGoal - angleCompass - 180;
-		  else if (x < 0 && y > 0) //checks for quad 2
-			  theta = -angleCompass - angleGoal;
-	  }
-
-	  //for any other condtions
-	  if (theta == 0){
-		  theta = angleWaypoint - angleCompass;
-	  }
-	  return theta;
+		return theta;
   }
 
   sb_msgs::Gps_info GpsController::Createdata()
   {
 
     sb_msgs::Gps_info data; 
-    data.distance = CreateDistance();
-    data.angle = CreateAngle();
+  data.distance = ai::GpsController::CreateDistance();
+  data.angle = ai::GpsController::CreateAngle();
+  cout << "Current longitude: " << avgWaypoint.lon << " Current latitude: " << avgWaypoint.lat << endl;
+  cout << "distance" << data.distance << endl;
+  cout << "angle" << data.angle << endl;
+  return data; 
+  }
+
+  void GpsController::CompassCallback(const sb_msgs::RobotState::ConstPtr& state){
+	  angleCompass = state->compass;
+  }
+
+	void GpsController::print (int color, const std::string& message){cout << "\033[1;" << color << "m" << message << "\033[0m" << endl;}
+	void GpsController::print (int color, double value){cout << "\033[1;" << color << "m" << value << "\033[0m" << endl;}
+	void GpsController::print (int color, const std::string& message, double value){cout << "\033[1;" << color << "m" << message <<  value << "\033[0m" << endl;}
+	void GpsController::print (const std::string& message){cout << message << endl;}
+	void GpsController::print (const std::string& message, double value){cout << message << value << endl;}
+	void GpsController::print (int color, const std::string& message, double value, double value2){cout << "\033[1;" << color << "m" << message << value << "<<" << value2 << "\033[0m" << endl;}	
 	
-    return data;  
-  }
+  void GpsController::calibrate (void){
+	 printf ("Calibrating. . . .");
+	 int i = 0;
+	while ( i < 10) {
+		if (msg_flag){
+					setWaypoints(buffWaypoint,(buffWaypoint.lon +CurrentWaypoint.lon),(buffWaypoint.lat+CurrentWaypoint.lat));
+		i++;
+			}
+		else
+			cout << "\b\b\b\b\b\b\b. . . .";
+		}	
+		setWaypoints (offWaypoint, buffWaypoint.lon/10.0, buffWaypoint.lat/10.0);
+	print(35, "Calibration Points: ", offWaypoint.lon, offWaypoint.lat);
+	setWaypoints (offWaypoint, (offWaypoint.lon - calibration.lon), (offWaypoint.lat - offWaypoint.lat));
+	print(35, "Using: ", offWaypoint.lon, offWaypoint.lat);	
+	return;
+	}
 
-  void GpsController::CompassCallback(const sb_msgs::compass::ConstPtr& compass)
-  {
-	  angleCompass = compass->compass;
-  }
-
+	void GpsController::setWaypoints (sb_msgs::Waypoint& wp,double lon, double lat){
+	wp.lon = lon; 
+	wp.lat = lat;
 }
+
+	void GpsController::setWaypoints (sb_msgs::Waypoint& wp1, sb_msgs::Waypoint& wp2){
+	wp1.lon = wp2.lon;
+	wp1.lat = wp2.lat;
+	}
+
+void GpsController::calcwaypoint (void){
+	 printf ("Calculating Next Waypoint. . . .");
+	 int i = 0;
+	while ( i < 10) {
+		if (msg_flag){
+					setWaypoints(buffWaypoint,(buffWaypoint.lon +CurrentWaypoint.lon),(buffWaypoint.lat+CurrentWaypoint.lat));
+		i++;
+			}
+		else
+			cout << "\b\b\b\b\b\b\b . . . .";
+		}	
+		setWaypoints (avgWaypoint, buffWaypoint.lon/10.0, avgWaypoint.lat/10.0);
+	print(35, "NextPoint: ", avgWaypoint.lon, avgWaypoint.lat);
+	return;
+
+	
+}
+
+//end of namespace
+}
+
+
 
 
 

@@ -32,7 +32,7 @@ int main (int argc, char **argv){
   ros::Publisher car_pub = nh.advertise<geometry_msgs::Twist>(PUB_TOPIC, 100);
   ros::Publisher gps_pub = nh.advertise<sb_msgs::Gps_info>("GPS_DATA",50);
   ros::Publisher coord_pub = nh.advertise<sb_msgs::Waypoint>("GPS_COORD", 100);
-  ros::Subscriber compass_Sub = nh.subscribe ("robot_state", 20, compassSubHandle);
+  ros::Subscriber compass_Sub = nh.subscribe("robot_state", 20, compassSubHandle);
   ros::ServiceClient client = nh.serviceClient<sb_gps::gps_service>("GPS_SERVICE");
 
   ros::Rate loop_rate(10); //10hz loop rate
@@ -289,28 +289,40 @@ void setWaypoints (sb_msgs::Waypoint& wp1, sb_msgs::Waypoint& wp2){
 
 
 void calibration (void){
-	 printcolor (31, "Calibrating...");
+	 printcolor ("Calibrating...");
 	 int i = 0;
-	 for ( i = 0; i < 10; i++){
-		while(!msg_flag){}
-		setWaypoints(buffWaypoint,CurrentWaypoint.lon,CurrentWaypoint.lat);
-	}
-	seyWaypoints (off,buffWaypoint
-	/*
-if (msg_flag)
-					if (avg_count = 10){ 
-					setWaypoints (avgWayPoint, (buffWaypoint.lon/10.0), (buffWaypoint.lat/10.0));
-					  calibrate = true;
-					  avg_count = 0;
-					  startGps();
-					}			  
-					else{
-					  setWaypoints(buffWaypoint,CurrentWaypoint.lon,CurrentWaypoint.lat);
-					  avg_count ++;
-					}
-				else{ 
-			 ROS_INFO("No Fix:");
-				printcolor (31,"Waiting for fix for calibration");				
-				
-	*/
+	while ( i < 10) {
+		if (msg_flag){
+					setWaypoints(buffWaypoint,(buffWaypoint.lon +CurrentWaypoint.lon),(buffWaypoint.lat+CurrentWaypoint.lat));
+		i++;
+			}
+		else
+			cout << "\b\b\b..." << flush;
+		}	
+		setWaypoints (offWaypoint, buffWaypoint.lon/10.0, buffWaypoint.lat/10.0);
+	print(35, "Calibration Finished: ", buffWaypoint.lon, buffWaypoint.lat)
+	return;
 }
+
+void calcwaypoint (void){
+	 printcolor ("Calculating Next Waypoint");
+	 int i = 0;
+	while ( i < 10) {
+		if (msg_flag){
+					setWaypoints(avgWaypoint,(avgWaypoint.lon +CurrentWaypoint.lon),(avgWaypoint.lat+CurrentWaypoint.lat));
+		i++;
+			}
+		else
+			cout << "\b\b\b..." << flush;
+		}	
+		setWaypoints (avgWaypoint, avgWaypoint.lon/10.0, avgWaypoint.lat/10.0);
+	print(35, "Calibration Finished: ", avgWaypoint.lon, avgWaypoint.lat)
+	return;
+
+
+}
+
+
+
+
+

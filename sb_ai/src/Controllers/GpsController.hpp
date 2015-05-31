@@ -8,8 +8,9 @@
 #include "sb_msgs/Waypoint.h"
 #include "sb_msgs/Gps_info.h"
 #include <math.h>
-#include "sb_msgs/compass.h"
+#include "sb_msgs/RobotState.h"
 #include "std_msgs/String.h"
+
 
 
 
@@ -26,21 +27,22 @@ namespace ai
   
   private:
   
-    static const double EARTH_RADIUS = 6378.137;
-    static const double PI = 3.14159265;
+    static const double EARTH_RADIUS = 6371000.0; 
+    static const double PI = 3.14159265; 
+		static const double MAG_DECL = 11.034; //Magnetic declination
   
     double angleCompass;
-    bool moveStatus, goal, msg_flag, calibrate;;
+    bool moveStatus, goal, msg_flag;
     double d; //distance in metres from currentWaypoint to targetWaypoint
     double theta; //theta is the angle the robot needs to turn from currentWaypoint to targetWaypoint
-    sb_msgs::Waypoint CurrentWaypoint, LastWaypoint, off, buffWaypoint, avgWaypoint, TargetWaypoint;
+    sb_msgs::Waypoint CurrentWaypoint, LastWaypoint, offWaypoint, buffWaypoint, avgWaypoint, TargetWaypoint, calibration;
     geometry_msgs::Twist twist_msg;
     sb_msgs::Gps_info pub_data; //Angle and distance are being published
     int next_move, prev_move, avg_count;
     long double buffer [10];
     
     ros::Subscriber gps_Sub;
-    ros::Subscriber compass_Sub;
+    ros::Subscriber state_Sub;
     ros::Publisher gps_pub;
     ros::Publisher coord_pub;
     ros::ServiceClient client;
@@ -52,13 +54,22 @@ namespace ai
     double CreateDistance();
     double CreateAngle();
     sb_msgs::Gps_info Createdata();
-
+		void setWaypoints (sb_msgs::Waypoint& wp, double lon, double lat);
+		void setWaypoints (sb_msgs::Waypoint& wp1, sb_msgs::Waypoint& wp2);
+		void print (int color, const std::string &message);
+		void print (int color, double value);
+		void print (int color, const std::string &message, double value);
+		void print (const std::string &message);
+		void print (const std::string &message, double value);
+		void print (int color, const std::string &message, double value, double value2);
+		void calibrate();
+		void calcwaypoint();
 	  
   public:
   
 	  GpsController(ros::NodeHandle& nh);
 	  void GpsCallback(const std_msgs::String::ConstPtr& msg); // gpsSubHandle
-	  void CompassCallback(const sb_msgs::compass::ConstPtr& msg); // compassSubHandle
+	  void CompassCallback(const sb_msgs::RobotState::ConstPtr& msg); // compassSubHandle
 	  geometry_msgs::Twist Update();
   };
 }
