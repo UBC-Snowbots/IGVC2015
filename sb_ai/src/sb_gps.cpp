@@ -126,8 +126,7 @@ int NextMoveLogic (double distance, double angle){
 		    }	
 		}
 }
-geometry_msgs::Twist GetTwistMsg(int next_move) 
-{
+geometry_msgs::Twist GetTwistMsg(int next_move){
 	geometry_msgs::Twist twist;
 
 	twist.linear.x = 0;
@@ -159,7 +158,6 @@ double createDistance (void){
 	Purpose: calculates distance from target waypoints
 	Link:http://stackoverflow.com/questions/19412462/getting-distance-between-two-points-based-on-latitude-longitude-python
 	*/
-
 	//requires CurrentWaypoint.lat, CurrentWaypoint.lon, TargetWaypoint.lat, TargetWaypoint.lon
 	double toRad = PI / 180;
 
@@ -219,21 +217,28 @@ double createAngle(void){
 }
 
 sb_msgs::Gps_info createdata(void){
-
   sb_msgs::Gps_info data; 
   data.distance = createDistance();
   data.angle = createAngle();
-	
+  cout << "Current longitude: " << avgWaypoint.lon << " Current latitude: " << avgWaypoint.lat << endl;
+  cout << "distance" << data.distance << endl;
+  cout << "angle" << data.angle << endl;
   return data;  
 }
 
 void compassSubHandle (sb_msgs::compass compass){
-
 	angleCompass = compass.compass;
-	return;
-
 }
 //bool service
+void setWaypoints (sb_msgs::Waypoint& wp,double lon, double lat){
+	wp.lon = lon; 
+	wp.lat = lat;
+}
+void print (int color, const std::strings& message){cout << \033[1; << color << "m" << message << "\033[0m" << endl;}
+void print (int color, double value){cout << \033[1; << color << "m" << value << "\033[0m" << endl;}
+void print (int color, const std::strings& message, double value){cout << \033[1; << color << "m" << message <<  value << "\033[0m" << endl;}
+void print (const std::strings& message){cout << strings << endl;}
+void print (const std::strings& message, double value){cout << message << value << endl;}
 
 int main (int argc, char **argv){
 	int avg_count = 0;
@@ -245,50 +250,40 @@ int main (int argc, char **argv){
   ros::Publisher car_pub = nh.advertise<geometry_msgs::Twist>(PUB_TOPIC, 100);
   ros::Publisher gps_pub = nh.advertise<sb_msgs::Gps_info>("GPS_DATA",50);
   ros::Publisher coord_pub = nh.advertise<sb_msgs::Waypoint>("GPS_COORD", 100);
-  ros::Subscriber compass_Sub = nh.subscribe ("COMPASS_DATA", 1, compassSubHandle);
+  ros::Subscriber compass_Sub = nh.subscribe ("robot_state", 20, compassSubHandle);
   ros::ServiceClient client = nh.serviceClient<sb_srv::gps_service>("GPS_SERVICE");
 
   ros::Rate loop_rate(10); //10hz loop rate
-	cout.precision(13);
-/*  while (!msg_flag){
-		cout << "Waiting for GPS Fix" << endl;	
-		loop_rate.sleep();
-	}*/
-
-	TargetWaypoint.lon = 49.26238123;
-	TargetWaypoint.lat = -123.24871402;
-	buffWaypoint.lon = 0.0;
-	buffWaypoint.lat = 0.0;	
+  cout.precision(13);	
+	setWaypoints (TargetWaypoint,49.26238123,-123.24871402);
+	setWaypoints (BuffWaypoint,0.0,0.0);
 
   while (ros::ok()){
+	
 	if (client.call(srv)){
 		cout << srv.response.d << endl;
 		pub_data.distance = srv.response.d;
-		cout << "\033[1;32m" << "Distance Calculated: " << pub_data.distance << "\033[0m" << endl;
+		print(32,"Distance Caluclated: ", pub_data.distance);
 	}
 	else{
-		cout << "\033[1;31m" << "Service Failed" << "\033[0m" << endl;
+		print(31, "Service Failed");
 	}
 	
 	if (calibrate){	 
 		if (msg_flag){
 			if (avg_count = 10){
-		    	 avgWaypoint.lon = buffWaypoint.lon/10.0;
-				 avgWaypoint.lat = buffWaypoint.lat/10.0;
+				setWaypoints(avgWaypoint, (buffWaypoint.lon/10.0), (buffWaypoint.lat/10.0));
 				 avg_count = 0;
 			}
 			else{
-				  buffWaypoint.lon = CurrentWaypoint.lon;
-				  buffWaypoint.lat = CurrentWaypoint.lat;
+				  setWaypoints(buffWaypoint, CurrentWaypoint.lon, CurrentWaypoint.lat);
 				  avg_count ++;
 			}
 			 ROS_INFO ("Position:");
-			  cout << "Current longitude: " << avgWaypoint.lon << " Current latitude: " << avgWaypoint.lat << endl;
-			  pub_data = createdata();
-			  cout << "distance" << pub_data.distance << endl;
-			  cout << "angle" << pub_data.angle << endl;
+			  			  pub_data = createdata();
+			  
 				//Publish Data 
-
+			
 			  	  gps_pub.publish(pub_data); //a out 
 				  coord_pub.publish(CurrentWaypoint);
 			  	  next_move = NextMoveLogic(pub_data.distance,pub_data.angle);
@@ -298,11 +293,10 @@ int main (int argc, char **argv){
 		}
 		  else 
 			  ROS_INFO("No Fix:"); 
-	  	
 			}
 	else {	
 
-		  cout << "\033[1;31m calibrating \033[0m" << endl;;
+		  printcolor (31, "Calibrating");
 			if (msg_flag)
 				if (avg_count = 10){ 
 				  avgWaypoint.lon = buffWaypoint.lon/10.0;
@@ -313,13 +307,13 @@ int main (int argc, char **argv){
 			 	  cout <<"\x1b[1;31m" << off.lon << " and " << off.lat<< "\x1b[0m" << endl;
 				}			  
 				else{
-				  buffWaypoint.lon = CurrentWaypoint.lon;
-				  buffWaypoint.lat = CurrentWaypoint.lat;
+				  setWaypoints(buffWaypoint,CurrentWaypoint.lon,CurrenWaypoint.lat);
 				  avg_count ++;
 				}
 			else{ 
 			 ROS_INFO("No Fix:");
-				cout <<"\x1b[1;31m Waiting for fix for calibration \x1b[0m" << endl;
+			printcolor (31,"Waiting for fix for calibration");				
+			//cout <<"\x1b[1;31m Waiting for fix for calibration \x1b[0m" << endl;
 		}
 	
 	   //twist out 

@@ -16,7 +16,6 @@
 #include "sb_msgs/RobotState.h"
 #include "sb_msgs/IMU.h"
 #include "SerialCommunication.h"
-#include "sb_msgs/compass.h"
 #include "elsa_driver.h"
 
 #include <tf/transform_broadcaster.h>//odom stuff
@@ -102,7 +101,6 @@ int main(int argc, char** argv)
 //	Subscriber turret_command = n.subscribe(TURRET_COMMAND_TOPIC, 1, turret_command_callback);
 	Subscriber eStop_topic = n.subscribe(ESTOP_TOPIC, 1, eStop_callback);
 	
-  Publisher compass_state = n.advertise<sb_msgs::compass>(COMPASS_STATE_TOPIC,1);
 	Publisher robot_state = n.advertise<sb_msgs::RobotState>(ROBOT_STATE_TOPIC,1);
 	Publisher gps_state = n.advertise<std_msgs::String>(GPS_STATE_TOPIC,1);
 	
@@ -112,7 +110,7 @@ int main(int argc, char** argv)
 	
 	sb_msgs::IMU imu;
 	sb_msgs::RobotState state;
-    sb_msgs::compass compass;
+
 	std_msgs::String gps_data;
 	
 	ROS_INFO("arduino_driver ready");
