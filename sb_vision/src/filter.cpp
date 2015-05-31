@@ -26,7 +26,7 @@ void filter::testPrint(void)
 
 cv::Mat filter::getUpdate(cv::Mat inputImage) 
 {
-	/*
+	
 	//Blur Image
 	if (kBlur % 2 == 0) kBlur = kBlur + 1; //Will crash if kBlur is even
 	cv::medianBlur(inputImage, imageBlur, kBlur);
@@ -38,7 +38,7 @@ cv::Mat filter::getUpdate(cv::Mat inputImage)
 
 	//Threshold the image: 3 different options
 	//Regular threshold
-	threshold(imageBlur, imageThresholded, kThreshold, kMaxBinary,
+	threshold(imageBlur2, imageThresholded, kThreshold, kMaxBinary,
 			cv::THRESH_BINARY);
 	//Adaptive threshold
 	//adaptiveThreshold(image_blur2, image_thresholded,255, CV_ADAPTIVE_THRESH_GAUSSIAN_C, CV_THRESH_BINARY,71, 15);
@@ -48,8 +48,8 @@ cv::Mat filter::getUpdate(cv::Mat inputImage)
 	outputImage = imageThresholded.clone();
 	//Canny Edge detection
 	//cv::Canny(image_thresholded, image_canny, 50, 200, 3);
-	*/
-	outputImage = inputImage.clone();
+	
+	//outputImage = inputImage.clone();
 
 	return outputImage;
 }
