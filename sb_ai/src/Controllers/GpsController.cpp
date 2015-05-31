@@ -23,7 +23,7 @@ namespace ai
     coord_pub = nh.advertise<sb_msgs::Waypoint>(WAYPOINT_PUB_TOPIC, 100);
     
     // Service clients
-    client = nh.serviceClient<sb_srv::gps_service>(GPS_SERV_TOPIC);
+    //client = nh.serviceClient<sb_srv::gps_service>(GPS_SERV_TOPIC);
   
     // Initialize variables
     msg_flag = false;
@@ -44,14 +44,14 @@ namespace ai
   
   geometry_msgs::Twist GpsController::Update()
   {
-    if (client.call(srv))
+    /*if (client.call(srv))
     {
 		  cout << srv.response.d << endl;
 		  pub_data.distance = srv.response.d;
 		  cout << "\033[1;32m" << "Distance Calculated: " << pub_data.distance << "\033[0m" << endl;
 	  }
 	  else { cout << "\033[1;31m" << "Service Failed" << "\033[0m" << endl; }
-	
+	*/
 	  if (calibrate)
 	  {	 
 		  if (msg_flag)

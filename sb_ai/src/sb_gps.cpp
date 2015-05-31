@@ -16,33 +16,80 @@
 #include <geometry_msgs/Twist.h>
 #include <math.h>
 #include "sb_msgs/compass.h"
+#include "sb_gps.h"
 
 
 using namespace std; 
 using namespace sb_msgs;
 
-#define PI 3.14159265
+int main (int argc, char **argv){
+	int avg_count = 0;
+	bool calibrate = false;
+  ros::init(argc, argv, AI_NODE_NAME); //initialize access point to communicate
 
+  ros::NodeHandle nh; //create handle to this process node, NodeHandle is main access point to communication with ROS system. First one intializes node
+  ros::Subscriber gps_Sub = nh.subscribe("GPS_USB_DATA", 20, gpsSubHandle);
+  ros::Publisher car_pub = nh.advertise<geometry_msgs::Twist>(PUB_TOPIC, 100);
+  ros::Publisher gps_pub = nh.advertise<sb_msgs::Gps_info>("GPS_DATA",50);
+  ros::Publisher coord_pub = nh.advertise<sb_msgs::Waypoint>("GPS_COORD", 100);
+  ros::Subscriber compass_Sub = nh.subscribe ("robot_state", 20, compassSubHandle);
+  ros::ServiceClient client = nh.serviceClient<sb_gps::gps_service>("GPS_SERVICE");
 
-double angleCompass;
-bool moveStatus;
-bool goal;
-bool msg_flag = false;
-double d = 0; //distance in metres from currentWaypoint to targetWaypoint
-double theta = 0; //theta is the angle the robot needs to turn from currentWaypoint to targetWaypoint
-sb_msgs::Waypoint CurrentWaypoint,LastWaypoint,off, buffWaypoint, avgWaypoint;
-geometry_msgs::Twist twist_msg;
-sb_msgs::Gps_info pub_data; //Angle and distance are being published
-int next_move, prev_move = 0;
-sb_msgs::Waypoint TargetWaypoint;
-static double const EARTH_RADIUS = 6378.137;
-long double buffer [10];
+  ros::Rate loop_rate(10); //10hz loop rate
+  cout.precision(13);	
+  setWaypoints (TargetWaypoint,49.26238123,-123.24871402);
+  setWaypoints (BuffWaypoint,0.0,0.0);
+  calibration();
+  while (ros::ok()){
+	
+		if (client.call(srv)){
+			cout << srv.response.d << endl;
+			pub_data.distance = srv.response.d;
+			print(32,"Distance Caluclated: ", pub_data.distance);
+		}
+		else{
+			print(31, "Service Failed");
+		}
+	
+		
+			if (msg_flag){
+				if (avg_count = 10){
+					setWaypoints(avgWaypoint, (buffWaypoint.lon/10.0), (buffWaypoint.lat/10.0));
+					 avg_count = 0;
+				}
+				else{
+					  setWaypoints(buffWaypoint, CurrentWaypoint.lon, CurrentWaypoint.lat);
+					  avg_count ++;
+				}
+				 ROS_INFO ("Position:");
+				  	 pub_data = createdata();
+				  	 gps_pub.publish(pub_data); //a out 
+					//Publish Data 
+					  coord_pub.publish(CurrentWaypoint);
+				  	  next_move = NextMoveLogic(pub_data.distance,pub_data.angle);
+					//Twist Message
+				  	  twist_msg = GetTwistMsg(next_move);
+				  	  car_pub.publish(twist_msg);
+					//Published Data
+			}
+			  else 
+				  ROS_INFO("No Fix:"); 	
+		   //twist out 
+		  
+		  ros::spinOnce(); //ros spin is to ensure that ros threading does not leave suscribes un processed
+		  loop_rate.sleep(); 
+	}}
+
+    return 0;
+}
 
 void startGps(void /*double lon, double, lat */){
   //double lon = 49.262368;
   //double lat = -123.248591;
   off.lon = (49.157435497 - 49.26231834);
   off.lat = (-123.149139703 - (-123.24871396));
+  ROS_INFO("\x1b[1;31m Initialization Offset Values: \x1b[0m");
+  cout <<"\x1b[1;31m" << off.lon << " and " << off.lat<< "\x1b[0m" << endl;
   return;
 }
 
@@ -234,94 +281,36 @@ void setWaypoints (sb_msgs::Waypoint& wp,double lon, double lat){
 	wp.lon = lon; 
 	wp.lat = lat;
 }
-void print (int color, const std::strings& message){cout << \033[1; << color << "m" << message << "\033[0m" << endl;}
-void print (int color, double value){cout << \033[1; << color << "m" << value << "\033[0m" << endl;}
-void print (int color, const std::strings& message, double value){cout << \033[1; << color << "m" << message <<  value << "\033[0m" << endl;}
-void print (const std::strings& message){cout << strings << endl;}
-void print (const std::strings& message, double value){cout << message << value << endl;}
-
-int main (int argc, char **argv){
-	int avg_count = 0;
-	bool calibrate = false;
-  ros::init(argc, argv, AI_NODE_NAME); //initialize access point to communicate
-
-  ros::NodeHandle nh; //create handle to this process node, NodeHandle is main access point to communication with ROS system. First one intializes node
-  ros::Subscriber gps_Sub = nh.subscribe("GPS_USB_DATA", 20, gpsSubHandle);
-  ros::Publisher car_pub = nh.advertise<geometry_msgs::Twist>(PUB_TOPIC, 100);
-  ros::Publisher gps_pub = nh.advertise<sb_msgs::Gps_info>("GPS_DATA",50);
-  ros::Publisher coord_pub = nh.advertise<sb_msgs::Waypoint>("GPS_COORD", 100);
-  ros::Subscriber compass_Sub = nh.subscribe ("robot_state", 20, compassSubHandle);
-  ros::ServiceClient client = nh.serviceClient<sb_srv::gps_service>("GPS_SERVICE");
-
-  ros::Rate loop_rate(10); //10hz loop rate
-  cout.precision(13);	
-	setWaypoints (TargetWaypoint,49.26238123,-123.24871402);
-	setWaypoints (BuffWaypoint,0.0,0.0);
-
-  while (ros::ok()){
-	
-	if (client.call(srv)){
-		cout << srv.response.d << endl;
-		pub_data.distance = srv.response.d;
-		print(32,"Distance Caluclated: ", pub_data.distance);
-	}
-	else{
-		print(31, "Service Failed");
-	}
-	
-	if (calibrate){	 
-		if (msg_flag){
-			if (avg_count = 10){
-				setWaypoints(avgWaypoint, (buffWaypoint.lon/10.0), (buffWaypoint.lat/10.0));
-				 avg_count = 0;
-			}
-			else{
-				  setWaypoints(buffWaypoint, CurrentWaypoint.lon, CurrentWaypoint.lat);
-				  avg_count ++;
-			}
-			 ROS_INFO ("Position:");
-			  			  pub_data = createdata();
-			  
-				//Publish Data 
-			
-			  	  gps_pub.publish(pub_data); //a out 
-				  coord_pub.publish(CurrentWaypoint);
-			  	  next_move = NextMoveLogic(pub_data.distance,pub_data.angle);
-			  	  twist_msg = GetTwistMsg(next_move);
-			  	  car_pub.publish(twist_msg);
-				//Published Data
-		}
-		  else 
-			  ROS_INFO("No Fix:"); 
-			}
-	else {	
-
-		  printcolor (31, "Calibrating");
-			if (msg_flag)
-				if (avg_count = 10){ 
-				  avgWaypoint.lon = buffWaypoint.lon/10.0;
-				  avgWaypoint.lat = buffWaypoint.lat/10.0;
-				  calibrate = true;
-				  avg_count = 0;
-				  startGps();	
-			 	  cout <<"\x1b[1;31m" << off.lon << " and " << off.lat<< "\x1b[0m" << endl;
-				}			  
-				else{
-				  setWaypoints(buffWaypoint,CurrentWaypoint.lon,CurrenWaypoint.lat);
-				  avg_count ++;
-				}
-			else{ 
-			 ROS_INFO("No Fix:");
-			printcolor (31,"Waiting for fix for calibration");				
-			//cout <<"\x1b[1;31m Waiting for fix for calibration \x1b[0m" << endl;
-		}
-	
-	   //twist out 
-	  
-	  ros::spinOnce(); //ros spin is to ensure that ros threading does not leave suscribes un processed
-	  loop_rate.sleep(); 
-}}
-
-    return 0;
+void setWaypoints (sb_msgs::Waypoint& wp1, sb_msgs::Waypoint& wp2){
+	wp1.lon = wp2.lon;
+	wp1.lat = wp2.lat;
 }
 
+
+
+void calibration (void){
+	 printcolor (31, "Calibrating...");
+	 int i = 0;
+	 for ( i = 0; i < 10; i++){
+		while(!msg_flag){}
+		setWaypoints(buffWaypoint,CurrentWaypoint.lon,CurrentWaypoint.lat);
+	}
+	seyWaypoints (off,buffWaypoint
+	/*
+if (msg_flag)
+					if (avg_count = 10){ 
+					setWaypoints (avgWayPoint, (buffWaypoint.lon/10.0), (buffWaypoint.lat/10.0));
+					  calibrate = true;
+					  avg_count = 0;
+					  startGps();
+					}			  
+					else{
+					  setWaypoints(buffWaypoint,CurrentWaypoint.lon,CurrentWaypoint.lat);
+					  avg_count ++;
+					}
+				else{ 
+			 ROS_INFO("No Fix:");
+				printcolor (31,"Waiting for fix for calibration");				
+				
+	*/
+}

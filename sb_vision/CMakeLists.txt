@@ -65,10 +65,5 @@ target_link_libraries( vision ${catkin_LIBRARIES} ${OpenCV_LIBS} filter)
 #add_executable( filter src/filter.cpp )
 #target_link_libraries( filter ${catkin_LIBRARIES} ${OpenCV_LIBS})
 
-add_dependencies(LaneDetector sb_msgs_generate_messages_cpp)
-
-add_dependencies(Line_Detector sb_vision_generate_messages_cpp)
-
-
 
 
