@@ -43,6 +43,7 @@ void GenerateGlobalMap::TransformLocalToGlobal(){
 
 void GenerateGlobalMap::LocalMapSubscriberCallback(const sensor_msgs::Image::ConstPtr& imageMsg){
 
+  ROS_INFO("LocalMapSubscriberCallback doing stuff");
   _imageMsg.height = imageMsg->height; // Number of rows
   _imageMsg.width = imageMsg->width; // Number of columns
   _imageMsg.step = imageMsg->step;
@@ -76,6 +77,7 @@ uint8_t GenerateGlobalMap::ConvertXYCoordToIndex(uint8_t x, uint8_t y, uint8_t w
 
 void GenerateGlobalMap::WaypointSubscriberCallback(const sb_msgs::Waypoint::ConstPtr& waypointMsg){
 
+  ROS_INFO("WaypointSubscriberCallback doing stuff");
   _globalMap.info.origin.position.x = waypointMsg->lon; // FIXME CONVERT STUFF TO X AND Y
   _globalMap.info.origin.position.y = waypointMsg->lat;
 
@@ -84,12 +86,13 @@ void GenerateGlobalMap::WaypointSubscriberCallback(const sb_msgs::Waypoint::Cons
 
 void GenerateGlobalMap::GPSInfoSubscriberCallback(const sb_msgs::Gps_info::ConstPtr& gpsInfoMsg){
   
+  ROS_INFO("GPSInfoSubscriberCallback doing stuff");
   _compassAngle = gpsInfoMsg->angle;
 
 }
 
 void GenerateGlobalMap::testDoSomething() {
 
-  printf("Did something");
+ ROS_INFO("Did something");
 
 }
