@@ -21,8 +21,7 @@ namespace ai
     gps_pub = nh.advertise<sb_msgs::Gps_info>(GPS_PUB_TOPIC,50);
     coord_pub = nh.advertise<sb_msgs::Waypoint>(WAYPOINT_PUB_TOPIC, 100);
     
-    // Service clients
-    //client = nh.serviceClient<sb_srv::gps_service>(GPS_SERV_TOPIC);
+    client = nh.serviceClient<sb_gps::Gps_Service>(GPS_SERV_TOPIC);
   
     // Initialize variables
     msg_flag = false;
@@ -57,11 +56,12 @@ namespace ai
 		    GpsController::calcwaypoint();
 			  ROS_INFO ("Position:");
 			  cout << "Current longitude: " << avgWaypoint.lon << " Current latitude: " << avgWaypoint.lat << endl;
+				
 			  pub_data = Createdata();
 			  cout << "distance" << pub_data.distance << endl;
 			  cout << "angle" << pub_data.angle << endl;
 				//Publish Data 
-
+				
 			  gps_pub.publish(pub_data); //a out 
 				coord_pub.publish(CurrentWaypoint);
 			  next_move = NextMoveLogic(pub_data.distance,pub_data.angle);
@@ -158,6 +158,10 @@ namespace ai
 			  if (distance > 100){
 				  cout << "forward quickly" << endl;
 				  return 50;
+				if (distance < 0){
+					cout << "Distance was not calculated" << distance << endl;
+					return 0;
+				}
 			  }
 			  else if (distance < 100){
 				  cout << "forward slowly" << endl;
@@ -196,26 +200,21 @@ namespace ai
   }
 
   double GpsController::CreateDistance (){
-	  /*
-	  Input Parameter: void
-	  Output: distance in meteres from currentWaypoint to targetWaypoint
-	  Purpose: calculates distance from target waypoints
-	  Link:http://stackoverflow.com/questions/19412462/getting-distance-between-two-points-based-on-latitude-longitude-python
-	  */
-
-	  //requires CurrentWaypoint.lat, CurrentWaypoint.lon, TargetWaypoint.lat, TargetWaypoint.lon
-	  double toRad = PI / 180;
-
-	  double lat1 = CurrentWaypoint.lat * toRad;
-	  double lon1 = CurrentWaypoint.lon * toRad;
-	  double lat2 = TargetWaypoint.lat * toRad;
-	  double lon2 = TargetWaypoint.lon * toRad;
-	  //from http://www.movable-type.co.uk/scripts/latlong.html, Distance formula (using haversine)
-	  double a = sin((long double)((lat2 - lat1) / 2))*sin(((lat2 - lat1) / 2)) + cos(lat1) * cos(lat2) * sin((lon2 - lon1) / 2)*sin((lon2 - lon1) / 2);
-	  double c = 2 * atan2(sqrt(a), sqrt(1 - a));
-	  double d = EARTH_RADIUS * c;
-	  return d;
-  }
+		double distance; 
+	 	srv.request.lon1 = TargetWaypoint.lon;
+		srv.request.lat1 = TargetWaypoint.lat;
+ 	 	srv.request.lon2 = avgWaypoint.lon;
+		srv.request.lat2 = avgWaypoint.lat;
+		if (client.call(srv)){
+		distance = srv.response.distance;
+		print (34, "Distance: ", distance);
+		}
+		else {
+		ROS_ERROR("SRV Failed");
+		return -1;
+		}
+		return distance;
+	}	
 
   double GpsController::CreateAngle(void){
 		double dx = (TargetWaypoint.lon - CurrentWaypoint.lon)*111302.62;

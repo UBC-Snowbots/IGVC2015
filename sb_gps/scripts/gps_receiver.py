@@ -38,7 +38,6 @@ def main ():
 		rospy.loginfo(link.readline())
 		pub.publish(link.readline())
 		rate.sleep()
-		rospy.spin()
 
 if __name__ == '__main__':
 	try: 
