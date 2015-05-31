@@ -8,12 +8,13 @@ const static std::string CV_WINDOW = "StitcherSub";
 void imageCallback(const sensor_msgs::ImageConstPtr& msg){
 	try{
 		ROS_INFO("Got something..");		
-		cv::imshow(CV_WINDOW, cv_bridge::toCvShare(msg, "bgr8")->image);
-		//if(cv::waitKey(30) == 27){
+		cv::namedWindow("Subscribed Image", CV_WINDOW_NORMAL);
+		cv::imshow("Subscribed Image", cv_bridge::toCvShare(msg, "mono8")->image);
+		if(cv::waitKey(30) == 27){
 			
-		//}
+		}
 	}catch (cv_bridge::Exception& e){
-		ROS_ERROR("Could not convert from '%s' to 'bgr8'.", msg->encoding.c_str());
+		ROS_ERROR("Could not convert from '%s' to 'mono8'.", msg->encoding.c_str());
 	}
 }
 
