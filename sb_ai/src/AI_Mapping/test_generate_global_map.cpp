@@ -13,7 +13,7 @@ int main(int argc, char **argv) {
 
   while (ros::ok()){
 
-  //GenerateGlobalMap generateGlobalMap;
+    GenerateGlobalMap generateGlobalMap;
 
   //generateGlobalMap.testDoSomething();
 
