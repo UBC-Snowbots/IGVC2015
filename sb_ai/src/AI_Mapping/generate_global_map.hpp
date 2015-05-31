@@ -3,7 +3,6 @@
 #include "stdint.h"
 #include "ros/ros.h"
 #include "nav_msgs/OccupancyGrid.h"
-#include "sensor_msgs/Image.h"
 #include "sb_msgs/Gps_info.h"
 #include "sb_msgs/Waypoint.h"
 
@@ -15,14 +14,14 @@ class GenerateGlobalMap {
 
   private:
 
-    uint8_t ConvertIndexToXCoord(uint8_t index);
+    uint8_t ConvertIndexToLocalXCoord(uint8_t index);
 
-    uint8_t ConvertIndexToYCoord(uint8_t index);
+    uint8_t ConvertIndexToLocalYCoord(uint8_t index);
 
     uint8_t ConvertXYCoordToIndex(uint8_t x, uint8_t y, uint8_t width);
 
     // Gets the local map from vision
-    void LocalMapSubscriberCallback(const sensor_msgs::Image::ConstPtr& imageMsg);
+    void LocalMapSubscriberCallback(const nav_msgs::OccupancyGrid::ConstPtr& localMap);
 
     // Gets the longitude and latitude and converts to global x and y coords
     void WaypointSubscriberCallback(const sb_msgs::Waypoint::ConstPtr& waypointMsg);
@@ -42,12 +41,12 @@ class GenerateGlobalMap {
     ros::Subscriber _gpsInfoSubscriber;
 
     // Stores the local map of the robot
-    sensor_msgs::Image _imageMsg;
+    nav_msgs::OccupancyGrid _localMap;
 
     // Stores the global map of the robot along with it's position in the global map
     nav_msgs::OccupancyGrid _globalMap;
     
-    uint32_t _visionMapSize;
+    uint32_t _globalMapSize;
 
     // Real world angle of robot
     uint8_t _compassAngle;

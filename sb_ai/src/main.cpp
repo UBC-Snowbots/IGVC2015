@@ -5,7 +5,6 @@
 #include "Controllers/sb_ai.h"
 #include <geometry_msgs/Twist.h>
 
-#include "Controllers/ControllerBase.hpp"
 #include "Controllers/DijkstraController.hpp"
 #include "Controllers/VisionController.hpp"
 #include "Controllers/LidarController.hpp"

@@ -5,18 +5,20 @@ int main(int argc, char **argv) {
 
   ros::init(argc, argv, "test_generate_global_map");
 
-  std::cout << "hello world" << std::endl;
+  ros::Time::init();
 
-  ros::Rate loop_rate(5); //10hz loop rate
+  std::cout << "hello worldf" << std::endl;
+
+  ros::Rate loopRate(5); //10hz loop rate
 
   while (ros::ok()){
 
-  //GenerateGlobalMap generateGlobalMap;
+    GenerateGlobalMap generateGlobalMap;
 
-  //generateGlobalMap.testDoSomething();
+    generateGlobalMap.testDoSomething();
 
-  ros::spinOnce(); //ros spin is to ensure that ros threading does not leave suscribes un processed
-  loop_rate.sleep();
+    ros::spin(); //ros spin is to ensure that ros threading does not leave subscribes un processed
+    loopRate.sleep();
 
   }
 
