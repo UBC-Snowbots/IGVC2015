@@ -1,5 +1,4 @@
 #include "DijkstraController.hpp"
-#include "AI/Utilities/PathSmoothing.h"
 
 namespace ai
 {
@@ -25,13 +24,13 @@ namespace ai
 		  dijkstras.Search(dijkstras.GetStart());
 		  dijkstras.ReconstructPath(dijkstras.GetGoal());
 		  dijkstras.SetFirstAndThird(first, fourth);
-		  Location targets[2];
-		  Location target_one, target_two;
+		  AI_Utilities::Location targets[2];
+		  AI_Utilities::Location target_one, target_two;
 		  target_one = dijkstras.ConvertToLocation(first);
 		  target_two = dijkstras.ConvertToLocation(fourth);
 		  std::cout << "Fourth: " << fourth << std::endl;
 		  std::cout << "Goal: " << dijkstras.GetGoal() << std::endl;
-		  dijkstras.GetVelocity(targets, 0.0f, twist_msg);
+		  AI_Utilities::GetVelocity(targets, 0.0f, twist_msg);
 		  std::cout << "T_one: " << target_one.x << ", " << target_one.y << std::endl;
 		  std::cout << "T_two: " << target_two.x << ", " << target_two.y << std::endl;
 	  }
