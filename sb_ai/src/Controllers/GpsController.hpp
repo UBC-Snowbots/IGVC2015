@@ -10,7 +10,7 @@
 #include <math.h>
 #include "sb_msgs/RobotState.h"
 #include "std_msgs/String.h"
-
+#include "sb_gps/Gps_Service.h"
 
 
 
@@ -46,6 +46,7 @@ namespace ai
     ros::Publisher gps_pub;
     ros::Publisher coord_pub;
     ros::ServiceClient client;
+		sb_gps::Gps_Service srv;
     
     void StartGps();
     bool CheckGoal();
