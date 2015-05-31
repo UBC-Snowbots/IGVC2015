@@ -1,5 +1,6 @@
-#include "GridWorld.h"
+#include "DSLiteAController.hpp"
 
+namespace ai{
 GridWorld* world;
 
 //The dimensions of the square map
@@ -10,7 +11,7 @@ const int INTERSECTION_RADIUS = 2;
 
 //How far the robot can look ahead when determining its next movement
 //To avoid any funny business, this value should be greater than INTERSECTION_RADIUS
-const int SCAN_RADIUS = 3;
+const int SCAN_RADIUS = 4;
 
 /*
 For testing purposes only, this array represents the "real map" to pathfind on.
@@ -56,14 +57,16 @@ void scanMap(){
 		for (int x = -SCAN_RADIUS; x <= SCAN_RADIUS; x++){
 			if (world->withinWorld(currentX + x, currentY + y)){
 				if (realWorld[(currentY + y)*SIZE + currentX + x] == 1 
-					&& world->getTileAt(currentX + x, currentY + y)->cost < INFINITY){
+					&& world->getTileAt(currentX + x, currentY + y)->cost < PF_INFINITY){
 
 					printf("\tInconistancy between maps detected at %d %d\n", currentX+x, currentY+y);
-					world->inflate(currentX + x, currentY + y, INFINITY);
+					world->inflate(currentX + x, currentY + y, PF_INFINITY);
 				}
 			}
 		}
 	}
+
+
 }
 
 /*
@@ -74,14 +77,14 @@ void execute(){
 	int counter = 0;
 
 	//Having a wall during normal search doesn't seem to cause any problems
-	//getTileAt(3,3)->cost = INFINITY;
+	//getTileAt(3,3)->cost = PF_INFINITY;
 
 	world->computeShortestPath();
 
 	while (world->start != world->goal){
-		std::cout << "Iteration " << counter << std::endl;
+		std::cout << "Iteration " << counter;
 
-		if (world->start->rhs == INFINITY){
+		if (world->start->rhs == PF_INFINITY){
 			std::cout << "\tNO PATH EXIST" << std::endl;
 			break;
 		}
@@ -99,13 +102,39 @@ void execute(){
 	}
 	
 	//Uncomment the line below to print every info about gridworld
-	world->printWorld();
+	//world->printWorld();
 }
 
 
-//Setting up the pathfinder etc...
-void main(){
-		std::cout << "Generating Map" << std::endl;
+geometry_msgs::Twist DSLiteAController::GetTwistMsg(int next_move){
+	geometry_msgs::Twist twist;
+	twist.linear.x = 0;
+	twist.linear.y = 0;
+	twist.linear.z = 0;
+		
+	twist.angular.x = 0;
+	twist.angular.y = 0;
+	twist.angular.z = 0;
+
+	if (next_move == -1 || next_move == 1) {
+		twist.linear.y = 0.1; twist.angular.z = next_move * 0.3; 
+	}
+	if (next_move == -2 || next_move == 2) { 
+		twist.linear.y = 0.3;
+	}
+	    
+	return twist;
+}
+
+DSLiteAController::DSLiteAController(ros::NodeHandle& nh):
+	map_ptr(NULL),
+	width(100),
+	height(100),
+	start(90),
+	goal(11),
+	next_movement(0)
+{
+	std::cout << "Generating Map" << std::endl;
 		world = new GridWorld(SIZE, INTERSECTION_RADIUS);
 		std::cout << "Finished generation" << std::endl;
 		execute();
@@ -113,9 +142,20 @@ void main(){
 
 		for (unsigned int y = 0; y < SIZE; y++){
 			for (unsigned int x = 0; x < SIZE; x++){
-				std::cout << realWorld[y*SIZE + x] << " ";
+				if (world->getTileAt(x, y)->cost == INFLATION){
+					std::cout << "^ ";
+				}else{
+					std::cout << realWorld[y*SIZE + x] << " ";
+				}				
 			}
 			std::cout << std::endl;
 		}
-		system("PAUSE");
+}
+
+//Returns the next twist message to publish (this is called each main loop iteration)
+geometry_msgs::Twist DSLiteAController::Update(){
+
+	  
+	return GetTwistMsg(0);
+}
 }

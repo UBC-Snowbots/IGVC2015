@@ -1,19 +1,21 @@
+#define __STDC_LIMIT_MACROS
+#include <stdint.h>
+#include <climits>
+#include <stdio.h>
 #include <algorithm>
 #include <vector>
 #include <iostream>
 
-#define INFINITY 10000000000  // no INT_MAX
-#define INFLATION INFINITY/2
+#define PF_INFINITY INT_MAX
+#define INFLATION INT_MAX/2
 #define SQRT2 1.4142135623
 
-class GridWorld
-{
+class GridWorld{
 
 typedef std::pair<double, double> KeyPair;
 
 public:
-	struct Tile
-	{
+	struct Tile{
 		const unsigned int x, y;
 		double rhs, g, h, cost;
 		KeyPair key;
@@ -27,7 +29,6 @@ public:
 
 		void info() const;
 	};
-	
 	typedef std::pair<GridWorld::Tile*, double> TilePair;
 
 	bool withinWorld(unsigned int x, unsigned int y) const;
@@ -50,15 +51,15 @@ public:
 	unsigned int size;
 	int radius;
 	double km;
+
 	Tile* start;
 	Tile* goal;
 	Tile* previous;
 	
 	std::vector<Tile*> open;
-	std::vector<Tile* const> world;
+	std::vector<Tile*> world;
 
 
-public:
 	GridWorld(unsigned int size, int radius);
 	void printWorld() const;
 	void updateCost(unsigned int x, unsigned int y, double cost);

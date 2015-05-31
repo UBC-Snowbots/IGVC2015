@@ -58,9 +58,11 @@ Pathfinding algorimths tend to be demonstraited with a graph rather than a grid,
 in order to update the cost between two tiles we must update both the tile and its neighbour.
 */
 void GridWorld::updateCost(unsigned int x, unsigned int y, double newCost){
+	static int count = 1;
+	count++;
 	Tile* tile = getTileAt(x,y);
 
-	//printf("<%d, %d>\n", x, y);
+	printf("Updating <%d, %d> from %2.0lf to %2.0lf - Update: %d\n", x, y, tile->cost, newCost, count);
 	km += calculateH(previous);
 	previous = start;
 
@@ -70,17 +72,18 @@ void GridWorld::updateCost(unsigned int x, unsigned int y, double newCost){
 	double oldCost = tile->cost;	
 	double oldCostToTile, newCostToTile;
 	double currentRHS, otherG;
-	
+
 	//Update CURRENT by finding its new minimum RHS-value from NEIGHBOURS
-	for(Tile* neighbour : getNeighbours(tile)){
+	std::vector<Tile*> neighbours(getNeighbours(tile));
+	for (int i = 0; i < neighbours.size(); i++){
 		tile->cost = oldCost;
-		oldCostToTile = calculateC(tile, neighbour);
+		oldCostToTile = calculateC(tile, neighbours[i]);
 		
 		tile->cost = newCost;
-		newCostToTile = calculateC(tile, neighbour);
+		newCostToTile = calculateC(tile, neighbours[i]);
 
 		currentRHS = tile->rhs;
-		otherG = neighbour->g;
+		otherG = neighbours[i]->g;
 
 		if(oldCostToTile > newCostToTile){
 			if(tile != goal){
@@ -96,26 +99,26 @@ void GridWorld::updateCost(unsigned int x, unsigned int y, double newCost){
 	updateVertex(tile);
 	
 	//Update all NEIGHBOURING cells by finding their new min RHS-values from CURRENT
-	for (Tile* neighbour : getNeighbours(tile)){
+	for (int i = 0; i < neighbours.size(); i++){
 		tile->cost = oldCost;
-		oldCostToTile = calculateC(tile, neighbour);
+		oldCostToTile = calculateC(tile, neighbours[i]);
 		
 		tile->cost = newCost;
-		newCostToTile = calculateC(tile, neighbour);
+		newCostToTile = calculateC(tile, neighbours[i]);
 
-		currentRHS = neighbour->rhs;
+		currentRHS = neighbours[i]->rhs;
 		otherG = tile->g;
 
 		if(oldCostToTile > newCostToTile){
-			if(neighbour != goal){
-				neighbour->rhs = std::min(currentRHS, (newCostToTile + otherG));
+			if (neighbours[i] != goal){
+				neighbours[i]->rhs = std::min(currentRHS, (newCostToTile + otherG));
 			}
 		} else if (currentRHS == (oldCostToTile + otherG)){
-			if(neighbour != goal){
-				neighbour->rhs = getMinSuccessor(neighbour).second;
+			if (neighbours[i] != goal){
+				neighbours[i]->rhs = getMinSuccessor(neighbours[i]).second;
 			}
 		}
-		updateVertex(neighbour);
+		updateVertex(neighbours[i]);
 	}
 	
 	computeShortestPath();
@@ -160,12 +163,13 @@ bool GridWorld::computeShortestPath(){
 			make_heap(open.begin(), open.end(), GridWorld::compareTiles);
 			current->isOpen = false;
 
-			for (Tile* neighbour : getNeighbours(current)){
-				if(neighbour != 0){
-					if(neighbour != goal){
-						neighbour->rhs = std::min(neighbour->rhs, calculateC(current, neighbour) + otherG);
+			std::vector<Tile*> neighbours(getNeighbours(current));
+			for (int i = 0; i < neighbours.size(); i++){
+				if(neighbours[i] != 0){
+					if (neighbours[i] != goal){
+						neighbours[i]->rhs = std::min(neighbours[i]->rhs, calculateC(current, neighbours[i]) + otherG);
 					}
-					updateVertex(neighbour);
+					updateVertex(neighbours[i]);
 				}
 			}
 
@@ -173,7 +177,7 @@ bool GridWorld::computeShortestPath(){
 			//Execution of this branch updates the tile during incremental search
 
 			previousG = otherG;
-			current->g = INFINITY;
+			current->g = PF_INFINITY;
 
 			//Update CURRENT'S RHS
 			if(current != goal){
@@ -182,12 +186,13 @@ bool GridWorld::computeShortestPath(){
 			updateVertex(current);
 
 			//Update NEIGHBOUR'S RHS to their minimum successor
-			for (Tile* neighbour : getNeighbours(current)){
-				if(neighbour != 0){
-					if(neighbour->rhs == (calculateC(current, neighbour) + previousG) && neighbour != goal){
-						neighbour->rhs = getMinSuccessor(neighbour).second;
+			std::vector<Tile*> neighbours(getNeighbours(current));
+			for (int i = 0; i < neighbours.size(); i++){
+				if (neighbours[i] != 0){
+					if (neighbours[i]->rhs == (calculateC(current, neighbours[i]) + previousG) && neighbours[i] != goal){
+						neighbours[i]->rhs = getMinSuccessor(neighbours[i]).second;
 					}
-					updateVertex(neighbour);
+					updateVertex(neighbours[i]);
 				}
 			}
 
@@ -267,18 +272,19 @@ bool GridWorld::compareKeys(const KeyPair& left, const KeyPair& right){
 
 GridWorld::TilePair GridWorld::getMinSuccessor(GridWorld::Tile*& tile){
 	Tile* minTile = 0;
-	double minCost = INFINITY;
+	double minCost = PF_INFINITY;
 
-	for (Tile* neighbour : getNeighbours(tile)){
-		double cost = calculateC(tile, neighbour);
-		double g = neighbour->g;
+	std::vector<Tile*> neighbours(getNeighbours(tile));
+	for (int i = 0; i < neighbours.size(); i++){
+		double cost = calculateC(tile, neighbours[i]);
+		double g = neighbours[i]->g;
 			
-		if(cost == INFINITY || g == INFINITY){
+		if(cost == PF_INFINITY || g == PF_INFINITY){
 			continue;
 		}
 			
 		if(cost + g < minCost){   //potential overflow?
-			minTile = neighbour;
+			minTile = neighbours[i];
 			minCost = cost + g;
 		}
 	}
@@ -298,8 +304,8 @@ double GridWorld::calculateH(GridWorld::Tile*& tile){
 }
 
 double GridWorld::calculateC(GridWorld::Tile*& tileA, GridWorld::Tile*& tileB){
-	if(tileA->cost == INFINITY || tileB->cost == INFINITY){
-		return INFINITY;
+	if(tileA->cost == PF_INFINITY || tileB->cost == PF_INFINITY){
+		return PF_INFINITY;
 	}
 
 	if(labs(tileA->x - tileB->x) + labs(tileA->y - tileB->y) == 2){
@@ -320,8 +326,8 @@ GridWorld::KeyPair GridWorld::calculateKey(GridWorld::Tile*& tile){
 GridWorld::Tile::Tile(unsigned int x, unsigned int y, double cost) : x(x), y(y){
 	this->cost = cost;
 
-	this->rhs = INFINITY;
-	this->g = INFINITY;
+	this->rhs = PF_INFINITY;
+	this->g = PF_INFINITY;
 	this->h = 0;
 
 	this->isOpen = false;
@@ -340,11 +346,11 @@ GridWorld::Tile::Tile(Tile& other) : x(other.x), y(other.y){
 void GridWorld::Tile::info() const{
 
 	printf("[(%d, %d)  H: %.2lf, G: %.2lf, RHS: %.2lf, K:<%.2lf, %.2lf>]", this->x, this->y,
-		this->h == INFINITY ? -1:this->h, 
-		this->g == INFINITY ? -1:this->g,
-		this->rhs == INFINITY ? -1:this->rhs, 
-		this->key.first == INFINITY ? -1:this->key.first,
-		this->key.second == INFINITY ? -1:this->key.second);
+		this->h == PF_INFINITY ? -1:this->h, 
+		this->g == PF_INFINITY ? -1:this->g,
+		this->rhs == PF_INFINITY ? -1:this->rhs, 
+		this->key.first == PF_INFINITY ? -1:this->key.first,
+		this->key.second == PF_INFINITY ? -1:this->key.second);
 }
 
 void GridWorld::printWorld() const{
@@ -360,7 +366,7 @@ void GridWorld::printWorld() const{
 	for (unsigned int y = 0; y < size; y++){
 		for (unsigned int x = 0; x < size; x++){
 			double cost = getTileAt(x, y)->cost;
-			if (cost == INFINITY){
+			if (cost == PF_INFINITY){
 				printf("-1 ");
 			}else if (cost == INFLATION){
 				printf("^^ ");
@@ -375,7 +381,7 @@ void GridWorld::printWorld() const{
 	std::cout << "G:" << std::endl;
 	for (unsigned int y = 0; y < size; y++){
 		for (unsigned int x = 0; x < size; x++){
-			printf("%2.0lf ", getTileAt(x,y)->g == INFINITY ? -1 : getTileAt(x,y)->g);
+			printf("%2.0lf ", getTileAt(x,y)->g == PF_INFINITY ? -1 : getTileAt(x,y)->g);
 		}
 		std::cout << std::endl;
 	}
@@ -383,7 +389,7 @@ void GridWorld::printWorld() const{
 	std::cout << "RHS:" << std::endl;
 	for (unsigned int y = 0; y < size; y++){
 		for (unsigned int x = 0; x < size; x++){
-			printf("%2.0lf ", getTileAt(x,y)->rhs == INFINITY ? -1 : getTileAt(x,y)->rhs);
+			printf("%2.0lf ", getTileAt(x,y)->rhs == PF_INFINITY ? -1 : getTileAt(x,y)->rhs);
 		}
 		std::cout << std::endl;
 	}
