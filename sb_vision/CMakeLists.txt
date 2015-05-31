@@ -38,6 +38,11 @@ add_subdirectory(src)
 add_executable(image_stitching_simon src/image_stitching_simon.cpp)
 target_link_libraries( image_stitching_simon ${catkin_LIBRARIES} ${OpenCV_LIBS})
 
+add_executable(stitch_pub src/stitch_pub.cpp)
+target_link_libraries( stitch_pub ${catkin_LIBRARIES} ${OpenCV_LIBS})
+
+add_executable(stitch_sub src/stitch_sub.cpp)
+target_link_libraries( stitch_sub ${catkin_LIBRARIES} ${OpenCV_LIBS})
 
 add_executable(image_stitching src/image_stitching.cpp)
 target_link_libraries( image_stitching ${catkin_LIBRARIES} ${OpenCV_LIBS})
