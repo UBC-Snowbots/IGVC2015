@@ -1,6 +1,8 @@
 #pragma once
 
 #include <unistd.h>
+#include <sys/time.h>
+#include <stdio.h>
 #include <math.h>
 #include <iostream>
 #include <ros/ros.h>
@@ -19,9 +21,17 @@ private:
 	int danger;
 	int backup;
 
+	// some variables
+	long timeDiffce;	// currently in milliseconds
+	struct timeval current_time;
+	struct timeval prev_time;
+
 	// data types
 	geometry_msgs::Vector3 directions;
-    sb_msgs::CarCommand car_command;
+	geometry_msgs::Vector3 prevObjectDist;
+	geometry_msgs::Vector3 currentObjectDist;
+	geometry_msgs::Vector3 velocity;
+	sb_msgs::CarCommand car_command;
     
     ros::Subscriber lidar_state;
 
@@ -36,6 +46,11 @@ public:
 	void callback(const sensor_msgs::LaserScanConstPtr& msg_ptr);
 
     geometry_msgs::Twist twist_converter(sb_msgs::CarCommand cc);
+
+    geometry_msgs::Vector3 convertPolar(double r, double theta);
+
+    geometry_msgs::Vector3 calculateVelocity(geometry_msgs::Vector3 dist1, geometry_msgs::Vector3 dist2);
+
 };
 
 

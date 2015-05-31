@@ -39,7 +39,7 @@ the lowest deviceID avalible, making the next connection ID predictable
 bool connectToCamera(VideoCapture& camera){
 	static unsigned int occupiedID = 1;
 	
-	camera.set(CV_CAP_PROP_FPS, 20);
+	camera.set(CV_CAP_PROP_FPS, 30);
 	
 	//Our webcams support 1080p recording, making the ideal resolution 1920x1080
 	//However this large resolution will significantly impact the sticher's performance
@@ -142,7 +142,7 @@ int main(int argc, char **argv)	{
 		} else {			    
 			ROS_INFO("Awaiting for stiched image to display");
 			imshow(CVWINDOW, pano);
-			if(waitKey(50) == 27){
+			if(waitKey(25) == 27){
 				ROS_INFO("ESC key pressed! Exiting loop now");
 				ROS_WARN("The next run has a higher chance of crashing for unknown reasons");
 				break;

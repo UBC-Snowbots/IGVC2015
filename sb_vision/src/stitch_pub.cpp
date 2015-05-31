@@ -29,6 +29,7 @@ int main(int argc, char** argv){
 		cap.read(frame);
 		//Check if grabbed frame is actually full with some content
 		if(!frame.empty()) {
+			ROS_INFO("Sending image...");
 			msg = cv_bridge::CvImage(std_msgs::Header(), "bgr8", frame).toImageMsg();
 			pub.publish(msg);
 			cv::waitKey(1);
