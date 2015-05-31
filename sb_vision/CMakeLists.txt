@@ -65,9 +65,9 @@ target_link_libraries( vision ${catkin_LIBRARIES} ${OpenCV_LIBS} filter)
 #add_executable( filter src/filter.cpp )
 #target_link_libraries( filter ${catkin_LIBRARIES} ${OpenCV_LIBS})
 
+
 #add_executable( image_stitcher src/image_stitcher.cpp )
 #target_link_libraries( image_stitcher ${catkin_LIBRARIES} ${OpenCV_LIBS})
-
 
 
 

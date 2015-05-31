@@ -1,5 +1,4 @@
 add_subdirectory(Controllers/AI)
-add_subdirectory(Controllers/PathSmoothing)
 add_subdirectory(AI_Mapping)
 
 find_package(OpenCV REQUIRED)
@@ -10,6 +9,7 @@ set(MAIN_HEADERS
 	Controllers/ControllerBase.hpp
 	Controllers/VisionController.hpp
 	Controllers/LidarController.hpp
+	Controllers/GpsController.hpp
 	#Controllers/DSLiteController.hpp
 	Controllers/sb_ai.h
 )
@@ -18,13 +18,14 @@ set(MAIN_SOURCE
 	Controllers/DijkstraController.cpp
 	Controllers/VisionController.cpp
 	Controllers/LidarController.cpp
+	Controllers/GpsController.cpp
 	#Controllers/DSLiteController.cpp
 	main.cpp
 )
 
 set(MODE_LIBRARIES
 	ai_dijkstra
-	path_smoothing
+	ai_utilities
 	ai_map
 	${OpenCV_LIBS})
 
