@@ -27,6 +27,7 @@ set(MODE_LIBRARIES
 	ai_dijkstra
 	ai_utilities
 	ai_map
+	#ai_dsliteA
 	${OpenCV_LIBS})
 
 set(MODE_INCLUDE_DIRS
