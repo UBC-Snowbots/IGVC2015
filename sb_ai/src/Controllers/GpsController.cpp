@@ -217,49 +217,35 @@ namespace ai
 	  return d;
   }
 
-  double GpsController::CreateAngle()
-  {
-	  /*
-	  Input Parameter:
-	  1. direction of robot from North (0-359 degrees)
-	  ??
-	  2. x cordinates of TargetWaypoint in metres
-	  3. y cordinates of TargetWaypoint in metres
-	  Output: the direction the robot needs to turn (-180 < theta < 180) 
-	  Purpose: calculates angle of robot to target waypoint ((-180) to 180 degrees)
-	  Author: Nick Wu
-	  */
-	  double x = 1, y = 1; //x and y cordinates in metres, this needs to be calculated or passed in a paramaters
+  double GpsController::CreateAngle(void){
+		double dx = (TargetWaypoint.lon - CurrentWaypoint.lon)*111302.62;
+		double dy = (TargetWaypoint.lat - CurrentWaypoint.lat)*110574.61;
+		long double theta, GeoNorth;
+		int quad; 
+		//1.converting magnetic north to geo north 
+		GeoNorth = angleCompass - MAG_DECL;
+		if (GeoNorth < -179)
+				GeoNorth = 180 + (GeoNorth + 179);
+		//2.Move 0 to north of robot
+		GeoNorth = GeoNorth - 90;
+		if (GeoNorth < 180) 
+				GeoNorth = 180 + (GeoNorth + 179);
+		//3.Decide Qudrant using deltalon, deltalat
+		if (dx > 0 && dy > 0) quad = 1;
+		else if (dx > 0 && dy < 0) quad = 2; 
+		else if (dx < 0 && dy < 0) quad = 3; 
+		else quad = 4; 
+		//4.Arctan dy/dx to find angle from "x-axis" (E-W)
+		if (quad == 1 || quad == 4)
+		theta = atan(dx/dy);
+		else 
+		theta = 90 + atan(dy/dx);
+		//5.How much GeoNorth needs to rotate left or right to get to theta
+		if (GeoNorth > theta) 
+			theta = theta - GeoNorth; 
+		else theta = GeoNorth - theta;
 
-	  double theta = 0, angleWaypoint = 180; //theta: angle robot needs to turn, angleWaypoint goal angle from North
-	  double r = sqrt(x*x + y*y); //r = distance from the robot to waypoint
-	  double angleGoal = 180/PI * (acos(abs(y) / r)); //reference angle with respect to y-axis
-
-	  if (x > 0 && y >= 0) //goal angle in quad 1
-		  angleWaypoint = angleGoal;
-	  else if (x >= 0 && y < 0) //goal angle in quad 4
-		  angleWaypoint = (180 - angleGoal);
-	  //checking special condition under quad 1 and 4
-	  if (angleCompass > angleWaypoint + 180)
-		  theta = 360 - angleCompass + angleWaypoint;
-
-	  if (x < 0 && y <= 0) //goal angle in quad 3
-		  angleWaypoint = angleGoal + 180;
-	  else if (x < 0 && y > 0) //goal angle in quad 2 
-		  angleWaypoint = 360 - angleGoal;
-	  //checking special condition under quad 3 and 2 
-	  if (angleCompass <= angleWaypoint - 180){
-		  if (x < 0 && y <= 0) //checks for quad 3 
-			  theta = angleGoal - angleCompass - 180;
-		  else if (x < 0 && y > 0) //checks for quad 2
-			  theta = -angleCompass - angleGoal;
-	  }
-
-	  //for any other condtions
-	  if (theta == 0){
-		  theta = angleWaypoint - angleCompass;
-	  }
-	  return theta;
+		return theta;
   }
 
   sb_msgs::Gps_info GpsController::Createdata()

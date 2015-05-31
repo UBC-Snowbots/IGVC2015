@@ -27,8 +27,9 @@ namespace ai
   
   private:
   
-    static const double EARTH_RADIUS = 6378.137;
-    static const double PI = 3.14159265;
+    static const double EARTH_RADIUS = 6371000.0; 
+    static const double PI = 3.14159265; 
+		static const double MAG_DECL = 11.034; //Magnetic declination
   
     double angleCompass;
     bool moveStatus, goal, msg_flag;
