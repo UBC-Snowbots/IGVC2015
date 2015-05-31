@@ -128,15 +128,15 @@ void setup()
   battery_mon2.init();
   battery_mon2.set_monitoring(AP_BATT_MONITOR_VOLTAGE_AND_CURRENT);
   //LED control
-  a_led = hal.gpio->channel(54);//A10 output for LEDs
+  a_led = hal.gpio->channel(64);//A10 output for LEDs solid
   a_led->mode(GPIO_OUTPUT);
   a_led->write(0);
-  b_led = hal.gpio->channel(53);//A9 output for LEDs
+  b_led = hal.gpio->channel(63);//A9 output for LEDs blinking
   b_led->mode(GPIO_OUTPUT);
   b_led->write(0);
   
   //set up compass and MPU6000
-//  setup_compass();
+  setup_compass();
   
   //set up encoders
   hal.i2c->writeRegister(Encoder,0x00,0x00);
@@ -154,7 +154,7 @@ void loop()
   //hal.console->printf_P(PSTR("4"));
   move_pwm();
   //hal.console->printf_P(PSTR("5"));
-//  run_compass();
+  run_compass();
   //hal.console->printf_P(PSTR("6"));
   velocity();
   //hal.console->printf_P(PSTR("7"));
@@ -186,7 +186,7 @@ void move_pwm()// commands the esc
     //hal.console->printf_P(PSTR("twist"));
     wheels[0]=1500+(twist_z-twist_y)*right_motor_cal; //double check left vs right
     wheels[1]=1500+(twist_z+twist_y)*left_motor_cal;
-    a_led->write(0);//LED solid
+    a_led->write(0);//LED blinking
     b_led->write(1);
   }
   else if(rc[2].control_in < 650)//autonomous
@@ -194,8 +194,8 @@ void move_pwm()// commands the esc
     //hal.console->printf_P(PSTR("radio"));
     wheels[0]=1500+(rc[3].control_in-rc[1].control_in)*right_motor_cal;
     wheels[1]=1500+(rc[3].control_in+rc[1].control_in)*left_motor_cal+30;
-    a_led->write(0);//LED Blinking
-    b_led->write(1);
+    a_led->write(1);//LED solid
+    b_led->write(0);
   }
   else//wireless e-stop
   {
@@ -311,7 +311,7 @@ void talk()
   uint8_t bytes[20];//used to send into
   unsigned test=0;
 
-  if(hal.console->available() >=10)
+  if(hal.console->available() >=7)
   { 
     //hal.console->println("talked");
     while(hal.console->available() >=10)
@@ -355,7 +355,7 @@ void talk()
         Rspeed=rc[6].control_in-1500;
         Lspeed=rc[7].control_in-1500;
         
-        hal.console->printf("%04d,%07d,%07d.", compdeg, Rspeed, Lspeed);
+        hal.console->printf("%04d,%07d,%07d.\n", compdeg, Rspeed, Lspeed);
         hal.scheduler->delay(2);
         /*char outbytes[10];
         outbytes[0]=compdeg>>8;
@@ -507,21 +507,65 @@ void velocity()
 }
 
 void read_Encoder()//talks to the encoder MCU via i2c
-{
-	uint8_t data[6];
-	uint8_t stat = hal.i2c->readRegisters(Encoder,0x01,8, data);
-	if (stat == 0){
-        
-        leftE = data[0] << 24;
-        leftE |= data[1] << 16;
-        leftE |= data[2] << 8;
-        leftE |= data[3];
-        
-        rightE = data[4] << 24;
-        rightE |= data[5] << 16;
-        rightE |= data[6] << 8;
-        rightE |= data[7];
-	}
+{int mid=0;
+  int ending=0;	
+  uint8_t data[6];
+  uint8_t stat = hal.i2c->readRegisters(Encoder,0x01,24, data);
+  if (stat == 0){
+    for(int i=0;i<24;i++)
+    {
+      if(data[i]=',')
+      {
+        mid=i;
+      }
+      else if(data[i]='.')
+      {
+        ending=i;
+        i=24;
+      }
+    }  
+    leftE=0;
+    rightE=0;
+
+    if(data[0]='-')
+    {
+      for(int j=1;j<mid;j++)
+      {
+        leftE=leftE*10;
+        leftE+=(data[0]-'0');
+      }
+      leftE=leftE*-1;
+    }
+    else 
+    {
+      for(int j=0;j<mid;j++)
+      {
+        leftE=leftE*10;
+        leftE+=(data[0]-'0');
+      }
+      leftE=leftE*-1;
+    }
+
+
+    if(data[0]='-')
+    {
+      for(int j=1;j<mid;j++)
+      {
+        rightE=leftE*10;
+        rightE+=(data[0]-'0');
+      }
+      rightE=rightE*-1;
+    }
+    else 
+    {
+      for(int j=0;j<mid;j++)
+      {
+        rightE=leftE*10;
+        rightE+=(data[0]-'0');
+      }
+      rightE=rightE*-1;
+    }
+  }
 }
 
 void motor_calibration(){

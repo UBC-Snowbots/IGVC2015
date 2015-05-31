@@ -5,7 +5,7 @@
 #Date: May 17, 2015
 #Reminder: chmod +x gps_receiver.py 
 #Run: rosrun sb_gps gps_ receiver.py 
-
+from sb_gps.srv import *
 import serial
 import rospy
 from std_msgs.msg import String
@@ -21,10 +21,10 @@ def handle_gps_service(req,res):
 	lon1 = CurrentWaypoint[1] * toRad;
 	lat2 = TargetWaypoint[0] * toRad;
 	lon2 = TargetWaypoint[1] * toRad;
-	
+
 	a = math.sin((lat2 - lat1) / 2)*math.sin((lat2 - lat1) / 2) + math.cos(lat1) * math.cos(lat2) * math.sin((lon2 - lon1) / 2)*math.sin((lon2 - lon1) / 2);
 	c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a));
-	res.d = 6371000 * c;
+	res.distance = 6371000 * c;
 	
 
 	

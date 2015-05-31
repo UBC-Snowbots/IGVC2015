@@ -8,6 +8,8 @@ find_package(
   std_msgs
   genmsg
   sb_msgs
+  cv_bridge
+  image_transport
 )
 
 find_package(OpenCV REQUIRED)
@@ -22,7 +24,7 @@ generate_messages(
 
 catkin_package(
    CATKIN_DEPENDS
-   message_runtime roscpp rospy std_msgs
+   message_runtime roscpp rospy std_msgs 
 )
 
 include_directories(
@@ -32,18 +34,10 @@ include_directories(
 )
 add_subdirectory(src)
 
-add_executable(Line_Detector src/Line_Detector.cpp)
-target_link_libraries( Line_Detector ${catkin_LIBRARIES} ${OpenCV_LIBS})
-
-add_executable(LaneDetector src/LaneDetector.cpp)
-target_link_libraries( LaneDetector  ${catkin_LIBRARIES} ${OpenCV_LIBS})
-
-add_executable(LineFilter src/LineFilter.cpp)
-target_link_libraries( LineFilter    ${catkin_LIBRARIES} ${OpenCV_LIBS})
-
 
 add_executable(image_stitching_simon src/image_stitching_simon.cpp)
 target_link_libraries( image_stitching_simon ${catkin_LIBRARIES} ${OpenCV_LIBS})
+
 
 add_executable(image_stitching src/image_stitching.cpp)
 target_link_libraries( image_stitching ${catkin_LIBRARIES} ${OpenCV_LIBS})
@@ -63,8 +57,10 @@ target_link_libraries( ipm ${catkin_LIBRARIES} ${OpenCV_LIBS})
 add_executable( Pylon_Detector src/Pylon_Detector/Pylon_Detector.cpp )
 target_link_libraries( Pylon_Detector ${catkin_LIBRARIES} ${OpenCV_LIBS})
 
+
 add_executable( vision src/vision.cpp )
 target_link_libraries( vision ${catkin_LIBRARIES} ${OpenCV_LIBS} filter)
+
 
 #add_executable( filter src/filter.cpp )
 #target_link_libraries( filter ${catkin_LIBRARIES} ${OpenCV_LIBS})
