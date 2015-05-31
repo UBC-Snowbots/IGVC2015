@@ -8,10 +8,6 @@
 
 
 
-image_stitcher::image_stitcher()
- {
-	
- }
 /*
 void image_stitcher::testPrint(void)
 {
