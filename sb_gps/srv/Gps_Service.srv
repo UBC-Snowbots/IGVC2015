@@ -1,0 +1,6 @@
+float64 lat1
+float64 lon1
+float64 lat2
+float64 lon2
+---
+float64 distance
