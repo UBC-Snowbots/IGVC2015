@@ -16,13 +16,16 @@ VideoCapture cap1;
 VideoCapture cap2;
 VideoCapture cap3;
 
+/*
+This function handles the releasing of objects when this node is
+requested or forced (via CTRL+C) to shutdown.
+*/
 void onShutdown(int sig){
-	ROS_INFO("Releasing VideoCapture objects!");
-	destroyWindow(CVWINDOW);//SHOULD BE OUTSIDE OF LOOP?
+	destroyWindow(CVWINDOW);
 	cap1.release();
 	cap2.release();
 	cap3.release();
-	ROS_INFO("All VideoCaptures should have been released, proper shutdown complete");
+	ROS_INFO("All objects should have been released, proper shutdown complete");
 	ros::shutdown();
 }
 
@@ -61,7 +64,6 @@ int main(int argc, char **argv)	{
 	ros::init(argc, argv, NODE_NAME, ros::init_options::NoSigintHandler);
 	signal(SIGINT, onShutdown);
 	
-									
 	if(!connectToCamera(cap1) || !connectToCamera(cap2) || !connectToCamera(cap3)){
 		ROS_FATAL("Unable to connect to all cameras, exiting now");
 		ROS_FATAL("If this error persist, run the usb-reset.sh in the home directory");
@@ -77,10 +79,6 @@ int main(int argc, char **argv)	{
 	namedWindow(CVWINDOW);	
 
 	while (ros::ok() && errorCounter < 5){
-		//Testing to see if having the mat obj recreated every loop would
-		//decrease the chances of encountering the error again...
-		
-
 		ROS_INFO("Image Stitching Started!");
 		counter++;
 		
@@ -126,7 +124,9 @@ int main(int argc, char **argv)	{
 		if (image1.empty() || image2.empty() || image3.empty())
 			ROS_WARN("One of the Mat is empty");
 
-		//Stitching the images now
+		//Delcaring the @pano inside the loop seems to significantly decrease
+		//the chance of an error happening. Perhaps there's some old data that
+		//wasn't properly destroyed...
 		Mat pano;
 		imgs.push_back(image1);
 		imgs.push_back(image2);
@@ -141,40 +141,16 @@ int main(int argc, char **argv)	{
 
 		} else {			    
 			ROS_INFO("Awaiting for stiched image to display");
-			/*
-			At this point the stiched image is ready in the Mat object
-			If you want to process the Mat directly without displaying
-			the image then there's no problem.
-
-			HOWEVER... if you need to display the image continously				
-			things will start to go wrong
-				
-			We are using ros::ok to continously run this program
-			and imshow() displays the stitched image to the window
-			Therefore closing the window via the 'x' button will 
-			not stop the program since we're in a loop
-				
-			Only ctrl+c will stop the loop, but this is terrible because the code
-			is forced to quit and it will never be able to release the webcams
-			with .release() - This causes the webcam to not connect the next time
-			this program is executed, without having to manually re-connected it again
-			*/
 			imshow(CVWINDOW, pano);
 			if(waitKey(50) == 27){
 				ROS_INFO("ESC key pressed! Exiting loop now");
 				ROS_WARN("The next run has a higher chance of crashing for unknown reasons");
 				break;
 	       	}
-			
-			//ROS_INFO("Destroyed stitch image window");
 		}
-		ROS_INFO("Counter: %d", counter);
+		ROS_INFO("Iteration: %d", counter);
 	}
 
-	//If you CTRL + C while inside the ros::ok loop, this part will never get executed
-	//causing a re-connection problem to the webcams in any subsequent execution.
-	onShutdown(0);
-	
+	onShutdown(0);	
 	return 0;
 }
-

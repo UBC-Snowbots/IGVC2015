@@ -16,7 +16,6 @@
 #include "sb_msgs/RobotState.h"
 #include "sb_msgs/IMU.h"
 #include "SerialCommunication.h"
-#include "sb_msgs/compass.h"
 #include "elsa_driver.h"
 
 #include <tf/transform_broadcaster.h>//odom stuff
@@ -55,11 +54,6 @@ char twist_z[3]={'1','2','5'};
 
 bool eStop = false;
 
-sb_msgs::compass createComp(double compass_val){
-	sb_msgs::compass compas;
-	compas.compass = compass_val;
-	return compas;
-}
 
 int main(int argc, char** argv)
 {
@@ -100,14 +94,13 @@ int main(int argc, char** argv)
 	        return 0;
 	    }
 	}
-	usleep(3*SECOND);
+	usleep(10*SECOND);
 		
 	//subscribers and publishers
 	Subscriber car_command = n.subscribe(CAR_COMMAND_TOPIC, 1, car_command_callback);
 //	Subscriber turret_command = n.subscribe(TURRET_COMMAND_TOPIC, 1, turret_command_callback);
 	Subscriber eStop_topic = n.subscribe(ESTOP_TOPIC, 1, eStop_callback);
 	
-  Publisher compass_state = n.advertise<sb_msgs::compass>(COMPASS_STATE_TOPIC,1);
 	Publisher robot_state = n.advertise<sb_msgs::RobotState>(ROBOT_STATE_TOPIC,1);
 	Publisher gps_state = n.advertise<std_msgs::String>(GPS_STATE_TOPIC,1);
 	
@@ -117,7 +110,7 @@ int main(int argc, char** argv)
 	
 	sb_msgs::IMU imu;
 	sb_msgs::RobotState state;
-    sb_msgs::compass compass;
+
 	std_msgs::String gps_data;
 	
 	ROS_INFO("arduino_driver ready");
@@ -150,12 +143,12 @@ int main(int argc, char** argv)
 			cout << ss.str() << endl;
 	    link.writeData(ss.str(), 7); 
 	    //delay for sync
-	    usleep(20000);
+	    usleep(2000000);
 	    
 	    //publish data
 			char test[24];
 	 link.readData(24, test);
-			cout << "OMFG WFT: " << test << endl;
+			cout << test;
 	    processData(test,state);//" -19,      0,      0."
 	    robot_state.publish(state);
      
@@ -164,8 +157,6 @@ int main(int argc, char** argv)
 	    th=state.compass*M_PI/180;//check units is degres what you need?
 	    vy=(state.RightVelo+state.LeftVelo)/2;
 
-     	compass = createComp(th);
-      compass_state.publish(compass);
 	    
 	    //compute odometry in a typical way given the velocities of the robot
 	    double dt = (current_time - last_time).toSec();
@@ -238,18 +229,20 @@ void processData(string data,sb_msgs::RobotState &state)
 
 	cout << "data: " << data << endl;
 	
-	long right, left;
+	int right, left; 
+	int compass_d;
 	
 	if (data.size() >= 5) 
 	{
-		cout << "1: " << data.substr(0,4) << endl;
-	  state.compass=atoi(data.substr(0,4).c_str());//" -19,      0,      0."
+	 compass_d = atoi(data.substr(0,4).c_str());
+		cout << "1: " << compass_d << endl;
 	}
 	
   if (data.size() >= 6)
   {
-    cout << "2: " << data.substr(5,7) << endl;
+
 	  right=atoi(data.substr(5,7).c_str());
+    cout << "2: " << right << endl;
   }
 
   if (data.size() >= 14)
@@ -260,6 +253,7 @@ void processData(string data,sb_msgs::RobotState &state)
   
 	state.RightVelo = (float) (right/1000);
 	state.LeftVelo = (float) (left/1000);
+	state.compass = (int) compass_d;
 
 //	state.RightVelo.push_back(float(right)/1000);
 //	state.LeftVelo.push_back(float(left)/1000);

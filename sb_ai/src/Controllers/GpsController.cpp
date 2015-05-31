@@ -6,28 +6,114 @@
 //Things needed to be implemented: compass callback function, struct 
 //Need to be within 1m radius 
 
+#include "GpsController.hpp"
+
 using namespace std; 
-using namespace sb_msgs;
 
 namespace ai
 {
   GpsController::GpsController(ros::NodeHandle& nh)
   {
+    // Subscribers
+    gps_Sub = nh.subscribe(GPS_SUB_TOPIC, 20, &GpsController::GpsCallback, this);
+    compass_Sub = nh.subscribe (COMPASS_SUB_TOPIC, 1, &GpsController::CompassCallback, this);
     
-      ros::NodeHandle nh; //create handle to this process node, NodeHandle is main access point to communication with ROS system. First one intializes node
-  ros::Subscriber gps_Sub = nh.subscribe("GPS_USB_DATA", 20, gpsSubHandle);
-  ros::Publisher car_pub = nh.advertise<geometry_msgs::Twist>(PUB_TOPIC, 100);
-  ros::Publisher gps_pub = nh.advertise<sb_msgs::Gps_info>("GPS_DATA",50);
-  ros::Publisher coord_pub = nh.advertise<sb_msgs::Waypoint>("GPS_COORD", 100);
-  ros::Subscriber compass_Sub = nh.subscribe ("COMPASS_DATA", 1, compassSubHandle);
-  ros::ServiceClient client = nh.serviceClient<sb_srv::gps_service>("GPS_SERVICE");
+    // Publishers
+    gps_pub = nh.advertise<sb_msgs::Gps_info>(GPS_PUB_TOPIC,50);
+    coord_pub = nh.advertise<sb_msgs::Waypoint>(WAYPOINT_PUB_TOPIC, 100);
     
+    // Service clients
+    client = nh.serviceClient<sb_srv::gps_service>(GPS_SERV_TOPIC);
+  
+    // Initialize variables
+    msg_flag = false;
+    d = 0;
+    theta = 0;
+    prev_move = 0;
+    avg_count = 0;
+    calibrate = false;
+    TargetWaypoint.lon = 49.26238123;
+	  TargetWaypoint.lat = -123.24871402;
+	  buffWaypoint.lon = 0.0;
+	  buffWaypoint.lat = 0.0;	
+	  
+	  // Set precision of the numbers we print
+	  cout.precision(13);
   }
+  
   
   geometry_msgs::Twist GpsController::Update()
   {
-  
+    if (client.call(srv))
+    {
+		  cout << srv.response.d << endl;
+		  pub_data.distance = srv.response.d;
+		  cout << "\033[1;32m" << "Distance Calculated: " << pub_data.distance << "\033[0m" << endl;
+	  }
+	  else { cout << "\033[1;31m" << "Service Failed" << "\033[0m" << endl; }
+	
+	  if (calibrate)
+	  {	 
+		  if (msg_flag)
+		  {
+			  if (avg_count = 10)
+			  {
+		      avgWaypoint.lon = buffWaypoint.lon/10.0;
+				  avgWaypoint.lat = buffWaypoint.lat/10.0;
+				  avg_count = 0;
+			  }
+			  else
+			  {
+				  buffWaypoint.lon = CurrentWaypoint.lon;
+				  buffWaypoint.lat = CurrentWaypoint.lat;
+				  avg_count++;
+			  }
+			  
+			  ROS_INFO ("Position:");
+			  cout << "Current longitude: " << avgWaypoint.lon << " Current latitude: " << avgWaypoint.lat << endl;
+			  pub_data = Createdata();
+			  cout << "distance" << pub_data.distance << endl;
+			  cout << "angle" << pub_data.angle << endl;
+				//Publish Data 
+
+			  gps_pub.publish(pub_data); //a out 
+				coord_pub.publish(CurrentWaypoint);
+			  next_move = NextMoveLogic(pub_data.distance,pub_data.angle);
+			  twist_msg = GetTwistMsg(next_move);
+			  return twist_msg;
+				//Published Data
+		  }
+		  else { ROS_INFO("No Fix:"); }
+	  }
+	  else 
+	  {	
+	    cout << "\033[1;31m calibrating \033[0m" << endl;;
+			if (msg_flag)
+			{
+				if (avg_count = 10)
+				{ 
+				  avgWaypoint.lon = buffWaypoint.lon/10.0;
+				  avgWaypoint.lat = buffWaypoint.lat/10.0;
+				  calibrate = true;
+				  avg_count = 0;
+				  StartGps();	
+			 	  cout <<"\x1b[1;31m" << off.lon << " and " << off.lat<< "\x1b[0m" << endl;
+				}			  
+				else
+				{
+				  buffWaypoint.lon = CurrentWaypoint.lon;
+				  buffWaypoint.lat = CurrentWaypoint.lat;
+				  avg_count ++;
+				}
+			}
+			else
+			{ 
+			  ROS_INFO("No Fix:");
+				cout <<"\x1b[1;31m Waiting for fix for calibration \x1b[0m" << endl;
+		  }
+    }
   }
+
 
   void GpsController::StartGps() /*double lon, double, lat */
   {
@@ -95,7 +181,7 @@ namespace ai
 
   int GpsController::NextMoveLogic (double distance, double angle){
 	  int next_move; 
-	  if (checkGoal()) {
+	  if (CheckGoal()) {
 	  cout << "Arrived at waypoint" << endl;
 		  return 0;}
 	  else{
@@ -219,8 +305,8 @@ namespace ai
   {
 
     sb_msgs::Gps_info data; 
-    data.distance = createDistance();
-    data.angle = createAngle();
+    data.distance = CreateDistance();
+    data.angle = CreateAngle();
 	
     return data;  
   }
@@ -242,93 +328,4 @@ namespace ai
 
 
 
-//bool service
-
-int main (int argc, char **argv){
-	int avg_count = 0;
-	bool calibrate = false;
-  ros::init(argc, argv, AI_NODE_NAME); //initialize access point to communicate
-
-  ros::Rate loop_rate(10); //10hz loop rate
-	cout.precision(13);
-/*  while (!msg_flag){
-		cout << "Waiting for GPS Fix" << endl;	
-		loop_rate.sleep();
-	}*/
-
-	TargetWaypoint.lon = 49.26238123;
-	TargetWaypoint.lat = -123.24871402;
-	buffWaypoint.lon = 0.0;
-	buffWaypoint.lat = 0.0;	
-
-  while (ros::ok()){
-	if (client.call(srv)){
-		cout << srv.response.d << endl;
-		pub_data.distance = srv.response.d;
-		cout << "\033[1;32m" << "Distance Calculated: " << pub_data.distance << "\033[0m" << endl;
-	}
-	else{
-		cout << "\033[1;31m" << "Service Failed" << "\033[0m" << endl;
-	}
-	
-	if (calibrate){	 
-		if (msg_flag){
-			if (avg_count = 10){
-		    	 avgWaypoint.lon = buffWaypoint.lon/10.0;
-				 avgWaypoint.lat = buffWaypoint.lat/10.0;
-				 avg_count = 0;
-			}
-			else{
-				  buffWaypoint.lon = CurrentWaypoint.lon;
-				  buffWaypoint.lat = CurrentWaypoint.lat;
-				  avg_count ++;
-			}
-			 ROS_INFO ("Position:");
-			  cout << "Current longitude: " << avgWaypoint.lon << " Current latitude: " << avgWaypoint.lat << endl;
-			  pub_data = createdata();
-			  cout << "distance" << pub_data.distance << endl;
-			  cout << "angle" << pub_data.angle << endl;
-				//Publish Data 
-
-			  	  gps_pub.publish(pub_data); //a out 
-				  coord_pub.publish(CurrentWaypoint);
-			  	  next_move = NextMoveLogic(pub_data.distance,pub_data.angle);
-			  	  twist_msg = GetTwistMsg(next_move);
-			  	  car_pub.publish(twist_msg);
-				//Published Data
-		}
-		  else 
-			  ROS_INFO("No Fix:"); 
-	  	
-			}
-	else {	
-
-		  cout << "\033[1;31m calibrating \033[0m" << endl;;
-			if (msg_flag)
-				if (avg_count = 10){ 
-				  avgWaypoint.lon = buffWaypoint.lon/10.0;
-				  avgWaypoint.lat = buffWaypoint.lat/10.0;
-				  calibrate = true;
-				  avg_count = 0;
-				  startGps();	
-			 	  cout <<"\x1b[1;31m" << off.lon << " and " << off.lat<< "\x1b[0m" << endl;
-				}			  
-				else{
-				  buffWaypoint.lon = CurrentWaypoint.lon;
-				  buffWaypoint.lat = CurrentWaypoint.lat;
-				  avg_count ++;
-				}
-			else{ 
-			 ROS_INFO("No Fix:");
-				cout <<"\x1b[1;31m Waiting for fix for calibration \x1b[0m" << endl;
-		}
-	
-	   //twist out 
-	  
-	  ros::spinOnce(); //ros spin is to ensure that ros threading does not leave suscribes un processed
-	  loop_rate.sleep(); 
-}}
-
-    return 0;
-}
 

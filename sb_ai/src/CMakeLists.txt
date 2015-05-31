@@ -9,6 +9,7 @@ set(MAIN_HEADERS
 	Controllers/ControllerBase.hpp
 	Controllers/VisionController.hpp
 	Controllers/LidarController.hpp
+	Controllers/GpsController.hpp
 	#Controllers/DSLiteController.hpp
 	Controllers/sb_ai.h
 )
@@ -17,6 +18,7 @@ set(MAIN_SOURCE
 	Controllers/DijkstraController.cpp
 	Controllers/VisionController.cpp
 	Controllers/LidarController.cpp
+	Controllers/GpsController.cpp
 	#Controllers/DSLiteController.cpp
 	main.cpp
 )

@@ -3,7 +3,6 @@
 #include "stdint.h"
 #include "ros/ros.h"
 #include "nav_msgs/OccupancyGrid.h"
-#include "geometry_msgs/Pose2D.h"
 #include "sensor_msgs/Image.h"
 #include "sb_msgs/Gps_info.h"
 #include "sb_msgs/Waypoint.h"
@@ -45,17 +44,18 @@ class GenerateGlobalMap {
     // Stores the local map of the robot
     sensor_msgs::Image _imageMsg;
 
-    // Stores the angle of the robot
-    geometry_msgs::Pose2D _poseMsg;
-
     // Stores the global map of the robot along with it's position in the global map
     nav_msgs::OccupancyGrid _globalMap;
     
     uint32_t _visionMapSize;
 
+    // Real world angle of robot
+    uint8_t _compassAngle;
+
+    // Orientation angle of the global map
+    uint8_t _globalMapAngle;
+
     uint32_t _localMapSize;
-    
-    int _mapSize;
 
   public:
 

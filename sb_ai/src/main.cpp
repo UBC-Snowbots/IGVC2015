@@ -9,6 +9,7 @@
 #include "Controllers/DijkstraController.hpp"
 #include "Controllers/VisionController.hpp"
 #include "Controllers/LidarController.hpp"
+#include "Controllers/GpsController.hpp"
 //#include "Controllers/DSLiteController.hpp"
 
 ai::ControllerBase* GetController(ros::NodeHandle& nh)
@@ -32,6 +33,11 @@ ai::ControllerBase* GetController(ros::NodeHandle& nh)
 	  std::cout << "Running Lidar!" << std::endl;
 		return new ai::LidarController(nh);
 	}
+	else if (param=="gps")
+	{
+	  std::cout << "Running GPS!" << std::endl;
+	  return new ai::GpsController(nh);
+	}
 	//else if (param=="dslite")
 	//{ 
 	//  std::cout << "Running D* Lite!" << std::endl;
@@ -46,6 +52,7 @@ ai::ControllerBase* GetController(ros::NodeHandle& nh)
 	std::cout << "\tdijkstra" << std::endl;
 	std::cout << "\tlidar" << std::endl;
 	std::cout << "\tvision" << std::endl;
+	std::cout << "\tgps" << std::endl;
 	std::cout << "Defaulting to dijkstra" << std::endl;
 	return new ai::DijkstraController(nh);
 }

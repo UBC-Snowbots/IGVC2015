@@ -8,6 +8,8 @@ find_package(
   std_msgs
   genmsg
   sb_msgs
+  cv_bridge
+  image_transport
 )
 
 find_package(OpenCV REQUIRED)
@@ -25,7 +27,7 @@ generate_messages(
 
 catkin_package(
    CATKIN_DEPENDS
-   message_runtime roscpp rospy std_msgs
+   message_runtime roscpp rospy std_msgs 
 )
 
 include_directories(
@@ -38,6 +40,8 @@ add_executable(Line_Detector src/Line_Detector.cpp)
 add_executable(LaneDetector src/LaneDetector.cpp)
 add_executable(LineFilter src/LineFilter.cpp)
 add_executable(image_stitching_simon src/image_stitching_simon.cpp)
+add_executable(stitch_sub src/stitch_sub.cpp)
+add_executable(stitch_pub src/stitch_pub.cpp)
 add_executable(image_stitching src/image_stitching.cpp)
 add_executable(CameraCal src/Perspective_Transform/Camera_Cal/sample_camera_calibration.cpp)
 add_executable(ObjectDetect src/ObjectDetect.cpp)
@@ -51,6 +55,8 @@ target_link_libraries( LaneDetector  ${catkin_LIBRARIES} ${OpenCV_LIBS})
 target_link_libraries( LineFilter    ${catkin_LIBRARIES} ${OpenCV_LIBS})
 target_link_libraries( image_stitching ${catkin_LIBRARIES} ${OpenCV_LIBS})
 target_link_libraries( image_stitching_simon ${catkin_LIBRARIES} ${OpenCV_LIBS})
+target_link_libraries( stitch_sub ${catkin_LIBRARIES} ${OpenCV_LIBS})
+target_link_libraries( stitch_pub ${catkin_LIBRARIES} ${OpenCV_LIBS})
 
 target_link_libraries( CameraCal ${catkin_LIBRARIES} ${OpenCV_LIBS})
 target_link_libraries( ObjectDetect ${catkin_LIBRARIES} ${OpenCV_LIBS})
