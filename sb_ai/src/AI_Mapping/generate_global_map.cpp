@@ -31,8 +31,8 @@ void GenerateGlobalMap::TransformLocalToGlobal(){
   // Loop through the vision map
   for(int index = 0; index < _localMapSize; index++) {
 
-      xGlobalVisionCoord = cos(_compassAngle) * ConvertIndexToXCoord(index) - sin(_compassAngle) * ConvertIndexToYCoord(index) +            _globalMap.info.origin.position.x;
-      yGlobalVisionCoord = sin(_compassAngle) * ConvertIndexToXCoord(index) + cos(_compassAngle) * ConvertIndexToYCoord(index) + _globalMap.info.origin.position.y;
+      xGlobalVisionCoord = cos(_compassAngle - _globalMapAngle) * ConvertIndexToXCoord(index) - sin(_compassAngle - _globalMapAngle) * ConvertIndexToYCoord(index) +            _globalMap.info.origin.position.x;
+      yGlobalVisionCoord = sin(_compassAngle - _globalMapAngle) * ConvertIndexToXCoord(index) + cos(_compassAngle - _globalMapAngle) * ConvertIndexToYCoord(index) + _globalMap.info.origin.position.y;
 
     // Update global map with 0/1 to show that an obstacle dne/exists
     _globalMap.data[ConvertXYCoordToIndex(xGlobalVisionCoord, yGlobalVisionCoord, _globalMap.info.width)] = _imageMsg.data[index];
