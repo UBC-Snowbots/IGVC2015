@@ -6,6 +6,10 @@
 #include <vector>
 #include <iostream>
 
+#define PF_INFINITY INT_MAX
+#define INFLATION INT_MAX/2
+#define SQRT2 1.4142135623
+
 class GridWorld{
 
 typedef std::pair<double, double> KeyPair;
@@ -16,14 +20,15 @@ public:
 		double rhs, g, h, cost;
 		KeyPair key;
 		bool isOpen;
-		Tile* parent;
+		Tile* successor;
+
+		//------------------------------
 
 		Tile(unsigned int x, unsigned int y, double cost);
 		Tile(Tile& other);
 
 		void info() const;
 	};
-
 	typedef std::pair<GridWorld::Tile*, double> TilePair;
 
 	bool withinWorld(unsigned int x, unsigned int y) const;
@@ -42,23 +47,21 @@ public:
 	TilePair getMinSuccessor(Tile*& tile);
 	std::vector<Tile*> getNeighbours(Tile*& tile);
 
-	bool isDiagonal(Tile*& a, Tile*& b);
-
-	//------------------------------------------------
+	//---------------------------------------------
 	unsigned int size;
+	int radius;
 	double km;
+
 	Tile* start;
 	Tile* goal;
-
-	Tile* oldGoal;
+	Tile* previous;
 	
 	std::vector<Tile*> open;
 	std::vector<Tile*> world;
 
 
-public:
-	GridWorld(unsigned int size);
+	GridWorld(unsigned int size, int radius);
 	void printWorld() const;
-	//void replan();
 	void updateCost(unsigned int x, unsigned int y, double cost);
+	void inflate(unsigned int x, unsigned int y, double cost);
 };

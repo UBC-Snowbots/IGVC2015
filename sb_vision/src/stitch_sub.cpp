@@ -14,7 +14,7 @@ void imageCallback(const sensor_msgs::ImageConstPtr& msg){
 			ros::shutdown();
 		}
 	}catch (cv_bridge::Exception& e){
-		ROS_ERROR("Could not convert from '%s' to 'bgr8'.", msg->encoding.c_str());
+		ROS_ERROR("Could not convert from '%s' to 'mono8'.", msg->encoding.c_str());
 	}
 }
 
@@ -25,7 +25,7 @@ int main(int argc, char **argv){
 	cv::namedWindow(CV_WINDOW);
 	//cv::startWindowThread();
 	image_transport::ImageTransport it(nh);
-	image_transport::Subscriber sub = it.subscribe("stitcher", 1, imageCallback);
+	image_transport::Subscriber sub = it.subscribe("image", 1, imageCallback);
 	
 	ros::spin();
 	cv::destroyWindow(CV_WINDOW);

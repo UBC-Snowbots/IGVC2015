@@ -54,17 +54,17 @@ target_link_libraries( CameraCal ${catkin_LIBRARIES} ${OpenCV_LIBS})
 add_executable(ObjectDetect src/ObjectDetect.cpp)
 target_link_libraries( ObjectDetect ${catkin_LIBRARIES} ${OpenCV_LIBS})
 
-add_executable( ipm src/Perspective_Transform/ipm_code/main.cpp 
-			src/Perspective_Transform/ipm_code/IPM.cpp 
-			src/Perspective_Transform/ipm_code/IPM.h)
-target_link_libraries( ipm ${catkin_LIBRARIES} ${OpenCV_LIBS})
+#add_executable( ipm src/Perspective_Transform/ipm_code/main.cpp 
+#			src/Perspective_Transform/ipm_code/IPM.cpp 
+#			src/Perspective_Transform/ipm_code/IPM.h)
+#target_link_libraries( ipm ${catkin_LIBRARIES} ${OpenCV_LIBS})
 
 add_executable( Pylon_Detector src/Pylon_Detector/Pylon_Detector.cpp )
 target_link_libraries( Pylon_Detector ${catkin_LIBRARIES} ${OpenCV_LIBS})
 
 
 add_executable( vision src/vision.cpp )
-target_link_libraries( vision ${catkin_LIBRARIES} ${OpenCV_LIBS} filter)
+target_link_libraries( vision ${catkin_LIBRARIES} ${OpenCV_LIBS} filter ipm)
 
 
 #add_executable( filter src/filter.cpp )
@@ -73,6 +73,10 @@ target_link_libraries( vision ${catkin_LIBRARIES} ${OpenCV_LIBS} filter)
 
 #add_executable( image_stitcher src/image_stitcher.cpp )
 #target_link_libraries( image_stitcher ${catkin_LIBRARIES} ${OpenCV_LIBS})
+
+#add_executable( ipm src/IPM.cpp )
+#target_link_libraries( ipm ${catkin_LIBRARIES} ${OpenCV_LIBS})
+
 
 
 

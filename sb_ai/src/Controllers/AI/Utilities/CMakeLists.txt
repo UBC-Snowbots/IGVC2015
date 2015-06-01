@@ -1,1 +1,1 @@
-add_library(ai_utilities PathSmoothing.h PathSmoothing.cpp)
+add_library(ai_utilities Utilities.h Utilities.cpp)
