@@ -12,9 +12,9 @@ static const std::string NODE_NAME = "ImageStitcher";
 static const std::string CVWINDOW = "Sticher Window";
 static const unsigned int CAMERA_AMOUNT = 3;
 
-VideoCapture cap1;
-VideoCapture cap2;
-VideoCapture cap3;
+//Putting these inside an array seems to cause the program to not update...why?
+VideoCapture cap1, cap2, cap3;
+
 
 /*
 This function handles the releasing of objects when this node is
@@ -39,7 +39,7 @@ the lowest deviceID avalible, making the next connection ID predictable
 bool connectToCamera(VideoCapture& camera){
 	static unsigned int occupiedID = 1;
 	
-	camera.set(CV_CAP_PROP_FPS, 30);
+	camera.set(CV_CAP_PROP_FPS, 15);
 	
 	//Our webcams support 1080p recording, making the ideal resolution 1920x1080
 	//However this large resolution will significantly impact the sticher's performance
@@ -70,13 +70,15 @@ int main(int argc, char **argv)	{
 		return 0;
 	}
 	
-	Mat image1, image2, image3;			
+	Mat image1, image2, image3;		
 	std::vector<Mat> imgs;
 	Stitcher stitcher = Stitcher::createDefault(true);
 
 	int counter = 0;
 	int errorCounter = 0;
+	bool retry = false;
 	namedWindow(CVWINDOW);	
+	//ros::Duration(1).sleep();	//Give some time for the camera to warm up
 
 	while (ros::ok() && errorCounter < 5){
 		ROS_INFO("Image Stitching Started!");
@@ -96,14 +98,7 @@ int main(int argc, char **argv)	{
 			VIDIOC_DQBUF: No such device
 			Segmentation fault(core dumped)
 		*/
-	
-		//According to the OpenCV documentation: >> does the same as .read()
-		//However from testing the code, if I attempt to read without doing >> first, 
-		//the initial run of this program will always fail, while all subsequent ones run fine...
-		cap1 >> image1;
-		cap2 >> image2;
-		cap3 >> image3;
-		
+			
 		if (!cap1.read(image1)){
 			ROS_WARN("Cannot read image 1 from video stream");
 			errorCounter++;
@@ -119,8 +114,7 @@ int main(int argc, char **argv)	{
 			errorCounter++;
 			continue;
 		}
-		
-		
+	
 		if (image1.empty() || image2.empty() || image3.empty())
 			ROS_WARN("One of the Mat is empty");
 
