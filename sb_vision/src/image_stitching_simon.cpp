@@ -15,7 +15,6 @@ static const unsigned int CAMERA_AMOUNT = 3;
 //Putting these inside an array seems to cause the program to not update...why?
 VideoCapture cap1, cap2, cap3;
 
-
 /*
 This function handles the releasing of objects when this node is
 requested or forced (via CTRL+C) to shutdown.

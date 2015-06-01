@@ -44,8 +44,8 @@ target_link_libraries( camera_publisher ${catkin_LIBRARIES} ${OpenCV_LIBS})
 add_executable(camera_subscriber src/camera_subscriber.cpp)
 target_link_libraries(camera_subscriber ${catkin_LIBRARIES} ${OpenCV_LIBS})
 
-add_executable(image_stitching src/image_stitching.cpp)
-target_link_libraries( image_stitching ${catkin_LIBRARIES} ${OpenCV_LIBS})
+#add_executable(image_stitching src/image_stitching.cpp)
+#target_link_libraries( image_stitching ${catkin_LIBRARIES} ${OpenCV_LIBS})
 
 
 add_executable(CameraCal src/Perspective_Transform/Camera_Cal/sample_camera_calibration.cpp)
