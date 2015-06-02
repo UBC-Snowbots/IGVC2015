@@ -22,8 +22,11 @@ GenerateGlobalMap::GenerateGlobalMap(sb_msgs::Waypoint gpsOrigin, uint32_t cours
   _globalMap.info.width = courseWidth + GLOBAL_MAP_PADDING;
   _globalMap.info.height = courseHeight + GLOBAL_MAP_PADDING;
   _globalMap.info.resolution = mapResolution;
-  _globalMapSize = 100*100;
-  // TODO need to initialize values to 0
+  _globalMapSize = _globalMap.info.width * _globalMap.info.height;
+  _globalMap.data.assign(_globalMapSize,0);
+  // Assume robot starts somewhere in the middle bottom of the course  
+  _globalMap.info.origin.position.x = _globalMap.info.width / 2; 
+  _globalMap.infi.origin.position.y = _globalMap.info.height * 3 / 4;
 
   _globalMapAngle = 0; // pretty much useless because the global map is oriented the same way GPS is oriented, so NWSE
 
@@ -42,9 +45,8 @@ void GenerateGlobalMap::TransformLocalToGlobal(){
   // Loop through the vision map
   for(int index = 0; index < _localMapSize; index++) {
 
-  // FIXME will need some sort of scaling depending on the resolution of the global map and the local map
-      xGlobalVisionCoord = cos(_compassAngle - _globalMapAngle) * ConvertIndexToLocalXCoord(index) - sin(_compassAngle - _globalMapAngle) * ConvertIndexToLocalYCoord(index) + _globalMap.info.origin.position.x;
-      yGlobalVisionCoord = sin(_compassAngle - _globalMapAngle) * ConvertIndexToLocalXCoord(index) + cos(_compassAngle - _globalMapAngle) * ConvertIndexToLocalYCoord(index) + _globalMap.info.origin.position.y;
+      xGlobalVisionCoord = cos(_compassAngle - _globalMapAngle) * ConvertIndexToLocalXCoord(index) - sin(_compassAngle - _globalMapAngle) * ConvertIndexToLocalYCoord(index) + _localMap.info.origin.position.x;
+      yGlobalVisionCoord = sin(_compassAngle - _globalMapAngle) * ConvertIndexToLocalXCoord(index) + cos(_compassAngle - _globalMapAngle) * ConvertIndexToLocalYCoord(index) + _localMap.info.origin.position.y;
 
     // Update global map with 0/1 to show that an obstacle dne/exists
     _globalMap.data[ConvertXYCoordToIndex(xGlobalVisionCoord, yGlobalVisionCoord, _globalMap.info.width)] = _localMap.data[index];
@@ -100,8 +102,8 @@ uint8_t GenerateGlobalMap::ConvertXYCoordToIndex(uint8_t x, uint8_t y, uint8_t w
 void GenerateGlobalMap::WaypointSubscriberCallback(const sb_msgs::Waypoint::ConstPtr& waypointMsg){
 
   ROS_INFO("WaypointSubscriberCallback doing stuff");
-  _globalMap.info.origin.position.x = waypointMsg->lon; // FIXME CONVERT STUFF TO X AND Y
-  _globalMap.info.origin.position.y = waypointMsg->lat;
+  _localMap.info.origin.position.x = waypointMsg->lon; // FIXME CONVERT STUFF TO X AND Y
+  _localMap.info.origin.position.y = waypointMsg->lat;
 
 }
 

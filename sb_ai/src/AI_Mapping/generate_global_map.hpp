@@ -48,10 +48,10 @@ class GenerateGlobalMap {
     // Publisher for the global map
     ros::Publisher _globalMapPublisher;
 
-    // Stores the local map of the robot
+    // Stores the local map of the robot and the CURRENT POSITION in the global map
     nav_msgs::OccupancyGrid _localMap;
 
-    // Stores the global map of the robot along with it's position in the global map
+    // Stores the global map of the robot along with the ORIGIN in the global map
     nav_msgs::OccupancyGrid _globalMap;
     
     // Origin GPS coords of the robot at the start

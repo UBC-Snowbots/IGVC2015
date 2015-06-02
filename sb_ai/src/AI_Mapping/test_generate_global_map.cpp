@@ -1,4 +1,5 @@
 #include "generate_global_map.hpp"
+#include <algorithm> 
 #include <iostream>
 
 sb_msgs::Waypoint GPS_ORIGIN_GLOBAL_MSG;
@@ -35,8 +36,8 @@ int main(int argc, char **argv) {
     nav_msgs::OccupancyGrid localMap;
     localMap.info.width = 4;
     localMap.info.height = 4;
-    int tempArray[] = {0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0};
-    localMap.data.assign(tempArray, tempArray + 16);
+    localMap.data.assign(16, 0);
+    localMap.data[5] = 1;
     ROS_INFO("YOLO");
 
     printf("Local Map:\n");
