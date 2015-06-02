@@ -17,6 +17,7 @@ int main(int argc, char **argv) {
 
     ros::NodeHandle n;
 
+    //// Create Test Local Map
     nav_msgs::OccupancyGrid localMap;
     localMap.info.width = 4;
     localMap.info.height = 4;
