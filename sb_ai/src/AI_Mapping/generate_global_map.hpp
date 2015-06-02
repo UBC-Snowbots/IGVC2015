@@ -30,6 +30,10 @@ class GenerateGlobalMap {
     // Gets the real world angle
     void GPSInfoSubscriberCallback(const sb_msgs::Gps_info::ConstPtr& gpsInfoMsg);
 
+    void CalculateMeterChangePerLongitude();
+
+    void CalculateMeterChangePerLatitude();
+
     ros::NodeHandle _n;
 
     // Subscriber for the local map from vision
@@ -58,6 +62,12 @@ class GenerateGlobalMap {
 
     // How many meters per degree of latitude
     uint32_t _meterChangePerLatitude;
+  
+    // Course width in meters
+    uint32_t _courseWidth;
+
+    // Course height in meters
+    uint32_t _courseHeight;
 
     uint32_t _globalMapSize;
 
@@ -71,7 +81,7 @@ class GenerateGlobalMap {
 
   public:
 
-    GenerateGlobalMap(sb_msgs::Waypoint gpsOrigin);
+    GenerateGlobalMap(sb_msgs::Waypoint gpsOrigin, uint32_t courseWidth, uint32_t courseHeight, float mapResolution);
 
     ~GenerateGlobalMap();
 

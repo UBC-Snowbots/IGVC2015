@@ -1,7 +1,11 @@
 #include "generate_global_map.hpp"
 #include <iostream>
 
-sb_msgs::Waypoint gpsOriginGlobalMsg;
+sb_msgs::Waypoint GPS_ORIGIN_GLOBAL_MSG;
+
+uint32_t COURSE_WIDTH = 200;
+uint32_t COURSE_HEIGHT = 100;
+float MAP_RESOLUTION = 0.5;
 
 // Make this global so we can unsubscribe after processing and storing the gpsOrigin to the global variable
 ros::Subscriber gpsOriginSubscriber;
@@ -23,7 +27,7 @@ int main(int argc, char **argv) {
     // We subscribe to this to get the GPS origin, this will run once and then the callback will close the subscriber
     gpsOriginSubscriber = n.subscribe(WAYPOINT_TOPIC, 1000, &gpsOriginSubscriberCallback);
 
-    GenerateGlobalMap generateGlobalMap(gpsOriginGlobalMsg);
+    GenerateGlobalMap generateGlobalMap(GPS_ORIGIN_GLOBAL_MSG, COURSE_WIDTH, COURSE_HEIGHT, MAP_RESOLUTION);
 
     generateGlobalMap.testDoSomething();
 
@@ -68,8 +72,8 @@ int main(int argc, char **argv) {
 
 void gpsOriginSubscriberCallback(const sb_msgs::Waypoint::ConstPtr& gpsOriginMsg) {
 
-    gpsOriginGlobalMsg.lon = gpsOriginMsg->lon;
-    gpsOriginGlobalMsg.lat = gpsOriginMsg->lat;
+    GPS_ORIGIN_GLOBAL_MSG.lon = gpsOriginMsg->lon;
+    GPS_ORIGIN_GLOBAL_MSG.lat = gpsOriginMsg->lat;
     gpsOriginSubscriber.shutdown();
 
 }
