@@ -9,6 +9,7 @@
 static const std::string VISION_TOPIC = "vision_topic";
 static const std::string WAYPOINT_TOPIC = "warpoint_topic";
 static const std::string GPS_INFO_TOPIC = "gps_info_topic";
+static const std::string GLOBAL_MAP_TOPIC = "global_map_topic";
 
 class GenerateGlobalMap {
 
@@ -32,13 +33,16 @@ class GenerateGlobalMap {
     ros::NodeHandle _n;
 
     // Subscriber for the local map from vision
-    ros::Subscriber _imageSubscriber;
+    ros::Subscriber _localMapSubscriber;
 
     // Subscriber for the gps longitude and latitude
     ros::Subscriber _waypointSubscriber;
 
     // Subscriber for the real world angle
     ros::Subscriber _gpsInfoSubscriber;
+
+    // Publisher for the global map
+    ros::Publisher _globalMapPublisher;
 
     // Stores the local map of the robot
     nav_msgs::OccupancyGrid _localMap;

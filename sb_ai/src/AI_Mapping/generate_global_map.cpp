@@ -6,9 +6,12 @@ GenerateGlobalMap::GenerateGlobalMap()
 {
 
   // Initialize subscribers
-  _imageSubscriber = _n.subscribe(VISION_TOPIC, 1000, &GenerateGlobalMap::LocalMapSubscriberCallback, this);
+  _localMapSubscriber = _n.subscribe(VISION_TOPIC, 1000, &GenerateGlobalMap::LocalMapSubscriberCallback, this);
   _waypointSubscriber = _n.subscribe(WAYPOINT_TOPIC, 1000, &GenerateGlobalMap::WaypointSubscriberCallback, this);
   _gpsInfoSubscriber = _n.subscribe(GPS_INFO_TOPIC, 1000, &GenerateGlobalMap::GPSInfoSubscriberCallback, this);
+
+  // Initialize publishers
+  _globalMapPublisher = _n.advertise<nav_msgs::OccupancyGrid>(GLOBAL_MAP_TOPIC, 1000);
 
   // Initialize global map
   _globalMap.info.width = 100;
@@ -31,7 +34,8 @@ void GenerateGlobalMap::TransformLocalToGlobal(){
   // Loop through the vision map
   for(int index = 0; index < _localMapSize; index++) {
 
-      xGlobalVisionCoord = cos(_compassAngle - _globalMapAngle) * ConvertIndexToLocalXCoord(index) - sin(_compassAngle - _globalMapAngle) * ConvertIndexToLocalYCoord(index) +            _globalMap.info.origin.position.x;
+  // FIXME will need some sort of scaling depending on the resolution of the global map and the local map
+      xGlobalVisionCoord = cos(_compassAngle - _globalMapAngle) * ConvertIndexToLocalXCoord(index) - sin(_compassAngle - _globalMapAngle) * ConvertIndexToLocalYCoord(index) + _globalMap.info.origin.position.x;
       yGlobalVisionCoord = sin(_compassAngle - _globalMapAngle) * ConvertIndexToLocalXCoord(index) + cos(_compassAngle - _globalMapAngle) * ConvertIndexToLocalYCoord(index) + _globalMap.info.origin.position.y;
 
     // Update global map with 0/1 to show that an obstacle dne/exists
