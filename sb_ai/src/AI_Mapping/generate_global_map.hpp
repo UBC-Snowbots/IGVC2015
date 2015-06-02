@@ -50,9 +50,18 @@ class GenerateGlobalMap {
     // Stores the global map of the robot along with it's position in the global map
     nav_msgs::OccupancyGrid _globalMap;
     
+    // Origin GPS coords of the robot at the start
+    sb_msgs::Waypoint _gpsOrigin;
+
+    // How many meters per degree of longitude
+    uint32_t _meterChangePerLongitude;
+
+    // How many meters per degree of latitude
+    uint32_t _meterChangePerLatitude;
+
     uint32_t _globalMapSize;
 
-    // Real world angle of robot
+    // Real world angle of robot -> same angle as the local map
     uint8_t _compassAngle;
 
     // Orientation angle of the global map
@@ -62,7 +71,7 @@ class GenerateGlobalMap {
 
   public:
 
-    GenerateGlobalMap();
+    GenerateGlobalMap(sb_msgs::Waypoint gpsOrigin);
 
     ~GenerateGlobalMap();
 

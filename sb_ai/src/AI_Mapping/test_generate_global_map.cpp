@@ -1,6 +1,13 @@
 #include "generate_global_map.hpp"
 #include <iostream>
 
+sb_msgs::Waypoint gpsOriginGlobalMsg;
+
+// Make this global so we can unsubscribe after processing and storing the gpsOrigin to the global variable
+ros::Subscriber gpsOriginSubscriber;
+
+void gpsOriginSubscriberCallback(const sb_msgs::Waypoint::ConstPtr& gpsOriginMsg);
+
 int main(int argc, char **argv) {
 
   ros::init(argc, argv, "test_generate_global_map");
@@ -11,11 +18,14 @@ int main(int argc, char **argv) {
 
   while (ros::ok()){
 
-    GenerateGlobalMap generateGlobalMap;
+    ros::NodeHandle n;
+
+    // We subscribe to this to get the GPS origin, this will run once and then the callback will close the subscriber
+    gpsOriginSubscriber = n.subscribe(WAYPOINT_TOPIC, 1000, &gpsOriginSubscriberCallback);
+
+    GenerateGlobalMap generateGlobalMap(gpsOriginGlobalMsg);
 
     generateGlobalMap.testDoSomething();
-
-    ros::NodeHandle n;
 
     //// Create Test Local Map
     nav_msgs::OccupancyGrid localMap;
@@ -46,9 +56,6 @@ int main(int argc, char **argv) {
     ros::Publisher waypointPublisher = n.advertise<sb_msgs::Waypoint>(WAYPOINT_TOPIC, 1000);
     ros::Publisher gpsInfoPublisher = n.advertise<sb_msgs::Gps_info>(GPS_INFO_TOPIC, 1000);
     
-
-
-
     ros::spin(); //ros spin is to ensure that ros threading does not leave subscribes un processed
 
     loopRate.sleep();
@@ -59,3 +66,10 @@ int main(int argc, char **argv) {
 
 }
 
+void gpsOriginSubscriberCallback(const sb_msgs::Waypoint::ConstPtr& gpsOriginMsg) {
+
+    gpsOriginGlobalMsg.lon = gpsOriginMsg->lon;
+    gpsOriginGlobalMsg.lat = gpsOriginMsg->lat;
+    gpsOriginSubscriber.shutdown();
+
+}

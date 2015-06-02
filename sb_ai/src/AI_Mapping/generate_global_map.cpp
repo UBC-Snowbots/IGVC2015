@@ -2,8 +2,8 @@
 #include "math.h"
 
 
-GenerateGlobalMap::GenerateGlobalMap()
-{
+GenerateGlobalMap::GenerateGlobalMap(sb_msgs::Waypoint gpsOrigin):
+  _gpsOrigin(gpsOrigin) {
 
   // Initialize subscribers
   _localMapSubscriber = _n.subscribe(VISION_TOPIC, 1000, &GenerateGlobalMap::LocalMapSubscriberCallback, this);
@@ -18,6 +18,8 @@ GenerateGlobalMap::GenerateGlobalMap()
   _globalMap.info.height = 100;
   _globalMapSize = 100*100;
   // _globalMap.data.data[_globalMap.data.info.width * _globalMap.data.info.height]; // Not sure about this...
+
+  _globalMapAngle = 0;
 
 }
 
