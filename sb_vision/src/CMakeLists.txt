@@ -2,17 +2,20 @@ find_package(OpenCV REQUIRED)
 
 add_library(filter filter.h filter.cpp)
 
-add_library(image_stitcher image_stitcher.h image_stitcher.cpp)
+#add_library(camera Camera.h Camera.cpp)
 
 add_library(ipm IPM.h IPM.cpp)
 
+#When adding class files, add them here for any other to include it
 set(MAIN_HEADERS
 	filter.h
 	IPM.h
+	Camera.h
 )
 
 set(MAIN_SOURCE
 	vision.cpp
+	Camera.cpp
 )
 
 

@@ -34,18 +34,16 @@ include_directories(
 )
 add_subdirectory(src)
 
-
+#---------Simon's Vision Code------------
 add_executable(image_stitching_simon src/image_stitching_simon.cpp)
 target_link_libraries( image_stitching_simon ${catkin_LIBRARIES} ${OpenCV_LIBS})
 
-add_executable(camera_publisher src/camera_publisher.cpp)
+add_executable(camera_publisher src/camera_publisher.cpp src/Camera.h src/Camera.cpp)
 target_link_libraries( camera_publisher ${catkin_LIBRARIES} ${OpenCV_LIBS})
 
 add_executable(camera_subscriber src/camera_subscriber.cpp)
 target_link_libraries(camera_subscriber ${catkin_LIBRARIES} ${OpenCV_LIBS})
-
-#add_executable(image_stitching src/image_stitching.cpp)
-#target_link_libraries( image_stitching ${catkin_LIBRARIES} ${OpenCV_LIBS})
+#----------------------------------------
 
 
 add_executable(CameraCal src/Perspective_Transform/Camera_Cal/sample_camera_calibration.cpp)
@@ -66,13 +64,8 @@ target_link_libraries( Pylon_Detector ${catkin_LIBRARIES} ${OpenCV_LIBS})
 add_executable( vision src/vision.cpp )
 target_link_libraries( vision ${catkin_LIBRARIES} ${OpenCV_LIBS} filter ipm)
 
-
 #add_executable( filter src/filter.cpp )
 #target_link_libraries( filter ${catkin_LIBRARIES} ${OpenCV_LIBS})
-
-
-#add_executable( image_stitcher src/image_stitcher.cpp )
-#target_link_libraries( image_stitcher ${catkin_LIBRARIES} ${OpenCV_LIBS})
 
 #add_executable( ipm src/IPM.cpp )
 #target_link_libraries( ipm ${catkin_LIBRARIES} ${OpenCV_LIBS})
