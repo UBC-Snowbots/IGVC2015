@@ -13,6 +13,8 @@
 
 #include <ros/ros.h>
 #include <signal.h>
+#include <opencv2/opencv.hpp>
+#include <opencv2/stitching/stitcher.hpp>
 #include <image_transport/image_transport.h>
 #include <opencv2/highgui/highgui.hpp>
 #include <cv_bridge/cv_bridge.h>
@@ -21,20 +23,24 @@
 
 static const std::string ENCODING = "bgr8";
 static const std::string TOPIC = "image";
+static const unsigned int CAMERA_AMOUNT = 3;
 
-//If only one camera is connected, the ID is ALWAYS 0
-//cv::VideoCapture camera(0);
+std::vector<Camera> cams;
+std::vector<cv::Mat> frames;
 
 
 //Handles the exiting of the publisher
 void onShutdown(int sig){
-	//camera.release();
+	for(int i = 0; i < CAMERA_AMOUNT; i++){
+		cams[i].release();
+	}
 	ROS_INFO("Camera should have been released, proper shutdown complete");
 	ros::shutdown();
 }
 
 
 int main(int argc, char** argv){
+	using namespace cv;
 	ROS_INFO("Starting the Publisher");
 	ros::init(argc, argv, "image_publisher_example", ros::init_options::NoSigintHandler);
 	ros::NodeHandle nodeHandler;
@@ -44,28 +50,37 @@ int main(int argc, char** argv){
 	image_transport::Publisher transportPub = imageTransporter.advertise(TOPIC, 1);
 
 	//Links shutdown process to our custom shutdown function
-	//signal(SIGINT, onShutdown);
+	signal(SIGINT, onShutdown);
 
-	//Check if video device can be opened with the given index
-	/*if(!camera.isOpened()){
-		ROS_FATAL("There was a problem connecting to the camera");
-		ROS_FATAL("If this persist, please run usb-reset.sh");
-		return -1;
+
+	for(int i = 0; i < CAMERA_AMOUNT; i++){
+		cams.push_back(Camera(i));
+		frames.push_back(Mat());
 	}
-	*/
-	Camera camera(0);
-	cv::Mat frame;
-	sensor_msgs::ImagePtr message;
 
+	sensor_msgs::ImagePtr message;
 	ros::Rate loop_rate(5);
 
+	//Could possibly take out @imgs as its redundant...
+	std::vector<Mat> imgs;
+	Stitcher stitcher = Stitcher::createDefault(true);
+
 	while (nodeHandler.ok()) {
-		//camera.read(frame);
-		camera.awaitFrame(frame);
-	
-		if(!frame.empty()) {
+		for(int i = 0; i < CAMERA_AMOUNT; i++){
+			cams[i].awaitFrame(frames[i]);
+			imgs.push_back(frames[i]);
+		}
+
+		Mat panorama;
+		Stitcher::Status status = stitcher.stitch(imgs, panorama);
+		imgs.clear();
+
+		if (status != Stitcher::OK) {
+			ROS_FATAL("Unable to stitch images together!, trying again...");
+			continue;
+		}else{
 			ROS_INFO("Publishing image");
-			message = cv_bridge::CvImage(std_msgs::Header(), ENCODING, frame).toImageMsg();
+			message = cv_bridge::CvImage(std_msgs::Header(), ENCODING, panorama).toImageMsg();
 			transportPub.publish(message);
 		}
 
