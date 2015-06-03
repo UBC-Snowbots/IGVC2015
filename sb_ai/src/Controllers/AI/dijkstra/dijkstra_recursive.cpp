@@ -5,86 +5,23 @@
 
 using namespace std;
 
-geometry_msgs::Twist Dijkstra::GetVelocity(Location* next_targets, float elsa_yaw, geometry_msgs::Twist &elsa_command)
-{
-  elsa_command.linear.x = 0;
-  elsa_command.linear.y = 0;
-  elsa_command.linear.z = 0;
-  elsa_command.angular.x = 0;
-  elsa_command.angular.y = 0;
-  elsa_command.angular.z = 0;
-  
-  // Check for null 
-  if (!next_targets) return elsa_command; 
-  
-  float dist_x, dist_y, ang_dist_sign;
-  float ang_dist;
-  float target_yaw = 0.0f;
-  
-  dist_x = next_targets[1].x - next_targets[0].x;
-  dist_y = next_targets[1].y - next_targets[0].y;
-
-  if (dist_y == 0 || dist_x == 0) { ang_dist = 0; }
-  else { ang_dist = dist_y / dist_x; }
-  target_yaw = atan(ang_dist);
-  ang_dist = target_yaw - elsa_yaw; // need to fix negatives
-  ang_dist_sign = (int) ang_dist;
-  ang_dist_sign /= abs(ang_dist_sign);  // check that this actually works
-  ang_dist = abs(ang_dist);
-
-  std::cout << "Ang dist: " << ang_dist << std::endl;
-
-  if (ang_dist > 120.0f)
-  {
-    elsa_command.angular.z = 0.1 * ang_dist_sign;
-    elsa_command.linear.y = 0.03;
-  }
-
-  else if (ang_dist > 80.0f)
-  {
-    elsa_command.angular.z = 0.08 * ang_dist_sign;
-    elsa_command.linear.y = 0.06;
-  }
-  
-   else if (ang_dist > 40.0f)
-  {
-    elsa_command.angular.z = 0.06 * ang_dist_sign;
-    elsa_command.linear.y = 0.08;
-  }
-  
-  else if (ang_dist > 10.0f)
-  {
-    elsa_command.angular.z = 0.03 * ang_dist_sign;
-    elsa_command.linear.y = 0.09;
-  }
-  
-  else
-  {
-    elsa_command.angular.z = 0.01;
-    elsa_command.linear.y = 0.1;
-  }
-  
-  return elsa_command;
-}
-
-
 // PRIVATE
 
 
-int Dijkstra::ConvertToIndex(Location * xy)
+int Dijkstra::ConvertToIndex(AI_Utilities::Location * xy)
 {
 	return (xy->y * map_width) + xy->x;
 }
 
-Location Dijkstra::ConvertToLocation(int n)
+AI_Utilities::Location Dijkstra::ConvertToLocation(int n)
 {
-	Location xy;
+	AI_Utilities::Location xy;
 	xy.x = n % map_width;
 	xy.y = n / map_width;
 	return xy; 
 }
 
-void Dijkstra::CheckBoundaries(Location * neighbor, int current)
+void Dijkstra::CheckBoundaries(AI_Utilities::Location * neighbor, int current)
 {
 	if (neighbor->x < 0 || neighbor->x >= map_width || neighbor->y < 0 || neighbor->y >= map_height) {
 		*neighbor = ConvertToLocation(parent[current]);
@@ -128,8 +65,8 @@ void Dijkstra::SetMap(int * curr_map)
 int Dijkstra::GetNextStep()
 {
 	if (first != -1) {
-		Location first_loc = ConvertToLocation(first);
-		Location curr_loc = ConvertToLocation(start);
+		AI_Utilities::Location first_loc = ConvertToLocation(first);
+		AI_Utilities::Location curr_loc = ConvertToLocation(start);
 		int x, y;
 		x = first_loc.x - curr_loc.x;
 		y = first_loc.y - curr_loc.y;
@@ -210,7 +147,7 @@ void Dijkstra::Search(int location)
 {
 	if (location == goal) { return; }
 	
-	Location up, down, left, right, current_loc;
+	AI_Utilities::Location up, down, left, right, current_loc;
 	current_loc = ConvertToLocation(location);
 	up = current_loc;
 	down = current_loc;
@@ -307,13 +244,13 @@ void Dijkstra::SetFirstAndThird(int &first_index, int &third_index)
 
 
 // later on for turning
-Location Dijkstra::GetDisplacement()
+AI_Utilities::Location Dijkstra::GetDisplacement()
 {
-	Location displacement;
+	AI_Utilities::Location displacement;
 
 	if (destination != -1) {
-		Location third_loc = ConvertToLocation(third);
-		Location curr_loc = ConvertToLocation(start);
+		AI_Utilities::Location third_loc = ConvertToLocation(third);
+		AI_Utilities::Location curr_loc = ConvertToLocation(start);
 		displacement.x = third_loc.x - curr_loc.x;
 		displacement.y = third_loc.y - curr_loc.y;
 	}

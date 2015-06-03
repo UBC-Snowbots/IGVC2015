@@ -17,6 +17,8 @@
 #include <geometry_msgs/Vector3.h>
 #include <geometry_msgs/Twist.h>
 #include <sb_msgs/CarCommand.h>
+#include <sys/time.h>
+ #include <stdio.h>
 
  using namespace ros;
  using namespace std;
@@ -35,20 +37,30 @@ static const double TURN_LIMIT  = 0.4;
 static const double THROTTLE_CONST = -1;
 static const double STEERING_CONST  = -2;
 static const unsigned int MICROSECOND = 2000000;	// sleep time
+static const long US_IN_MS = 1000;
+static const long S_IN_MS = 1000;
 
 //ros related constants
 static const string NODE_NAME       = "lidar_node";
 static const string SUBSCRIBE_TOPIC = "scan";
 static const string PUBLISH_TOPIC   = "lidar_nav";
+static const string PUBLISH_TOPIC2 = "lidar_velocity";
 static int LOOP_FREQ = 30;
 
 // user defined data types
 geometry_msgs::Vector3 directions;
+geometry_msgs::Vector3 prevObjectDist;
+geometry_msgs::Vector3 currentObjectDist;
+geometry_msgs::Vector3 velocity;
 sb_msgs::CarCommand car_command;
 
 // some flags
 int danger = 0;
 int backup = 0;	
+long timeDiffce = 0.0;	// currently in milliseconds
+//int tcount = 0;
+struct timeval current_time;
+struct timeval prev_time;
 
 /* clamp function sets an upperbound(cap) for the inputs (in)*/
 double clamp (double in, double cap)
@@ -80,7 +92,27 @@ geometry_msgs::Twist twist_converter(sb_msgs::CarCommand cc)
 	return twist;	
 }
 
+// converts polar coordinate into 3d vectory with x and y
+geometry_msgs::Vector3 convertPolar(double r, double theta){
+	geometry_msgs::Vector3 xyCoord;
 
+	xyCoord.x = r*sin(theta);
+	xyCoord.y = r*cos(theta);
+	xyCoord.z = 0.0;
+
+	return xyCoord;
+}
+
+// calculates velocity given object distance
+geometry_msgs::Vector3 calculateVelocity(geometry_msgs::Vector3 dist1, geometry_msgs::Vector3 dist2){
+	geometry_msgs::Vector3 result;
+
+	result.x = -(dist2.x - dist1.x)/timeDiffce*S_IN_MS;
+	result.y = -(dist2.y - dist1.y)/timeDiffce*S_IN_MS;
+	result.z = 0.0;
+
+	return result;
+}
 
 /* Callback function processes the lidar data*/
 void callback(const sensor_msgs::LaserScanConstPtr& msg_ptr)
@@ -91,9 +123,19 @@ void callback(const sensor_msgs::LaserScanConstPtr& msg_ptr)
 	double x_nearest = 30.0;
 	double y_nearest = 0.0;
 	int valid_rays = 0;
+	//int seconds = 0;
+
 	//cout << "angle min"<< (msg_ptr->angle_min) << endl;
 	//cout << "angle increment" << (msg_ptr->angle_increment) << endl;
 
+	gettimeofday(&current_time, NULL);
+	timeDiffce = (current_time.tv_sec - prev_time.tv_sec) * S_IN_MS ;
+	timeDiffce += (current_time.tv_usec - prev_time.tv_usec)/ US_IN_MS ;
+
+	if(timeDiffce != 0)
+	prev_time = current_time;
+
+	cout << "time difference : " << timeDiffce << "ms" << endl;
 
 // Count number of valid ray & calculates x and y totals
 	for(int i =0; i < num_rays;i++)
@@ -122,9 +164,9 @@ void callback(const sensor_msgs::LaserScanConstPtr& msg_ptr)
 				if(dist < x_nearest){
 					x_nearest = dist;
 					y_nearest = angle; 	// range from -.78(i.e. -pi/4) to .78(i.e. pi/4) 
-					//cout << "y_nearest" << y_nearest << endl;
-					//cout << "x_nearest" << x_nearest << endl;
-				}
+
+					currentObjectDist = convertPolar(x_nearest,y_nearest);
+					}
 
 				// sum up all the vectors
 				x_total += 1 / (force * cos(angle));					
@@ -133,6 +175,23 @@ void callback(const sensor_msgs::LaserScanConstPtr& msg_ptr)
 				valid_rays++;											// count the number of rays that detect obj within 5m
 			}
 		}		
+	}
+
+
+	/*check the lidar velocity using a reference object*/
+	cout << "nearest x is:" << x_nearest << endl;
+	cout << "nearest y is:" << y_nearest << endl;
+
+	cout << "currentObjectDist is (" << currentObjectDist.x << ", " << currentObjectDist.y << ")" <<endl;
+
+	if(timeDiffce > 0){
+	velocity = calculateVelocity(prevObjectDist, currentObjectDist);
+	
+	cout << "prevObjectDist is: x= " << prevObjectDist.x << ", y= " << prevObjectDist.y << endl;
+	
+	prevObjectDist = currentObjectDist;
+
+	cout << "velocity is : x= " << velocity.x << ", y= " << velocity.y << " m/s"<<endl;
 	}
 
 	// if there are no objects nearby
@@ -145,19 +204,10 @@ void callback(const sensor_msgs::LaserScanConstPtr& msg_ptr)
 		//r_command.priority = 0.5;
 	}
 	else
-	// if there are objects nearby
-	// if (valid_rays != 0)
 	{
 		
-		/*if (danger == 0)		
-		{
-			// find the average throttle given the sum of all vectors
-			//car_command.throttle =  -1 * x_total / valid_rays/20;
-      	car_command.throttle = NORMAL_SPEED;
-		}*/
-
 		// find the average steering given sum of all vectors
-		car_command.steering =   -1 * y_total / valid_rays / 20 ;
+		car_command.steering = -1 * y_total / valid_rays / 20 ;
 
 
 		// steer away from object in front and center of lidar
@@ -189,7 +239,7 @@ void callback(const sensor_msgs::LaserScanConstPtr& msg_ptr)
 				car_command.priority = 1;
 				danger = 2;		
 				backup++;
-				cout << "In REDZONE"<< endl;
+				//cout << "In REDZONE"<< endl;
 		}
 		else if (dist < ORANGEZONE)
 		{
@@ -197,7 +247,7 @@ void callback(const sensor_msgs::LaserScanConstPtr& msg_ptr)
 			car_command.priority = 0.8;
 			danger = 1; 
 			//backup = 0;
-			cout << "In ORANGEZONE"<< endl;
+			//cout << "In ORANGEZONE"<< endl;
 		}
 		else
 		{
@@ -229,14 +279,12 @@ void callback(const sensor_msgs::LaserScanConstPtr& msg_ptr)
  	 // break;
 	}
 
-
 	// restrict the throttle and steering
 	car_command.throttle = clamp(car_command.throttle, SPEED_LIMIT);
 	car_command.steering = clamp(car_command.steering, TURN_LIMIT);
 
 	
 }
-
 
 
 /*
@@ -246,12 +294,25 @@ int main (int argc, char** argv)
 {
 	init(argc, argv,NODE_NAME);
 	NodeHandle n;
+	NodeHandle m;
 	
+	// initialize some values
+	prevObjectDist.x = 0;
+	prevObjectDist.y = 0;
+	prevObjectDist.z = 0;
+
+	currentObjectDist.x = 0;
+	currentObjectDist.y = 0;
+	currentObjectDist.z = 0;
+
+	gettimeofday(&prev_time, NULL);
 
 	Subscriber lidar_state = n.subscribe(SUBSCRIBE_TOPIC,20,callback);
 	
 	Publisher car_pub = n.advertise<geometry_msgs::Twist>(PUBLISH_TOPIC,1);
 	
+	Publisher vel_pub = m.advertise<geometry_msgs::Vector3>(PUBLISH_TOPIC2, 1);
+
 	Rate loop_rate(LOOP_FREQ);
 
 	ROS_INFO("ready to go");
@@ -263,6 +324,8 @@ int main (int argc, char** argv)
 		cout<<"Throttle: " <<twistMsg.linear.y<<"   Steering: "<<  twistMsg.angular.z <<endl;
 	//	ROS_INFO("CarCommand {throttle: %0.2f , steering: %0.2f , priority: %0.2f}", car_command.throttle, car_command.steering, car_command.priority); 
 		car_pub.publish(twistMsg);
+		vel_pub.publish(velocity);
+
 		ros::spinOnce();
 		loop_rate.sleep();	
 	}

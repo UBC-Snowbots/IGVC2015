@@ -1,8 +1,6 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(sb_mapping)
 
-add_subdirectory(src)
-
 find_package(
   catkin REQUIRED COMPONENTS
   roscpp
@@ -27,7 +25,7 @@ include_directories(
  ${catkin_INCLUDE_DIRS}
 )
 
-add_executable(hector_lidar_mapping src/hector_lidar_mapping.cpp)
+add_executable(hector_lidar_mapping src/HectorMapping/hector_lidar_mapping.cpp)
 target_link_libraries( hector_lidar_mapping ${catkin_LIBRARIES})
 
 add_executable(image_to_grid_test_publisher src/image_to_grid_test_publisher.cpp)

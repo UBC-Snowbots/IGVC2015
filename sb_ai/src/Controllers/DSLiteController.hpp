@@ -1,33 +1,27 @@
 #pragma once
-
 #include "ros/ros.h"
 #include <string>
 #include <iostream>
-#include "sb_ai.h"
-#include "sb_msgs/AISimMap.h"
-#include "AI/dstarlite/GridWorld.h"
+#include "AI/D*lite_A/GridWorld.h"
 #include <geometry_msgs/Twist.h>
 #include "ControllerBase.hpp"
 
-namespace ai{
-	class DSLiteController: public ai::ControllerBase{
-  
+namespace ai
+{
+	class DSLiteController: public ai::ControllerBase
+	{
 	private:
-		int * map_ptr;
-		int width; 
-		int height;
-		int start;
-		int goal;
-		geometry_msgs::Twist twist_msg;
-		int next_movement;
-		ros::Subscriber map_sub;
-	  
-	protected:
-		geometry_msgs::Twist GetTwistMsg(int next_move);
+	  GridWorld* world;
+	  const int SIZE;
+	  const int INTERSECTION_RADIUS;
+	  const int SCAN_RADIUS;
+	  int * realWorld;
+	  void scanMap();
+	  void execute();
 	  
 	public:
 		DSLiteController(ros::NodeHandle& nh);	  
-		void MapCallback(const sb_msgs::AISimMap::ConstPtr& msg);
+		//void MapCallback(const sb_msgs::AISimMap::ConstPtr& msg);
 		geometry_msgs::Twist Update();
   };
 

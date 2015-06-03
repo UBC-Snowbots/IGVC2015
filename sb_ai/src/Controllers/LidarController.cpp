@@ -19,38 +19,59 @@ static const double TURN_LIMIT  = 0.4;
 static const double THROTTLE_CONST = -1;
 static const double STEERING_CONST  = -2;
 static const unsigned int MICROSECOND = 2000000;	// sleep time
+static const long US_IN_MS = 1000;
+static const long S_IN_MS = 1000;
 
 //ros related constants
 static const std::string SUBSCRIBE_TOPIC = "scan";
 static const std::string PUBLISH_TOPIC   = "lidar_nav";
+static const std::string PUBLISH_TOPIC2   = "lidar_vel";
 static int LOOP_FREQ = 30;
 
  	// main function
 	LidarController::LidarController(ros::NodeHandle& nh): 
 	danger(0),
-	backup(0)
+	backup(0), 
+	timeDiffce(0.0)
 	{
+
+		// initialize some values
+		prevObjectDist.x = 0;
+		prevObjectDist.y = 0;
+		prevObjectDist.z = 0;
+
+		currentObjectDist.x = 0;
+		currentObjectDist.y = 0;
+		currentObjectDist.z = 0;
+
+		gettimeofday(&prev_time, NULL);
+
 		//Subscriber 
 		lidar_state = nh.subscribe(SUBSCRIBE_TOPIC,20,&LidarController::callback,this);
 		
+		//Publisher
+    	CCMD_pub = nh.advertise<geometry_msgs::Twist>(PUBLISH_TOPIC,1);
+		velocity_pub = nh.advertise<geometry_msgs::Vector3>(PUBLISH_TOPIC2, 1);
+
+
 	}
 
+	// TODO: write a publisher for velocity 
+	//(see sb_lidar::lidar_v1.cpp for detail)
+	// do you need a new nodehandle for another publisher?
 	geometry_msgs::Twist LidarController::Update()
 	{
-		//Publisher 
-		//car_pub = n.advertise<geometry_msgs::Twist>(PUBLISH_TOPIC,1);
 		
 		geometry_msgs::Twist twistMsg = twist_converter(car_command);		// convert the car_command into a twistMsg
 		
 		std::cout<<"Throttle: " <<twistMsg.linear.y<<"   Steering: "<<  twistMsg.angular.z <<endl;
 		
-		//car_pub.publish(twistMsg);
-		
 		ros::spinOnce();
-		//loop_rate.sleep();	
 
-		//ROS_INFO("Vision Published a twist : y linear- %f, z angular - %f",twist.linear.y,twist.angular.z);
-		//count++;
+		// publish topics
+		CCMD_pub.publish(twistMsg);
+		velocity_pub.publish(velocity);
+		
 		return twistMsg;
 	}
 	
@@ -67,6 +88,17 @@ static int LOOP_FREQ = 30;
 		double x_nearest = 30.0;
 		double y_nearest = 0.0;
 		int valid_rays = 0;
+
+	// get the time between each scan
+		gettimeofday(&current_time, NULL);
+		timeDiffce = (current_time.tv_sec - prev_time.tv_sec) * S_IN_MS ;		// seconds passed (in ms)
+		timeDiffce += (current_time.tv_usec - prev_time.tv_usec)/ US_IN_MS ;	// microseconds passed (in ms)
+
+	// if no time passed, don't update previous time
+		if(timeDiffce != 0)
+		prev_time = current_time;
+
+		cout << "time difference : " << timeDiffce << "ms" << endl;
 
 
 	// Count number of valid ray & calculates x and y totals
@@ -96,6 +128,9 @@ static int LOOP_FREQ = 30;
 					if(dist < x_nearest){
 						x_nearest = dist;
 						y_nearest = angle; 	// range from -.78(i.e. -pi/4) to .78(i.e. pi/4)
+					
+						currentObjectDist = convertPolar(x_nearest,y_nearest);
+
 					}
 
 					// sum up all the vectors
@@ -106,6 +141,23 @@ static int LOOP_FREQ = 30;
 				}
 			}		
 		}
+
+		/*check the lidar velocity using a reference object*/
+		cout << "nearest x is:" << x_nearest << endl;
+		cout << "nearest y is:" << y_nearest << endl;
+
+		cout << "currentObjectDist is (" << currentObjectDist.x << ", " << currentObjectDist.y << ")" <<endl;
+
+		if(timeDiffce > 0){
+		velocity = calculateVelocity(prevObjectDist, currentObjectDist);
+		
+		cout << "prevObjectDist is: x= " << prevObjectDist.x << ", y= " << prevObjectDist.y << endl;
+		
+		prevObjectDist = currentObjectDist;
+
+		cout << "velocity is : x= " << velocity.x << ", y= " << velocity.y << " m/s"<<endl;
+		}
+
 
 		// if there are no objects nearby
 		if(valid_rays <= 0)
@@ -153,7 +205,7 @@ static int LOOP_FREQ = 30;
 					car_command.priority = 1;
 					danger = 2;		
 					backup++;
-					cout << "In REDZONE"<< endl;
+					//cout << "In REDZONE"<< endl;
 			}
 			else if (dist < ORANGEZONE)
 			{
@@ -161,7 +213,7 @@ static int LOOP_FREQ = 30;
 				car_command.priority = 0.8;
 				danger = 1; 
 				//backup = 0;
-				cout << "In ORANGEZONE"<< endl;
+				//cout << "In ORANGEZONE"<< endl;
 			}
 			else
 			{
@@ -222,6 +274,27 @@ static int LOOP_FREQ = 30;
 		twist.angular.z = cc.steering * STEERING_CONST;  // the constant allows adjustments to steering
 
 		return twist;	
+	}
+
+	geometry_msgs::Vector3 LidarController::convertPolar(double r, double theta){
+	geometry_msgs::Vector3 xyCoord;
+
+	xyCoord.x = r*sin(theta);
+	xyCoord.y = r*cos(theta);
+	xyCoord.z = 0.0;
+
+	return xyCoord;
+	}
+
+	// calculates velocity given object distance
+	geometry_msgs::Vector3 LidarController::calculateVelocity(geometry_msgs::Vector3 dist1, geometry_msgs::Vector3 dist2){
+		geometry_msgs::Vector3 result;
+
+		result.x = -(dist2.x - dist1.x)/timeDiffce*S_IN_MS;
+		result.y = -(dist2.y - dist1.y)/timeDiffce*S_IN_MS;
+		result.z = 0.0;
+
+		return result;
 	}
 	
 }
