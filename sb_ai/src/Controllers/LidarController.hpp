@@ -22,7 +22,7 @@ private:
 	int backup;
 
 	// some variables
-	long timeDiffce;	// currently in milliseconds
+	long timeDiffce;	// currently in  milliseconds
 	struct timeval current_time;
 	struct timeval prev_time;
 
@@ -33,7 +33,10 @@ private:
 	geometry_msgs::Vector3 velocity;
 	sb_msgs::CarCommand car_command;
     
+    // ros pub/subs
     ros::Subscriber lidar_state;
+    ros::Publisher velocity_pub;
+    ros::Publisher CCMD_pub;
 
 public:
 	LidarController(ros::NodeHandle&);

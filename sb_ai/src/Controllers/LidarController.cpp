@@ -25,6 +25,7 @@ static const long S_IN_MS = 1000;
 //ros related constants
 static const std::string SUBSCRIBE_TOPIC = "scan";
 static const std::string PUBLISH_TOPIC   = "lidar_nav";
+static const std::string PUBLISH_TOPIC2   = "lidar_vel";
 static int LOOP_FREQ = 30;
 
  	// main function
@@ -44,9 +45,15 @@ static int LOOP_FREQ = 30;
 		currentObjectDist.z = 0;
 
 		gettimeofday(&prev_time, NULL);
+
 		//Subscriber 
 		lidar_state = nh.subscribe(SUBSCRIBE_TOPIC,20,&LidarController::callback,this);
 		
+		//Publisher
+    	CCMD_pub = nh.advertise<geometry_msgs::Twist>(PUBLISH_TOPIC,1);
+		velocity_pub = nh.advertise<geometry_msgs::Vector3>(PUBLISH_TOPIC2, 1);
+
+
 	}
 
 	// TODO: write a publisher for velocity 
@@ -60,6 +67,10 @@ static int LOOP_FREQ = 30;
 		std::cout<<"Throttle: " <<twistMsg.linear.y<<"   Steering: "<<  twistMsg.angular.z <<endl;
 		
 		ros::spinOnce();
+
+		// publish topics
+		CCMD_pub.publish(twistMsg);
+		velocity_pub.publish(velocity);
 		
 		return twistMsg;
 	}
