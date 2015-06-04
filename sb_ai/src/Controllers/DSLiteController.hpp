@@ -2,20 +2,23 @@
 #include "ros/ros.h"
 #include <string>
 #include <iostream>
-#include "AI/D*lite_A/GridWorld.h"
+#include "AI/dstarliteA/GridWorld.h"
 #include <geometry_msgs/Twist.h>
 #include "ControllerBase.hpp"
 
+#define SIZE 20
+#define INTERSECTION_RADIUS 2
+#define SCAN_RADIUS 4
+
 namespace ai
 {
+
+
 	class DSLiteController: public ai::ControllerBase
 	{
 	private:
 	  GridWorld* world;
-	  const int SIZE;
-	  const int INTERSECTION_RADIUS;
-	  const int SCAN_RADIUS;
-	  int * realWorld;
+	  int* realWorld;	 
 	  void scanMap();
 	  void execute();
 	  
