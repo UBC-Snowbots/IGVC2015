@@ -1,9 +1,9 @@
 #include "Camera.h"
-
-Camera::Camera(unsigned int deviceID=0)
+#include <stdexcept>
+Camera::Camera(unsigned int deviceID)
 {
 	camera.set(CV_CAP_PROP_FPS, CAMERA_FPS);
-	
+	frameReadError = 0;
 	/*
 	Our webcams support 1080p recording, making the ideal resolution 1920x1080
 	However this large resolution will significantly impact the sticher's 
@@ -13,13 +13,22 @@ Camera::Camera(unsigned int deviceID=0)
 	camera.set(CV_CAP_PROP_FRAME_HEIGHT, CAMERA_HEIGHT);
 	if(!camera.open(deviceID)){
 		ROS_FATAL("Unable to establish connection to device ID: %d", deviceID);
+		ROS_FATAL("If there's an error above saying:");
+		ROS_FATAL("\tV4L index N is not correct");
+		ROS_FATAL("change the deviceID, otherwise run usb-reset.sh");
+		//camera.release();
+		//ros::shutdown();
+		throw std::invalid_argument("Failed to init camera");
 	}
 }
 
 
 Camera::~Camera(){
+	release();
+}
+
+void Camera::release(){
 	camera.release();
-	ROS_INFO("All VideoCapture should be closed now");
 }
 
 
@@ -37,7 +46,12 @@ bool Camera::getFrame(cv::Mat& frame){
 
 
 void Camera::awaitFrame(cv::Mat& frame){
-	while(!getFrame(frame)){
-		ROS_INFO("Awaiting...");
+	while(!getFrame(frame) && frameReadError < 10){
+		//ROS_INFO("Awaiting...");
+		frameReadError++;
 	}
+	if(frameReadError == 10){
+		ROS_FATAL("Too much errors reading from this iteration");
+	}
+	frameReadError = 0;
 }

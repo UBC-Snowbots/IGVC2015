@@ -12,13 +12,11 @@ class Mapping
 {
   private:
   
-    // Map sizes: width and height in terms of array sizes
-    int local_width, local_height, local_size;
-    int vision_width, vision_height, vision_size;
-    int lidar_width, lidar_height, lidar_size;
-    float final_resolution; // m/cell
-    float lidar_pos_x, lidar_pos_y;
-    float vision_pos_x, vision_pos_y;
+    // Map variables
+    int v_width, v_height;
+    int l_width, l_height;
+    int v_l_offset; // offset of vision from lidar map
+    int map_width, map_height;
     
     // Local maps
     nav_msgs::OccupancyGrid local_map, vision_map, lidar_map;
@@ -30,10 +28,9 @@ class Mapping
   public:
   
     // Initializer: vision/lidar displacement, estimated map size, resolution. 
-    Mapping();
+    Mapping(ros::NodeHandle& nh);
     
     // Callback for processing vision map
-    // Converts image into occupancy grid. Also adjust resolution.
     void VisionMapCallback(const sensor_msgs::Image::ConstPtr& map);
     
     // Callback for lidar map 

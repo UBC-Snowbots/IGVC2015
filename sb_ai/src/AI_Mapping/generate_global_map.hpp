@@ -9,6 +9,7 @@
 static const std::string VISION_TOPIC = "vision_topic";
 static const std::string WAYPOINT_TOPIC = "warpoint_topic";
 static const std::string GPS_INFO_TOPIC = "gps_info_topic";
+static const std::string GLOBAL_MAP_TOPIC = "global_map_topic";
 
 class GenerateGlobalMap {
 
@@ -29,10 +30,14 @@ class GenerateGlobalMap {
     // Gets the real world angle
     void GPSInfoSubscriberCallback(const sb_msgs::Gps_info::ConstPtr& gpsInfoMsg);
 
+    void CalculateMeterChangePerLongitude();
+
+    void CalculateMeterChangePerLatitude();
+
     ros::NodeHandle _n;
 
     // Subscriber for the local map from vision
-    ros::Subscriber _imageSubscriber;
+    ros::Subscriber _localMapSubscriber;
 
     // Subscriber for the gps longitude and latitude
     ros::Subscriber _waypointSubscriber;
@@ -40,15 +45,33 @@ class GenerateGlobalMap {
     // Subscriber for the real world angle
     ros::Subscriber _gpsInfoSubscriber;
 
-    // Stores the local map of the robot
+    // Publisher for the global map
+    ros::Publisher _globalMapPublisher;
+
+    // Stores the local map of the robot and the CURRENT POSITION in the global map
     nav_msgs::OccupancyGrid _localMap;
 
-    // Stores the global map of the robot along with it's position in the global map
+    // Stores the global map of the robot along with the ORIGIN in the global map
     nav_msgs::OccupancyGrid _globalMap;
     
+    // Origin GPS coords of the robot at the start
+    sb_msgs::Waypoint _gpsOrigin;
+
+    // How many meters per degree of longitude
+    uint32_t _meterChangePerLongitude;
+
+    // How many meters per degree of latitude
+    uint32_t _meterChangePerLatitude;
+  
+    // Course width in meters
+    uint32_t _courseWidth;
+
+    // Course height in meters
+    uint32_t _courseHeight;
+
     uint32_t _globalMapSize;
 
-    // Real world angle of robot
+    // Real world angle of robot -> same angle as the local map
     uint8_t _compassAngle;
 
     // Orientation angle of the global map
@@ -58,7 +81,7 @@ class GenerateGlobalMap {
 
   public:
 
-    GenerateGlobalMap();
+    GenerateGlobalMap(sb_msgs::Waypoint gpsOrigin, uint32_t courseWidth, uint32_t courseHeight, float mapResolution);
 
     ~GenerateGlobalMap();
 

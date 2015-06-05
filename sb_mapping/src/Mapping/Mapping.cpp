@@ -1,27 +1,26 @@
 #include "Mapping.h"
 
-Mapping::Mapping()
+Mapping::Mapping(ros::NodeHandle& nh) : 
+  v_width(200), 
+  v_height(150), 
+  l_width(100), 
+  l_height(76), 
+  v_l_offset(20)
 {
-    local_width = 200;
-    local_height = 200;
-    local_size = local_width * local_height;
-    final_resolution = 0.5; 
+  map_width = v_width; // max of two , forgot the math fnc
+  if (l_height >= v_height + v_l_offset) { map_height = l_height; } // based on assumption lidar displacement is always below vision
+  else { map_height = v_height + v_l_offset; } 
     
-    lidar_pos_x = 0.5;
-    lidar_pos_y = 1.0;
-    vision_pos_x = 0.5;
-    vision_pos_y = 0.75;
+  // Allocate memory for published local map
+  local_map.data.assign(map_width * map_height, -1);
     
-    final_resolution = 0.05; // m/cell
-    
-    // Hardcode for now
-    lidar_width = 60;
-    lidar_height = 30;
-    
-    // Initialize subscribers and publishers
-    //vision_sub
-    //lidar_sub
-    // ai_pub
+  // Initialize subscribers and publishers
+  
+  vision_sub = nh.subscribe(VISION_SUB_TOPIC, 10, &Mapping::VisionMapCallback, this);
+  
+  lidar_sub = nh.subscribe(LIDAR_SUB_TOPIC, 10, &Mapping::LidarMapCallback, this); 
+
+  ai_pub = nh.advertise<nav_msgs::OccupancyGrid>(AI_PUB_TOPIC, 1);
 }
 
 
@@ -33,23 +32,29 @@ void Mapping::VisionMapCallback(const sensor_msgs::Image::ConstPtr& map)
 
 void Mapping::LidarMapCallback(const nav_msgs::OccupancyGrid::ConstPtr& map)
 {
-  int width, height;
-  int xi, xf, yi, yi; // ranges to copy to
-  width = map->info.width;
-  height = map->info.height;
-  xi = (local_width/2) - (width/2);
-  xf = (local_width/2) + (width/2);
-  yi = local_height - height;
-  yf = local_height;
+  int start_x, end_x, start_y, end_y, diff;
+  diff = (map_width - l_width)/2;
+  start_x = diff;
+  end_x = map_width - diff;
+  diff = map_height - l_height;
+  start_y = diff;
+  end_y = map_height;
   
+  int i, j, j_end;
+  j = start_y * map_width + start_x;
+  j_end = end_y * map_width + end_x;
   
-  return;
+  for (i = 0, j; i < l_width * l_height, j < j_end; i++, j++)
+  {
+    if (local_map.data[j] > 0 && map->data[i] <= 0) {}
+    else { local_map.data[j] = map->data[i]; }
+  }
 }
 
 
 void Mapping::RosUpdate()
 {
-  std::cout << "Hello ! " << std::endl;
+  local_map.data.assign(map_width * map_height, -1);
   return;
 }
 

@@ -8,7 +8,7 @@ int main(int argc, char **argv)
   ros::init(argc, argv, NODE_NAME);
   ros::NodeHandle nh;
   ros::Rate loop_rate(10);
-  Mapping mapping;
+  Mapping mapping(nh);
   
   while(ros::ok())
   {

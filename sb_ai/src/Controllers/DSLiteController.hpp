@@ -2,7 +2,7 @@
 #include "ros/ros.h"
 #include <string>
 #include <iostream>
-#include "AI/dstarliteA/GridWorld.h"
+#include "AI/dstarliteB/GridWorld.h"
 #include <geometry_msgs/Twist.h>
 #include "ControllerBase.hpp"
 
