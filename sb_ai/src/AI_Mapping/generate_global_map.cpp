@@ -26,7 +26,7 @@ GenerateGlobalMap::GenerateGlobalMap(sb_msgs::Waypoint gpsOrigin, uint32_t cours
   _globalMap.data.assign(_globalMapSize,0);
   // Assume robot starts somewhere in the middle bottom of the course  
   _globalMap.info.origin.position.x = _globalMap.info.width / 2; 
-  _globalMap.infi.origin.position.y = _globalMap.info.height * 3 / 4;
+  _globalMap.info.origin.position.y = _globalMap.info.height * 3 / 4;
 
   _globalMapAngle = 0; // pretty much useless because the global map is oriented the same way GPS is oriented, so NWSE
 
