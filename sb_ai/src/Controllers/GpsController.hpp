@@ -65,6 +65,7 @@ namespace ai
 		void print (int color, const std::string &message, double value, double value2);
 		void calibrate();
 		void calcwaypoint();
+		void calcwaypoint(int i);
 	  
   public:
   

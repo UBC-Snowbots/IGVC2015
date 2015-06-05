@@ -7,6 +7,7 @@ find_package(catkin REQUIRED COMPONENTS
 	roscpp
 	std_msgs
 	sb_msgs
+	sb_gps
 )
 
 catkin_package(
@@ -56,6 +57,6 @@ target_link_libraries(jaus_server ${catkin_LIBRARIES})
 target_link_libraries(jaus_server JAUSCore JAUSEnvironment JAUSMobility CxUtils)
 target_link_libraries(jaus_judge JAUSCore JAUSEnvironment JAUSMobility CxUtils)
 
-add_dependencies(jaus_server sb_msgs_generate_messages_cpp)
+add_dependencies(jaus_server sb_msgs_generate_messages_cpp sb_gps_generate_messages_cpp)
 
 

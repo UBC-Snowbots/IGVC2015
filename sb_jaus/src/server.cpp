@@ -22,22 +22,21 @@ double getStereoAngularVelocity(double l, double r){
 	double diff = l-r;
 	const double wheel_diameter = 0.62;
 	double angle = asin(diff/wheel_diameter);
-	double normalised_angle = fmod(angle,360.0) - 180;
-	return normalised_angle;
+	return angle;
 }
 
-/*void onRobotStateChange(const sb_msgs::RobotState& state){
+void onRobotStateChange(const sb_msgs::RobotState& state){
 	JAUS::ReportLocalPose pose;
-	pose.SetYaw(state.compass);
+	pose.SetYaw(state.compass*CxUtils::PI/180);
 	localPoseSensor->SetLocalPose(pose);
 	
-	double l = state.l,r = state.r;
+	double l = state.LeftVelo,r = state.RightVelo;
 	
 	JAUS::ReportVelocityState vstate;
 	vstate.SetVelocityX((l + r)/2.0);
-	vstate.SetYawRate(getStereoAngularVelocity(state.l,state.r);
+	vstate.SetYawRate(getStereoAngularVelocity(l,r));
 	velocityStateSensor->SetVelocityState(vstate);
-}*/
+}
 
 void onNewWaypoint(const sb_msgs::Waypoint& pos){
 	JAUS::ReportLocalPose pose;
@@ -74,7 +73,7 @@ int main(int argc, char* argv[]) {
     	velocityStateSensor->SetVelocityState(state);
     }
 
-    //self.subscribe("test",100,onRobotStateChange);
+    self.subscribe("robot_state",100,onRobotStateChange);
     self.subscribe("GPS_COORD",100,onNewWaypoint);
 
     component.AddService(localPoseSensor);
