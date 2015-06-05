@@ -20,11 +20,12 @@ LocalLidarMap::LocalLidarMap(int range, float resolution)
   local_map.info.origin.position.x = map_width / 2;
   local_map.info.origin.position.y = map_height - 1;
   local_map.info.origin.position.z = 0;
+  
   // quaternion
   local_map.info.origin.orientation.x = 0;
   local_map.info.origin.orientation.y = 0;
-  local_map.info.origin.orientation.z;
-  local_map.info.origin.orientation.w;
+  local_map.info.origin.orientation.z = 0;
+  local_map.info.origin.orientation.w = 0;
 }
 
 nav_msgs::OccupancyGrid * LocalLidarMap::GetLocalMap()
@@ -37,7 +38,6 @@ void LocalLidarMap::LidarCallback(const sensor_msgs::LaserScan::ConstPtr& scan)
   float x, y;
   float range, theta;
   int scan_rays = scan->ranges.size();
-  ROS_INFO("Range size: %i", (int) scan->ranges.size());
   local_map.data.assign(map_size, 0); // clears the occupancy grid
   for (int i = 0; i < scan_rays; i++)
   {
@@ -47,9 +47,6 @@ void LocalLidarMap::LidarCallback(const sensor_msgs::LaserScan::ConstPtr& scan)
     else
     {
       theta = i*scan->angle_increment + scan->angle_min;
-      std::cout << "Theta: " << theta << std::endl;
-     // std::cout << "Min angle: " << scan->angle_min << std::endl;
-      //std::cout << "MAx angle: " << scan->angle_max << std::endl;
   
       x = range * sin(theta);
       x /= MAP_RESOLUTION;
@@ -80,9 +77,7 @@ int main(int argc, char **argv)
   ros::Rate loop_rate(10);
   
   while (ros::ok())
-  {
-    //ROS_INFO("Width: %i, Height: %i", lidar_map.GetLocalMap()->info.width, lidar_map.GetLocalMap()->info.height);
-    
+  {    
     local_map_pub.publish(*lidar_map.GetLocalMap());
     
     ros::spinOnce();

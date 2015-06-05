@@ -12,7 +12,7 @@ int main(int argc, char **argv)
   
   while(ros::ok())
   {
-    mapping.RosUpdate();
+    mapping.RosUpdate(); // subscribes, processes data, publishes
     ros::spinOnce();
     loop_rate.sleep();
   }

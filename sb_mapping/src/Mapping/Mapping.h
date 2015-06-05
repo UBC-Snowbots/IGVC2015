@@ -4,22 +4,20 @@
 #include "sensor_msgs/Image.h"
 #include <string>
 
-#define VISION_SUB_TOPIC "visionSub"
-#define LIDAR_SUB_TOPIC "lidarSub"
-#define AI_PUB_TOPIC "aiPub"
+#define VISION_SUB_TOPIC "image_bird"
+#define LIDAR_SUB_TOPIC "sb_lidar_map"
+#define AI_PUB_TOPIC "local_map"
+
+// Hardcoded values
+#define MAP_WIDTH 240 
+#define MAP_HEIGHT 120
 
 class Mapping
 {
   private:
   
-    // Map variables
-    int v_width, v_height;
-    int l_width, l_height;
-    int v_l_offset; // offset of vision from lidar map
-    int map_width, map_height;
-    
     // Local maps
-    nav_msgs::OccupancyGrid local_map, vision_map, lidar_map;
+    nav_msgs::OccupancyGrid local_map, vision_map;
     
     // Subscribers, publishers
     ros::Subscriber vision_sub, lidar_sub;
