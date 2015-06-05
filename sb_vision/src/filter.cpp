@@ -9,7 +9,7 @@
 
 
 int const kMaxBinary = 255;
-int const kThreshold = 195;
+int const kThreshold = 180; //195
 
 using namespace std;
 
@@ -60,7 +60,7 @@ void filter::displayImages(cv::Mat inputImage)
         std::cout<<"size of input outputImage"<<outputImage.rows<<","<<outputImage.cols<<endl;
 	    //Display Input Image
 	    cv::namedWindow("Display Image", CV_WINDOW_NORMAL);
-		cvMoveWindow("Display Image", 0, 0);
+		cvMoveWindow("Display Image", 0, 300);
 		cv::imshow("Display Image", inputImage);
         
 	    //Display direction image
