@@ -13,81 +13,81 @@ static const std::string GLOBAL_MAP_TOPIC = "global_map_topic";
 
 class GenerateGlobalMap {
 
-  private:
+private:
 
-    uint8_t ConvertIndexToLocalXCoord(uint8_t index);
+	uint8_t ConvertIndexToLocalXCoord(uint8_t index);
 
-    uint8_t ConvertIndexToLocalYCoord(uint8_t index);
+	uint8_t ConvertIndexToLocalYCoord(uint8_t index);
 
-    uint8_t ConvertXYCoordToIndex(uint8_t x, uint8_t y, uint8_t width);
+	uint8_t ConvertXYCoordToIndex(uint8_t x, uint8_t y, uint8_t width);
 
-    // Gets the local map from vision
-    void LocalMapSubscriberCallback(const nav_msgs::OccupancyGrid::ConstPtr& localMap);
+	// Gets the local map from vision
+	void LocalMapSubscriberCallback(
+			const nav_msgs::OccupancyGrid::ConstPtr& localMap);
 
-    // Gets the longitude and latitude and converts to global x and y coords
-    void WaypointSubscriberCallback(const sb_msgs::Waypoint::ConstPtr& waypointMsg);
- 
-    // Gets the real world angle
-    void GPSInfoSubscriberCallback(const sb_msgs::Gps_info::ConstPtr& gpsInfoMsg);
+	// Gets the longitude and latitude and converts to global x and y coords
+	void WaypointSubscriberCallback(
+			const sb_msgs::Waypoint::ConstPtr& waypointMsg);
 
-    void CalculateMeterChangePerLongitude();
+	// Gets the real world angle
+	void GPSInfoSubscriberCallback(
+			const sb_msgs::Gps_info::ConstPtr& gpsInfoMsg);
 
-    void CalculateMeterChangePerLatitude();
+	void CalculateMeterChangePerLongitude();
 
-    ros::NodeHandle _n;
+	void CalculateMeterChangePerLatitude();
 
-    // Subscriber for the local map from vision
-    ros::Subscriber _localMapSubscriber;
+	ros::NodeHandle _n;
 
-    // Subscriber for the gps longitude and latitude
-    ros::Subscriber _waypointSubscriber;
+	// Subscriber for the local map from vision
+	ros::Subscriber _localMapSubscriber;
 
-    // Subscriber for the real world angle
-    ros::Subscriber _gpsInfoSubscriber;
+	// Subscriber for the gps longitude and latitude
+	ros::Subscriber _waypointSubscriber;
 
-    // Publisher for the global map
-    ros::Publisher _globalMapPublisher;
+	// Subscriber for the real world angle
+	ros::Subscriber _gpsInfoSubscriber;
 
-    // Stores the local map of the robot and the CURRENT POSITION in the global map
-    nav_msgs::OccupancyGrid _localMap;
+	// Publisher for the global map
+	ros::Publisher _globalMapPublisher;
 
-    // Stores the global map of the robot along with the ORIGIN in the global map
-    nav_msgs::OccupancyGrid _globalMap;
-    
-    // Origin GPS coords of the robot at the start
-    sb_msgs::Waypoint _gpsOrigin;
+	// Stores the local map of the robot and the CURRENT POSITION in the global map
+	nav_msgs::OccupancyGrid _localMap;
 
-    // How many meters per degree of longitude
-    uint32_t _meterChangePerLongitude;
+	// Stores the global map of the robot along with the ORIGIN in the global map
+	nav_msgs::OccupancyGrid _globalMap;
 
-    // How many meters per degree of latitude
-    uint32_t _meterChangePerLatitude;
-  
-    // Course width in meters
-    uint32_t _courseWidth;
+	// Origin GPS coords of the robot at the start
+	sb_msgs::Waypoint _gpsOrigin;
 
-    // Course height in meters
-    uint32_t _courseHeight;
+	// How many meters per degree of longitude
+	uint32_t _meterChangePerLongitude;
 
-    uint32_t _globalMapSize;
+	// How many meters per degree of latitude
+	uint32_t _meterChangePerLatitude;
 
-    // Real world angle of robot -> same angle as the local map
-    uint8_t _compassAngle;
+	// Course width in meters
+	uint32_t _courseWidth;
 
-    // Orientation angle of the global map
-    uint8_t _globalMapAngle;
+	// Course height in meters
+	uint32_t _courseHeight;
 
-    uint32_t _localMapSize;
+	uint32_t _globalMapSize;
 
-  public:
+	// Real world angle of robot -> same angle as the local map
+	uint8_t _compassAngle;
 
-    GenerateGlobalMap(sb_msgs::Waypoint gpsOrigin, uint32_t courseWidth, uint32_t courseHeight, float mapResolution);
+	uint32_t _localMapSize;
 
-    ~GenerateGlobalMap();
+public:
 
-    void TransformLocalToGlobal();
+	GenerateGlobalMap(sb_msgs::Waypoint gpsOrigin, uint32_t courseWidth,
+			uint32_t courseHeight, float mapResolution);
 
-    void testDoSomething();
+	~GenerateGlobalMap();
 
+	void TransformLocalToGlobal();
+
+	void testDoSomething();
 
 };

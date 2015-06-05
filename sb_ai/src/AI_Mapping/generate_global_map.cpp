@@ -27,96 +27,113 @@ GenerateGlobalMap::GenerateGlobalMap(sb_msgs::Waypoint gpsOrigin, uint32_t cours
   // Assume robot starts somewhere in the middle bottom of the course  
   _globalMap.info.origin.position.x = _globalMap.info.width / 2; 
   _globalMap.info.origin.position.y = _globalMap.info.height * 3 / 4;
+}
 
-  _globalMapAngle = 0; // pretty much useless because the global map is oriented the same way GPS is oriented, so NWSE
+GenerateGlobalMap::~GenerateGlobalMap() {
 
 }
 
-GenerateGlobalMap::~GenerateGlobalMap(){
+void GenerateGlobalMap::TransformLocalToGlobal() {
 
-}
+	uint8_t xGlobalVisionCoord;
+	uint8_t yGlobalVisionCoord;
 
+	// Loop through the vision map
+	for (int index = 0; index < _localMapSize; index++) {
 
-void GenerateGlobalMap::TransformLocalToGlobal(){
+		xGlobalVisionCoord = cos(_compassAngle)
+				* ConvertIndexToLocalXCoord(index)
+				- sin(_compassAngle) * ConvertIndexToLocalYCoord(index)
+				+ _localMap.info.origin.position.x;
+		yGlobalVisionCoord = sin(_compassAngle)
+				* ConvertIndexToLocalXCoord(index)
+				+ cos(_compassAngle) * ConvertIndexToLocalYCoord(index)
+				+ _localMap.info.origin.position.y;
 
-  uint8_t xGlobalVisionCoord;
-  uint8_t yGlobalVisionCoord;
+		// Update global map with 0/1 to show that an obstacle dne/exists
+		_globalMap.data[ConvertXYCoordToIndex(xGlobalVisionCoord,
+				yGlobalVisionCoord, _globalMap.info.width)] =
+				_localMap.data[index];
 
-  // Loop through the vision map
-  for(int index = 0; index < _localMapSize; index++) {
-
-      xGlobalVisionCoord = cos(_compassAngle - _globalMapAngle) * ConvertIndexToLocalXCoord(index) - sin(_compassAngle - _globalMapAngle) * ConvertIndexToLocalYCoord(index) + _localMap.info.origin.position.x;
-      yGlobalVisionCoord = sin(_compassAngle - _globalMapAngle) * ConvertIndexToLocalXCoord(index) + cos(_compassAngle - _globalMapAngle) * ConvertIndexToLocalYCoord(index) + _localMap.info.origin.position.y;
-
-    // Update global map with 0/1 to show that an obstacle dne/exists
-    _globalMap.data[ConvertXYCoordToIndex(xGlobalVisionCoord, yGlobalVisionCoord, _globalMap.info.width)] = _localMap.data[index];
-
-  }
+	}
 
 }
 void GenerateGlobalMap::CalculateMeterChangePerLongitude() {
 
-  _meterChangePerLongitude = 111412.84 * cos(_gpsOrigin.lat) - 93.5 * cos(3 * _gpsOrigin.lat) - 0.118 * cos(5 * _gpsOrigin.lat);
+	_meterChangePerLongitude = 111412.84 * cos(_gpsOrigin.lat)
+			- 93.5 * cos(3 * _gpsOrigin.lat) - 0.118 * cos(5 * _gpsOrigin.lat);
 
 }
 
 void GenerateGlobalMap::CalculateMeterChangePerLatitude() {
 
-  _meterChangePerLatitude = 111132.92 - 559.82 * cos(2 * _gpsOrigin.lat) + 1.175 * cos(4 * _gpsOrigin.lat) - 0.0023 * cos(6 * _gpsOrigin.lat);
+	_meterChangePerLatitude = 111132.92 - 559.82 * cos(2 * _gpsOrigin.lat)
+			+ 1.175 * cos(4 * _gpsOrigin.lat)
+			- 0.0023 * cos(6 * _gpsOrigin.lat);
 
 }
 
-void GenerateGlobalMap::LocalMapSubscriberCallback(const nav_msgs::OccupancyGrid::ConstPtr& localMap){
+void GenerateGlobalMap::LocalMapSubscriberCallback(
+		const nav_msgs::OccupancyGrid::ConstPtr& localMap) {
 
-  ROS_INFO("LocalMapSubscriberCallback doing stuff");
-  _localMap.info.height = localMap->info.height; // Number of rows
-  _localMap.info.width = localMap->info.width; // Number of columns
-  _localMapSize = localMap->info.width * localMap->info.height;
+	ROS_INFO("LocalMapSubscriberCallback doing stuff");
+	_localMap.info.height = localMap->info.height; // Number of rows
+	_localMap.info.width = localMap->info.width; // Number of columns
+	_localMapSize = localMap->info.width * localMap->info.height;
 
-  for(int index = 0; index < _localMapSize; index++){
+	for (int index = 0; index < _localMapSize; index++) {
 
-    _localMap.data[index] = localMap->data[index];
+		_localMap.data[index] = localMap->data[index];
 
-  }
-
-}
-
-uint8_t GenerateGlobalMap::ConvertIndexToLocalXCoord(uint8_t index){
-
-   return index % _localMap.info.width;
+	}
 
 }
 
-uint8_t GenerateGlobalMap::ConvertIndexToLocalYCoord(uint8_t index){
+uint8_t GenerateGlobalMap::ConvertIndexToLocalXCoord(uint8_t index) {
 
-   return index / _localMap.info.width;
-
-}
-
-uint8_t GenerateGlobalMap::ConvertXYCoordToIndex(uint8_t x, uint8_t y, uint8_t width) {
-
-  return y * width + x;
+	return index % _localMap.info.width;
 
 }
 
-void GenerateGlobalMap::WaypointSubscriberCallback(const sb_msgs::Waypoint::ConstPtr& waypointMsg){
+uint8_t GenerateGlobalMap::ConvertIndexToLocalYCoord(uint8_t index) {
 
-  ROS_INFO("WaypointSubscriberCallback doing stuff");
-  _localMap.info.origin.position.x = waypointMsg->lon; // FIXME CONVERT STUFF TO X AND Y
-  _localMap.info.origin.position.y = waypointMsg->lat;
+	return index / _localMap.info.width;
 
 }
 
+uint8_t GenerateGlobalMap::ConvertXYCoordToIndex(uint8_t x, uint8_t y,
+		uint8_t width) {
 
-void GenerateGlobalMap::GPSInfoSubscriberCallback(const sb_msgs::Gps_info::ConstPtr& gpsInfoMsg){
-  
-  ROS_INFO("GPSInfoSubscriberCallback doing stuff");
-  _compassAngle = gpsInfoMsg->angle;
+	return y * width + x;
+
+}
+
+void GenerateGlobalMap::WaypointSubscriberCallback(
+		const sb_msgs::Waypoint::ConstPtr& waypointMsg) {
+
+	ROS_INFO("WaypointSubscriberCallback doing stuff");
+	float degreeChangeInLongitude = waypointMsg->lon - _gpsOrigin.lon;
+	float degreeChangeInLatitude = waypointMsg->lat - _gpsOrigin.lat;
+
+	_localMap.info.origin.position.x = _localMap.info.origin.position.x
+			+ _meterChangePerLatitude * degreeChangeInLatitude
+					/ _globalMap.info.resolution;
+	_localMap.info.origin.position.y = _localMap.info.origin.position.y
+			+ _meterChangePerLongitude * degreeChangeInLongitude
+					/ _globalMap.info.resolution;
+
+}
+
+void GenerateGlobalMap::GPSInfoSubscriberCallback(
+		const sb_msgs::Gps_info::ConstPtr& gpsInfoMsg) {
+
+	ROS_INFO("GPSInfoSubscriberCallback doing stuff");
+	_compassAngle = gpsInfoMsg->angle;
 
 }
 
 void GenerateGlobalMap::testDoSomething() {
 
- ROS_INFO("Did something");
+	ROS_INFO("Did something");
 
 }

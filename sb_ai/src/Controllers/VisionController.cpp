@@ -6,7 +6,6 @@ using namespace ros;
 
 namespace ai{
 
-static const std::string PUBLISH_TOPIC = "vision_vel";
 static const std::string PUBLISH_TOPIC2 = "vision_nav";
 const int MSG_QUEUE_SIZE = 20;
 
@@ -31,7 +30,6 @@ VisionController::VisionController():
 	count(0)
 {
 	image = imread("/home/mecanum/Pictures/course1.jpg", 1);
-	filterImage();
 	//imwrite( "/home/jannicke/Pictures/Image2.jpg", image_direction);
 }
 
@@ -44,35 +42,7 @@ geometry_msgs::Twist VisionController::Update(){
 	return twist;
 }
 
-void VisionController::filterImage(void) {
 
-	//Blur Image
-	if (blur_value % 2 == 0)
-		blur_value = blur_value + 1;
-	medianBlur(image, image_blur, blur_value);
-
-	showHSVHistograms(image_blur);
-
-	//Create grey-scaled version of image
-	cvtColor(image_blur, image_grey, CV_RGB2GRAY);
-
-	//Blur the image
-	if (blur_value % 2 == 0)
-		blur_value = blur_value + 1;
-	medianBlur(image_grey, image_blur2, blur_value);
-
-	//Threshold the image: 3 different options
-	//Regular threshold
-	//threshold(image_blur2, image_thresholded, threshold_value, max_BINARY_value,
-	//		THRESH_BINARY);
-	//Adaptive threshold
-	//adaptiveThreshold(image_blur2, image_thresholded,255, CV_ADAPTIVE_THRESH_GAUSSIAN_C, CV_THRESH_BINARY,71, 15);
-	//Otsu threshold
-	//threshold(image_blur2, image_thresholded, threshold_value, 255 , THRESH_OTSU|THRESH_BINARY  );
-	image_direction = image_thresholded.clone();
-	//Canny Edge detection
-	Canny(image_thresholded, image_canny, 50, 200, 3);
-}
 void VisionController::getDirection(void) {
 /*
 	int rows2Check = 14;

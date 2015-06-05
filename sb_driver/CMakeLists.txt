@@ -33,6 +33,8 @@ catkin_package(
  add_executable(sb_driver_elsa src/elsa_driver.cpp)
  add_dependencies(sb_driver_avalanche sb_msgs_generate_messages_cpp)
  add_dependencies(sb_driver_elsa sb_msgs_generate_messages_cpp)
+ add_dependencies(sb_driver_avalanche_headers sb_msgs_generate_messages_cpp)
+ add_dependencies(sb_driver_elsa_headers sb_msgs_generate_messages_cpp)
 
  target_link_libraries(
   sb_driver_avalanche
@@ -47,4 +49,4 @@ target_link_libraries(
   sb_serial_communication
   sb_driver_elsa_headers
   ${catkin_LIBRARIES}
- )
+)

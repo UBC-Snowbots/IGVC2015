@@ -1,15 +1,12 @@
 #pragma once
 
 #include <jaus/mobility/drivers/LocalWaypointDriver.h>
+#include <jaus/mobility/drivers/LocalWaypointListDriver.h>
 #include <jaus/mobility/sensors/LocalPoseSensor.h>
 #include <jaus/core/management/Management.h>
 #include "ros/ros.h"
 #include "sb_msgs/MoveCommand.h"
 #include <jaus/mobility/drivers/SetLocalWaypoint.h>
-
-#include "LocalWaypointListDriver.hpp"
-
-const double EqualityThreshold = 2; // change for actual sensible value (distance at which two waypoints should be considered equal)
 
 class LocalWaypointDriver: public JAUS::LocalWaypointDriver {
 private:
