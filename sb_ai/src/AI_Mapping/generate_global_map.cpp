@@ -3,36 +3,30 @@
 
 uint8_t GLOBAL_MAP_PADDING = 100;
 
-GenerateGlobalMap::GenerateGlobalMap(sb_msgs::Waypoint gpsOrigin,
-		uint32_t courseWidth, uint32_t courseHeight, float mapResolution) :
-		_gpsOrigin(gpsOrigin) {
+GenerateGlobalMap::GenerateGlobalMap(sb_msgs::Waypoint gpsOrigin, uint32_t courseWidth, uint32_t courseHeight, float mapResolution):
+  _gpsOrigin(gpsOrigin) {
 
-	// Calculate the meter change per longitude and latitude
-	CalculateMeterChangePerLongitude();
-	CalculateMeterChangePerLatitude();
+  // Calculate the meter change per longitude and latitude
+  CalculateMeterChangePerLongitude();
+  CalculateMeterChangePerLatitude();
 
-	// Initialize subscribers
-	_localMapSubscriber = _n.subscribe(VISION_TOPIC, 1000,
-			&GenerateGlobalMap::LocalMapSubscriberCallback, this);
-	_waypointSubscriber = _n.subscribe(WAYPOINT_TOPIC, 1000,
-			&GenerateGlobalMap::WaypointSubscriberCallback, this);
-	_gpsInfoSubscriber = _n.subscribe(GPS_INFO_TOPIC, 1000,
-			&GenerateGlobalMap::GPSInfoSubscriberCallback, this);
+  // Initialize subscribers
+  _localMapSubscriber = _n.subscribe(VISION_TOPIC, 1000, &GenerateGlobalMap::LocalMapSubscriberCallback, this);
+  _waypointSubscriber = _n.subscribe(WAYPOINT_TOPIC, 1000, &GenerateGlobalMap::WaypointSubscriberCallback, this);
+  _gpsInfoSubscriber = _n.subscribe(GPS_INFO_TOPIC, 1000, &GenerateGlobalMap::GPSInfoSubscriberCallback, this);
 
-	// Initialize publishers
-	_globalMapPublisher = _n.advertise < nav_msgs::OccupancyGrid
-			> (GLOBAL_MAP_TOPIC, 1000);
+  // Initialize publishers
+  _globalMapPublisher = _n.advertise<nav_msgs::OccupancyGrid>(GLOBAL_MAP_TOPIC, 1000);
 
-	// Initialize global map
-	_globalMap.info.width = courseWidth + GLOBAL_MAP_PADDING;
-	_globalMap.info.height = courseHeight + GLOBAL_MAP_PADDING;
-	_globalMap.info.resolution = mapResolution;
-	_globalMapSize = _globalMap.info.width * _globalMap.info.height;
-	_globalMap.data.assign(_globalMapSize, 0);
-	// Assume robot starts somewhere in the middle bottom of the course
-	_globalMap.info.origin.position.x = _globalMap.info.width / 2;
-	_globalMap.info.origin.position.y = _globalMap.info.height * 3 / 4;
-
+  // Initialize global map
+  _globalMap.info.width = courseWidth + GLOBAL_MAP_PADDING;
+  _globalMap.info.height = courseHeight + GLOBAL_MAP_PADDING;
+  _globalMap.info.resolution = mapResolution;
+  _globalMapSize = _globalMap.info.width * _globalMap.info.height;
+  _globalMap.data.assign(_globalMapSize,0);
+  // Assume robot starts somewhere in the middle bottom of the course  
+  _globalMap.info.origin.position.x = _globalMap.info.width / 2; 
+  _globalMap.info.origin.position.y = _globalMap.info.height * 3 / 4;
 }
 
 GenerateGlobalMap::~GenerateGlobalMap() {

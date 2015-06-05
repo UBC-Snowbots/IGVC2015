@@ -10,8 +10,8 @@ set(MAIN_HEADERS
 	Controllers/VisionController.hpp
 	Controllers/LidarController.hpp
 	Controllers/GpsController.hpp
-	Controllers/DSLiteAController.hpp
-	Controllers/DSLiteBController.hpp
+	Controllers/DSLiteController.hpp
+	#Controllers/DSLiteBController.hpp
 	Controllers/sb_ai.h
 )
 
@@ -20,8 +20,8 @@ set(MAIN_SOURCE
 	Controllers/VisionController.cpp
 	Controllers/LidarController.cpp
 	Controllers/GpsController.cpp
-	Controllers/DSLiteAController.cpp
-	Controllers/DSLiteBController.cpp
+	Controllers/DSLiteController.cpp
+	#Controllers/DSLiteBController.cpp
 	main.cpp
 )
 
@@ -30,7 +30,7 @@ set(MODE_LIBRARIES
 	ai_utilities
 	ai_map
 	ai_dstarliteA
-	ai_dstarliteB
+	#ai_dstarliteB
 	${OpenCV_LIBS})
 
 set(MODE_INCLUDE_DIRS

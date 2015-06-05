@@ -1,4 +1,5 @@
 add_library(ai_map generate_global_map.hpp generate_global_map.cpp)
+add_dependencies(ai_map sb_msgs_generate_messages_cpp)
 
 add_executable(test_generate_global_map test_generate_global_map.cpp)
 target_link_libraries(test_generate_global_map ${catkin_LIBRARIES} ai_map)

@@ -7,7 +7,6 @@ using namespace std;
 
 // PRIVATE
 
-
 int Dijkstra::ConvertToIndex(AI_Utilities::Location * xy)
 {
 	return (xy->y * map_width) + xy->x;
@@ -28,7 +27,6 @@ void Dijkstra::CheckBoundaries(AI_Utilities::Location * neighbor, int current)
 	}
 	return;
 }
-
 
 
 // PUBLIC	

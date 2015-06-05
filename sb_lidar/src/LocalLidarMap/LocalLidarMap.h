@@ -5,11 +5,11 @@
 
 #define NODE_NAME "local_lidar_map"
 #define LIDAR_SUB "scan"
-#define MAPPING_PUB "sb_mapping"
+#define MAPPING_PUB "sb_lidar_map"
 
 // Width of map should be double the height
 #define RANGE_M 6
-#define MAP_RESOLUTION 0.2f
+#define MAP_RESOLUTION 0.05f
 
 class LocalLidarMap {
 
