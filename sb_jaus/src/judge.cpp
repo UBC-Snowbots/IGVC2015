@@ -10,11 +10,6 @@
 
 #include <jaus/mobility/sensors/QueryVelocityState.h>
 #include <jaus/mobility/sensors/ReportVelocityState.h>
-//Cannot set velocity in this kind of message lol
-
-#include <jaus/mobility/sensors/QueryGlobalPose.h>
-#include <jaus/mobility/sensors/ReportGlobalPose.h>
-#include <jaus/mobility/sensors/SetGlobalPose.h>
 
 #include <jaus/core/liveness/QueryHeartbeatPulse.h>
 #include <jaus/core/liveness/ReportHeartbeatPulse.h>
@@ -24,6 +19,8 @@
 
 #include <jaus/core/events/CreateEvent.h>
 #include <jaus/core/events/QueryEvents.h>
+
+#include <jaus/mobility/drivers/SetLocalWaypoint.h>
 
 #include <iostream>
 #include <thread>
@@ -163,22 +160,7 @@ int main() {
     8 Time Stamp
      */
 
-    //Now to see if our bot can strike a pose
-    //Currently causing server side to report unsupported type (our system does not beleive that there is a GPS, but does have  a local pose?)
-    JAUS::QueryGlobalPose global_pose_query(JAUS::Address(5000, 1, 1), component.GetComponentID());
-    {
-      typedef JAUS::QueryGlobalPose::PresenceVector JAUSPresenceVector;
-      ushort presenceVector = 0; //does it work?
-      presenceVector |= JAUSPresenceVector::Latitude;
-      presenceVector |= JAUSPresenceVector::Longitude;
-      presenceVector |= JAUSPresenceVector::Yaw;
-    global_pose_query.SetPresenceVector(presenceVector);
-    }
-    JAUS::ReportGlobalPose global_pose_response;
-    while(!component.Send(&global_pose_query, &global_pose_response));
-    global_pose_response.PrintMessageBody();
-
-    //How about we meet the locals?
+    std::cout << "\033[4;31mLocal Pose Query:\033[0m" << std::endl;
     JAUS::QueryLocalPose local_pose_query(JAUS::Address(5000, 1, 1), component.GetComponentID());
     JAUS::ReportLocalPose local_pose_response;
     {
@@ -190,30 +172,22 @@ int main() {
     local_pose_query.SetPresenceVector(presenceVector);
     }
     while(!component.Send(&local_pose_query, &local_pose_response));
-    local_pose_response.PrintMessageBody();
-        
-    //How about we reset the locals?
-    JAUS::SetLocalPose local_pose_set(JAUS::Address(5000, 1, 1), component.GetComponentID());
+    local_pose_response.Print();
+	std::cout << local_pose_response.GetPresenceVector() << ' ' << local_pose_query.GetPresenceVector() << std::endl;
     
-    //First we reset, so that the robot's refference point is wherever the hell it is
-    JAUS::Point3D resetPosition(0,0,0);
-    JAUS::Point3D resetOrientation(0,0,0); //Could elminate what is essentially a duplicate, but readability is nice
-    
-    local_pose_set.SetPose(resetPosition, resetOrientation); // 3rd param may be needed. IDK.
-    
-    //Two potential problems:
-    //1. Does setting the pose actually make JAUS reply with the current pose?
-    //2. Deos send NEED the address of a pointer? Can I not simply give the address of a 
-    while(!component.Send(&local_pose_set, &local_pose_response));
-    
-    
-    JAUS::Point3D additionToLocation(10,10,0); //X Y Z . How much is 10 X? Fuck if I know
-    JAUS::Point3D additionToOrientation(0,0,10); //Roll Pitch Yaw. Also this robot identifies as a bottle of deoderant.
-   
-    local_pose_set.AddToPose(additionToLocation, additionToOrientation); //3rd param is time. unsure if needed.
-    
-    
-    
+	std::cout << "\033[4;31mVelocity State Query:\033[0m" << std::endl;
+    JAUS::QueryVelocityState velocity_state_query(JAUS::Address(5000, 1, 1), component.GetComponentID());
+	velocity_state_query.SetPresenceVector(JAUS::QueryVelocityState::PresenceVector::VelocityX | 
+		JAUS::QueryVelocityState::PresenceVector::YawRate);
+	JAUS::ReportVelocityState velocity_state_report;
+	while(!component.Send(&velocity_state_query,&velocity_state_report));
+	velocity_state_report.Print();
+	std::cout << velocity_state_report.GetPresenceVector() << ' ' << velocity_state_query.GetPresenceVector() << std::endl;
+	
+	std::cout << "\033[4;31mSet Waypoint:\033[0m" << std::endl;
+	JAUS::SetLocalWaypoint set_local_waypoint(JAUS::Address(5000,1,1), component.GetComponentID());
+	//while(!component.Send(&set_local_waypoint,
+
 
     //Debug still live
     component.Shutdown();
