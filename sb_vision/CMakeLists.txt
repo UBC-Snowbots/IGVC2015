@@ -43,6 +43,9 @@ target_link_libraries( camera_publisher ${catkin_LIBRARIES} ${OpenCV_LIBS})
 
 add_executable(camera_subscriber src/camera_subscriber.cpp)
 target_link_libraries(camera_subscriber ${catkin_LIBRARIES} ${OpenCV_LIBS})
+
+add_executable(pylon_filter src/PylonFilter.cpp)
+target_link_libraries(pylon_filter ${catkin_LIBRARIES} ${OpenCV_LIBS})
 #----------------------------------------
 
 

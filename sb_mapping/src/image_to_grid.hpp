@@ -39,6 +39,6 @@ class ConvertSensorImage {
 //		std::vector<uint8_t> resize(double new_resolution); //(cell/m)
 		nav_msgs::OccupancyGrid convert();
 		
-		
+		void printMap();
 		
 };
