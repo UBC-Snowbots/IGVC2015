@@ -23,7 +23,7 @@
 
 static const std::string ENCODING = "bgr8";
 static const std::string TOPIC = "image";
-static const unsigned int CAMERA_AMOUNT = 3;
+static const unsigned int CAMERA_AMOUNT = 1;
 
 std::vector<Camera> cams;
 std::vector<cv::Mat> frames;
@@ -53,36 +53,45 @@ int main(int argc, char** argv){
 	signal(SIGINT, onShutdown);
 
 
-	for(int i = 0; i < CAMERA_AMOUNT; i++){
-		cams.push_back(Camera(i));
+	for(int i = 0; i < CAMERA_AMOUNT ; i++){
+		try{
+			Camera cam(i);
+		cams.push_back(cam);
 		frames.push_back(Mat());
+		}catch(const std::invalid_argument& e){
+			ROS_WARN("FAILED %d", i);
+		}			
+
 	}
 
 	sensor_msgs::ImagePtr message;
 	ros::Rate loop_rate(5);
 
-	//Could possibly take out @imgs as its redundant...
 	std::vector<Mat> imgs;
 	Stitcher stitcher = Stitcher::createDefault(true);
 
 	while (nodeHandler.ok()) {
+		Mat panorama;
+		
 		for(int i = 0; i < CAMERA_AMOUNT; i++){
 			cams[i].awaitFrame(frames[i]);
 			imgs.push_back(frames[i]);
 		}
 
-		Mat panorama;
-		Stitcher::Status status = stitcher.stitch(imgs, panorama);
-		imgs.clear();
-
-		if (status != Stitcher::OK) {
-			ROS_FATAL("Unable to stitch images together!, trying again...");
-			continue;
+		if(CAMERA_AMOUNT > 1){
+			if (stitcher.stitch(imgs, panorama) != Stitcher::OK) {
+				ROS_FATAL("Unable to stitch images together!, trying again...");
+				continue;
+			}
+			ROS_INFO("Publishing stitched image");
 		}else{
-			ROS_INFO("Publishing image");
-			message = cv_bridge::CvImage(std_msgs::Header(), ENCODING, panorama).toImageMsg();
-			transportPub.publish(message);
+			ROS_INFO("Publishing single image");
+			panorama = frames[0];
 		}
+		
+		imgs.clear();
+		message = cv_bridge::CvImage(std_msgs::Header(), ENCODING, panorama).toImageMsg();
+		transportPub.publish(message);
 
 		ros::spinOnce();
 		loop_rate.sleep();

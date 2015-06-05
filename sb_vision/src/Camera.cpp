@@ -1,5 +1,5 @@
 #include "Camera.h"
-
+#include <stdexcept>
 Camera::Camera(unsigned int deviceID)
 {
 	camera.set(CV_CAP_PROP_FPS, CAMERA_FPS);
@@ -16,8 +16,9 @@ Camera::Camera(unsigned int deviceID)
 		ROS_FATAL("If there's an error above saying:");
 		ROS_FATAL("\tV4L index N is not correct");
 		ROS_FATAL("change the deviceID, otherwise run usb-reset.sh");
-		camera.release();
-		ros::shutdown();
+		//camera.release();
+		//ros::shutdown();
+		throw std::invalid_argument("Failed to init camera");
 	}
 }
 
