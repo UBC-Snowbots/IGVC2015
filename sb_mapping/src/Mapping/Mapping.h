@@ -38,6 +38,7 @@ class Mapping
     
     // update function for outputting combined local map
     void RosUpdate();
+    
 };
     
 

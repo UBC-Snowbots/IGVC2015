@@ -15,11 +15,8 @@ Mapping::Mapping(ros::NodeHandle& nh) :
   local_map.data.assign(map_width * map_height, -1);
     
   // Initialize subscribers and publishers
-  
   vision_sub = nh.subscribe(VISION_SUB_TOPIC, 10, &Mapping::VisionMapCallback, this);
-  
   lidar_sub = nh.subscribe(LIDAR_SUB_TOPIC, 10, &Mapping::LidarMapCallback, this); 
-
   ai_pub = nh.advertise<nav_msgs::OccupancyGrid>(AI_PUB_TOPIC, 1);
 }
 
@@ -55,6 +52,6 @@ void Mapping::LidarMapCallback(const nav_msgs::OccupancyGrid::ConstPtr& map)
 void Mapping::RosUpdate()
 {
   local_map.data.assign(map_width * map_height, -1);
-  return;
+  ai_pub.publish(local_map);
 }
 

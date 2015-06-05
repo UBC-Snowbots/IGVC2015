@@ -1,5 +1,7 @@
 #include "LocalLidarMap.h"
 #include <cmath>
+#define _USE_MATH_DEFINES // for C++
+#include <cmath>
 
 LocalLidarMap::LocalLidarMap(int range, float resolution)
 {
@@ -45,10 +47,14 @@ void LocalLidarMap::LidarCallback(const sensor_msgs::LaserScan::ConstPtr& scan)
     else
     {
       theta = i*scan->angle_increment + scan->angle_min;
-      x = range * cos(theta);
+      std::cout << "Theta: " << theta << std::endl;
+     // std::cout << "Min angle: " << scan->angle_min << std::endl;
+      //std::cout << "MAx angle: " << scan->angle_max << std::endl;
+  
+      x = range * sin(theta);
       x /= MAP_RESOLUTION;
-      x = map_width / 2 + x; 
-      y = range * sin(theta);
+      x += map_width / 2;
+      y = range * cos(theta);
       y /= MAP_RESOLUTION;
       int index = (int) y*map_width + x;
       local_map.data[index] = 100;
