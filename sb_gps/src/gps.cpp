@@ -215,6 +215,17 @@ double createAngle(double angleCompass){
 	double theta = 0, angleWaypoint = 180; //theta: angle robot needs to turn, angleWaypoint goal angle from North
 	double r = sqrt(x*x + y*y); //r = distance from the robot to waypoint
 	double angleGoal = 180/PI * (acos(abs(y) / r)); //reference angle with respect to y-axis
+	
+	//if angleCompass ranges (-180,180], initializes angleCompass to [0,360) where N = 0 going clockwise
+	if (angleCompass < 0){
+		angleCompass = -angleCompass + 90;
+	}
+	else if (0 <= angleCompass <= 90){
+		angleCompass = 90 - angleCompass;
+	}
+	else {
+		angleCompass = 360 - (180 - angleCompass);
+	}
 
 	if (x > 0 && y >= 0) //goal angle in quad 1
 		angleWaypoint = angleGoal;
