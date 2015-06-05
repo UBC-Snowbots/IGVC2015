@@ -19,7 +19,7 @@ JAUS::Message* LocalWaypointDriver::GenerateIdleDriveCommand(const JAUS::Byte st
     return NULL;
 }
 bool LocalWaypointDriver::IsWaypointAchieved(const JAUS::LocalPose& currentPose,const JAUS::SetLocalWaypoint& desiredWaypoint) const{
-    return sqrt(pow(currentPose.GetX()-desiredWaypoint.GetX(),2) + pow(currentPose.GetY()-desiredWaypoint.GetY(),2)) < EqualityThreshold;
+    return sqrt(pow(currentPose.GetX()-desiredWaypoint.GetX(),2) + pow(currentPose.GetY()-desiredWaypoint.GetY(),2)) < 1;
 }
 void LocalWaypointDriver::WaypointAchieved(const JAUS::SetLocalWaypoint& waypoint){
     std::vector<JAUS::SetLocalWaypoint> wpts = std::move(listDriver->GetWaypointList());
