@@ -33,15 +33,12 @@ int main(int argc, char **argv) {
 		GenerateGlobalMap generateGlobalMap(GPS_ORIGIN_GLOBAL_MSG, COURSE_WIDTH,
 				COURSE_HEIGHT, MAP_RESOLUTION);
 
-		generateGlobalMap.testDoSomething();
-
 		//// Create Test Local Map
 		nav_msgs::OccupancyGrid localMap;
 		localMap.info.width = 4;
 		localMap.info.height = 4;
 		localMap.data.assign(16, 0);
 		localMap.data[5] = 1;
-		ROS_INFO("YOLO");
 
 		printf("Local Map:\n");
 		for (int i = 0; i < localMap.data.size(); i++) {
@@ -59,6 +56,15 @@ int main(int argc, char **argv) {
 
 		}
 
+		//// Create Test Waypoint Msg
+		sb_msgs::Waypoint gpsOrigin;
+		gpsOrigin.lon = 100;
+		gpsOrigin.lat = 40;
+
+		//// Create Test Gps_info Msg
+		sb_msgs::Gps_info;
+		Gps_info.angle = 70; //FIXME MIGHT NEED TO CONVERT THIS TO RADIAN NOT SURE WHAT GPS_INFO OUTPUTS
+
 		// Testing the subscribers in the class
 		ros::Publisher localMapPublisher = n.advertise < nav_msgs::OccupancyGrid
 				> (VISION_TOPIC, 1000);
@@ -66,6 +72,9 @@ int main(int argc, char **argv) {
 				> (WAYPOINT_TOPIC, 1000);
 		ros::Publisher gpsInfoPublisher = n.advertise < sb_msgs::Gps_info
 				> (GPS_INFO_TOPIC, 1000);
+
+		// No clue if this works
+		generateGlobalMap.TransformLocalToGlobal();
 
 		ros::spin(); //ros spin is to ensure that ros threading does not leave subscribes un processed
 

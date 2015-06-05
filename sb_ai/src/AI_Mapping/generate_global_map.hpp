@@ -88,6 +88,4 @@ public:
 
 	void TransformLocalToGlobal();
 
-	void testDoSomething();
-
 };

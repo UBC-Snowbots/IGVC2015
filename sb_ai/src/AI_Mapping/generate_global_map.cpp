@@ -44,7 +44,7 @@ void GenerateGlobalMap::TransformLocalToGlobal() {
 	uint8_t xGlobalVisionCoord;
 	uint8_t yGlobalVisionCoord;
 
-	// Loop through the vision map
+	// Loop through the vision map and transform it onto the global
 	for (int index = 0; index < _localMapSize; index++) {
 
 		xGlobalVisionCoord = cos(_compassAngle)
@@ -66,6 +66,7 @@ void GenerateGlobalMap::TransformLocalToGlobal() {
 }
 void GenerateGlobalMap::CalculateMeterChangePerLongitude() {
 
+	// http://en.wikipedia.org/wiki/Geographic_coordinate_system#Expressing_latitude_and_longitude_as_linear_units
 	_meterChangePerLongitude = 111412.84 * cos(_gpsOrigin.lat)
 			- 93.5 * cos(3 * _gpsOrigin.lat) - 0.118 * cos(5 * _gpsOrigin.lat);
 
@@ -73,6 +74,7 @@ void GenerateGlobalMap::CalculateMeterChangePerLongitude() {
 
 void GenerateGlobalMap::CalculateMeterChangePerLatitude() {
 
+	// http://en.wikipedia.org/wiki/Geographic_coordinate_system#Expressing_latitude_and_longitude_as_linear_units
 	_meterChangePerLatitude = 111132.92 - 559.82 * cos(2 * _gpsOrigin.lat)
 			+ 1.175 * cos(4 * _gpsOrigin.lat)
 			- 0.0023 * cos(6 * _gpsOrigin.lat);
@@ -87,6 +89,7 @@ void GenerateGlobalMap::LocalMapSubscriberCallback(
 	_localMap.info.width = localMap->info.width; // Number of columns
 	_localMapSize = localMap->info.width * localMap->info.height;
 
+	// Update local map
 	for (int index = 0; index < _localMapSize; index++) {
 
 		_localMap.data[index] = localMap->data[index];
@@ -118,9 +121,13 @@ void GenerateGlobalMap::WaypointSubscriberCallback(
 		const sb_msgs::Waypoint::ConstPtr& waypointMsg) {
 
 	ROS_INFO("WaypointSubscriberCallback doing stuff");
+	// Get the change in longitude and latitude from the original gps position
+	// of the robot
 	float degreeChangeInLongitude = waypointMsg->lon - _gpsOrigin.lon;
 	float degreeChangeInLatitude = waypointMsg->lat - _gpsOrigin.lat;
 
+	// Update the current position of the robot by converting the change
+	// in latitude to change in meters and then to change in x and y coords
 	_localMap.info.origin.position.x = _localMap.info.origin.position.x
 			+ _meterChangePerLatitude * degreeChangeInLatitude
 					/ _globalMap.info.resolution;
@@ -134,12 +141,6 @@ void GenerateGlobalMap::GPSInfoSubscriberCallback(
 		const sb_msgs::Gps_info::ConstPtr& gpsInfoMsg) {
 
 	ROS_INFO("GPSInfoSubscriberCallback doing stuff");
-	_compassAngle = gpsInfoMsg->angle;
-
-}
-
-void GenerateGlobalMap::testDoSomething() {
-
-	ROS_INFO("Did something");
+	_compassAngle = gpsInfoMsg->angle; //FIXME MIGHT NEED TO CONVERT THIS TO DEGREE, NOT SURE WHAT GPS_INFO OUTPUTS, ALL THE CODE ASSUMES ANGLE IS IN DEGREES
 
 }
