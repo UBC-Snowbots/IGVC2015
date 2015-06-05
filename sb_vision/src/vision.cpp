@@ -52,9 +52,10 @@ int main(int argc, char **argv)
 	ros::NodeHandle n;
 	ros::Rate loop_rate(10);
     image_transport::ImageTransport it(n);
-    image_transport::Publisher pub = it.advertise("image", 1);
+    image_transport::Publisher pub2 = it.advertise("image_normal", 1);
+    image_transport::Publisher pub = it.advertise("image_bird", 1);
     sensor_msgs::ImagePtr msg;
-	 
+	sensor_msgs::ImagePtr msg2;
     //signal(SIGINT, onShutdown);  
 
 
@@ -163,7 +164,7 @@ int main(int argc, char **argv)
         else if(camera_status[0]) pano = image1;
         else if(camera_status[1]) pano = image2;
         else if(camera_status[2]) pano = image3;
-        else pano = imread("/home/jannicke/Pictures/Image1.jpg", 1);
+        else pano = imread("/home/snowbots/Pictures/Image1.jpg", 1);
 
         //Apply filter to stitched image
         filter myfilter; //create filter
@@ -190,6 +191,12 @@ int main(int argc, char **argv)
         resize(outputImg,dst,size);//resize image
 
         // Publish Image
+        if(!image_pano.empty()) {
+            msg2 = cv_bridge::CvImage(std_msgs::Header(), "mono8", dst).toImageMsg();
+            pub2.publish(msg2);
+            ROS_INFO("Vision published an image");
+            cv::waitKey(1);
+        }
         if(!outputImg.empty()) {
             msg = cv_bridge::CvImage(std_msgs::Header(), "mono8", dst).toImageMsg();
             pub.publish(msg);

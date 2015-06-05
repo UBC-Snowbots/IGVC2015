@@ -37,3 +37,5 @@ To use the sb_gps branch:
 The node will start streaming data
 =======
 > catkin_make -DCATKIN_WHITELIST_PACKAGES=""
+
+catkin_make -DCATKIN_BLACKLIST_PACKAGES="sb_gps;sb_jaus"
