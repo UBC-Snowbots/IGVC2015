@@ -29,8 +29,8 @@ namespace ai
     theta = 0;
     prev_move = 0;
     avg_count = 0;
-    TargetWaypoint.lon = 49.26238123;
-	  TargetWaypoint.lat = -123.24871402;
+    TargetWaypoint.lon = 49.26268123;
+	  TargetWaypoint.lat = -123.25001402;
 	  buffWaypoint.lon = 0.0;
 	  buffWaypoint.lat = 0.0;	
 		calibration.lon = 49.26231834;
@@ -38,7 +38,8 @@ namespace ai
 	  
 	  // Set precision of the numbers we print
 	  cout.precision(13);
-		GpsController::calibrate();
+		//GpsController::calibrate();
+		GpsController::StartGps();
   }
   
   
@@ -302,18 +303,26 @@ void GpsController::calcwaypoint (void){
 	 printf ("Calculating Next Waypoint. . . .");
 	 int i = 0;
 	while ( i < 10) {
+
 		if (msg_flag){
 					setWaypoints(buffWaypoint,(buffWaypoint.lon +CurrentWaypoint.lon),(buffWaypoint.lat+CurrentWaypoint.lat));
 		i++;
 			}
-		else
-			cout << "\b\b\b\b\b\b\b . . . .";
-		}	
-		setWaypoints (avgWaypoint, buffWaypoint.lon/10.0, avgWaypoint.lat/10.0);
+		else{
+			printf("\b\b\b\b\b\b\b. . . .");	
+		break;}
+	}
+	
+		setWaypoints (avgWaypoint, buffWaypoint.lon/10.0, buffWaypoint.lat/10.0);
+	setWaypoints (buffWaypoint, 0.0, 0.0);
 	print(35, "NextPoint: ", avgWaypoint.lon, avgWaypoint.lat);
 	return;
 
 	
+}
+
+void GpsController::calcwaypoint (int i){
+	setWaypoints(avgWaypoint, 49.26248123,-123.24881402);
 }
 
 //end of namespace
