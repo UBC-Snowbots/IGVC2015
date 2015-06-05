@@ -2,19 +2,24 @@
 
 namespace ai
 {
+
   DSLiteController::DSLiteController(ros::NodeHandle& nh)
   {
-	  std::cout << "Generating Map" << std::endl;
+    // Initialize world
 		world = new GridWorld(SIZE, INTERSECTION_RADIUS);
-		std::cout << "Finished generation" << std::endl;
 		
 		realWorld = new int[SIZE*SIZE];
 		for (int i = 0; i < SIZE*SIZE; i++)
 		{
 		  realWorld[i] = 0; 
-		  
 		}
+		
+		// Initialize subscribers
+		map_sub = nh.subscribe(MAP_SUB_TOPIC, 10, &DSLiteController::MapCallback, this);
+		gps_sub = nh.subscribe(GPS_SUB_TOPIC, 10, &DSLiteController::GpsCallback, this);
+		compass_sub = nh.subscribe(COMPASS_SUB_TOPIC, 10, &DSLiteController::CompassCallback, this);
   }
+
 
   //Returns the next twist message to publish (this is called each main loop iteration)
   geometry_msgs::Twist DSLiteController::Update()
@@ -31,6 +36,7 @@ namespace ai
 			std::cout << std::endl;
 		}
   }
+  
   
   void DSLiteController::scanMap()
   {
@@ -52,6 +58,7 @@ namespace ai
 	    }
     }
   }
+
 
   void DSLiteController::execute()
   {
@@ -85,4 +92,25 @@ namespace ai
 	  //Uncomment the line below to print every info about gridworld
 	  world->printWorld();
   }
+  
+  
+	void DSLiteController::MapCallback(const nav_msgs::OccupancyGrid::ConstPtr& map)
+	{
+	  // Add local to global functions
+	}
+	
+	
+	void DSLiteController::GpsCallback(const std_msgs::String::ConstPtr& gps)
+	{
+	  // process gps data, dummy data for now
+	  long_pos = 51.28374830;
+	  lat_pos = 16.939458393;
+	}
+	
+	
+	void DSLiteController::CompassCallback(const std_msgs::String::ConstPtr& compass)
+	{
+	  // process compass data
+	  orientation = 30.0;
+	}
 }
