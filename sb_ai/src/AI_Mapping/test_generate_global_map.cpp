@@ -4,6 +4,7 @@
 
 sb_msgs::Waypoint GPS_ORIGIN_GLOBAL_MSG;
 
+
 uint32_t COURSE_WIDTH = 200;
 uint32_t COURSE_HEIGHT = 100;
 float MAP_RESOLUTION = 0.5;
@@ -13,6 +14,8 @@ ros::Subscriber gpsOriginSubscriber;
 
 void gpsOriginSubscriberCallback(
 		const sb_msgs::Waypoint::ConstPtr& gpsOriginMsg);
+
+void GlobalMapSubscriberCallback(const const nav_msgs::OccupancyGrid::ConstPtr& globalMap);
 
 int main(int argc, char **argv) {
 
@@ -76,6 +79,9 @@ int main(int argc, char **argv) {
 		// No clue if this works
 		generateGlobalMap.TransformLocalToGlobal();
 
+		ros::Subscriber globalMap = n.subscribe(GLOBAL_MAP_TOPIC, 1000,
+				&GlobalMapSubscriberCallback);
+
 		ros::spin(); //ros spin is to ensure that ros threading does not leave subscribes un processed
 
 		loopRate.sleep();
@@ -92,5 +98,11 @@ void gpsOriginSubscriberCallback(
 	GPS_ORIGIN_GLOBAL_MSG.lon = gpsOriginMsg->lon;
 	GPS_ORIGIN_GLOBAL_MSG.lat = gpsOriginMsg->lat;
 	gpsOriginSubscriber.shutdown();
+
+}
+
+void GlobalMapSubscriberCallback(const const nav_msgs::OccupancyGrid::ConstPtr& globalMap) {
+
+	// TODO CHECK TO SEE IF THE GLOBAL COORD FOR THE OBSTACLE IN THE TEST LOCAL MAP EXISTS AND IS THE CORRECT COORDINATES
 
 }
