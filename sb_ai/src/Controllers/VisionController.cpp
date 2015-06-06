@@ -49,7 +49,6 @@ geometry_msgs::Twist VisionController::Update(){
 	    //detectLines();
 	    getDirection();
 	    displayWindows();
-
     }else ROS_INFO("image empty");
 	twist.angular.z = steeringOut;
 	twist.linear.y = throttle;

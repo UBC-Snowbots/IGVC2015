@@ -9,12 +9,14 @@
 
 
 int const kMaxBinary = 255;
-int const kThreshold = 180; //195
+int const kThreshold = 195; //195
+int const kUpperBound = 255;
+int const kLowerBound = 225;
 
 using namespace std;
 
 filter::filter():
-     kBlur(13)
+     kBlur(8)
  {
  	
  }
@@ -26,20 +28,31 @@ void filter::testPrint(void)
 
 cv::Mat filter::getUpdate(cv::Mat inputImage) 
 {
-	
+	image_histo = inputImage.clone();
+	//cv::cvtColor(inputImage, image_histo, CV_RGB2HSV);
 	//Blur Image
 	if (kBlur % 2 == 0) kBlur = kBlur + 1; //Will crash if kBlur is even
-	cv::medianBlur(inputImage, imageBlur, kBlur);
+	cv::medianBlur(image_histo, imageBlur2, kBlur);
+    cv::medianBlur(imageBlur2, imageBlur, kBlur);
 
+		//cvtColor(image, image_histo, COLOR_RGB2HSV);
+
+	
+	split(imageBlur, channels);
+
+		// And then if you like
+		image_H = channels[0];
+		image_S = channels[1];
+		image_V = channels[2];
 	//Create grey-scaled version of image
-	cv::cvtColor(imageBlur, imageGrey, CV_RGB2GRAY);
+    cout<<"filter split image"<<endl;
 
-	cv::medianBlur(imageGrey, imageBlur2, kBlur);
-
+	//cv::medianBlur(imageGrey, imageBlur2, kBlur);
+    inRange(image_V, kLowerBound,kUpperBound,imageThresholded);
 	//Threshold the image: 3 different options
 	//Regular threshold
-	threshold(imageBlur2, imageThresholded, kThreshold, kMaxBinary,
-			cv::THRESH_BINARY);
+	//threshold(imageBlur2, imageThresholded, kThreshold, kMaxBinary,
+	//		cv::THRESH_BINARY);
 	//Adaptive threshold
 	//adaptiveThreshold(image_blur2, image_thresholded,255, CV_ADAPTIVE_THRESH_GAUSSIAN_C, CV_THRESH_BINARY,71, 15);
 	//Otsu threshold
