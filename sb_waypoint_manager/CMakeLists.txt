@@ -14,7 +14,7 @@ catkin_package(
 
 include_directories(${catkin_INCLUDE_DIRS})
 
-add_executable(sb_waypoint_manager src/main.cpp src/WaypointManager.cpp)
+add_executable(sb_waypoint_manager src/main.cpp)
 add_dependencies(sb_waypoint_manager sb_gps_generate_messages_cpp)
 add_dependencies(sb_waypoint_manager sb_msgs_generate_messages_cpp)
 
