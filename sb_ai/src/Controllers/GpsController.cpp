@@ -29,8 +29,8 @@ namespace ai
     theta = 0;
     prev_move = 0;
     avg_count = 0;
-    TargetWaypoint.lon = 42.67833;
-	  TargetWaypoint.lat = -83.19502;
+    TargetWaypoint.lon = 42.67797;
+	  TargetWaypoint.lat = -83.19537;
 	  buffWaypoint.lon = 0.0;
 	  buffWaypoint.lat = 0.0;	
 		calibration.lon = 49.26231834;
