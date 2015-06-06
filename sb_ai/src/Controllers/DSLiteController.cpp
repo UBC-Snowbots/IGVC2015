@@ -5,11 +5,24 @@ namespace ai
 
   DSLiteController::DSLiteController(ros::NodeHandle& nh)
   {
+    // Initialize variable hacks
+    gps_count = 0;
+    compass_count = 0;
+    global_width = (MAP_WIDTH + MAP_PADDING * 2) / RESOLUTION;
+    global_height = (MAP_HEIGHT + MAP_PADDING * 2) / RESOLUTION;
+    global_size = global_width * global_height;
+	  origin_x = (int) global_width * START_POS_X;
+	  origin_y = (int) global_height * START_POS_Y;
+	  origin_lat = -1;
+	  origin_long = -1;
+	  x_pos = -1;
+	  y_pos = -1;
+  
     // Initialize world
-		world = new GridWorld(SIZE, INTERSECTION_RADIUS);
+		world = new GridWorld(global_width, INTERSECTION_RADIUS);
 		
-		realWorld = new int[SIZE*SIZE];
-		for (int i = 0; i < SIZE*SIZE; i++)
+		realWorld = new int[global_size];
+		for (int i = 0; i < global_size; i++)
 		{
 		  realWorld[i] = 0; 
 		}
@@ -18,6 +31,13 @@ namespace ai
 		map_sub = nh.subscribe(MAP_SUB_TOPIC, 10, &DSLiteController::MapCallback, this);
 		gps_sub = nh.subscribe(GPS_SUB_TOPIC, 10, &DSLiteController::GpsCallback, this);
 		compass_sub = nh.subscribe(COMPASS_SUB_TOPIC, 10, &DSLiteController::CompassCallback, this);
+		
+		// Initialize test global map pub
+		global_map_pub = nh.advertise<nav_msgs::OccupancyGrid>("test_global_map", 10);
+		global_map.data.assign(global_size, 0);
+		global_map.info.origin.position.x = 0;
+		global_map.info.origin.position.y = 0;
+		global_map.info.origin.position.z = 0;
   }
 
 
@@ -27,14 +47,17 @@ namespace ai
 		execute();
 		std::cout << "Path calculated!" << std::endl;
 
-		for (unsigned int y = 0; y < SIZE; y++)
+		for (unsigned int y = 0; y < global_height; y++)
 		{
-			for (unsigned int x = 0; x < SIZE; x++)
+			for (unsigned int x = 0; x < global_width; x++)
 			{
-				std::cout << realWorld[y*SIZE + x] << " ";
+				std::cout << realWorld[y*global_width + x] << " ";
 			}
 			std::cout << std::endl;
 		}
+		
+		UpdateGlobalMapTest();
+		global_map_pub.publish(global_map);
   }
   
   
@@ -49,7 +72,7 @@ namespace ai
 	    {
 		    if (world->withinWorld(currentX + x, currentY + y))
 		    {
-			    if (realWorld[(currentY + y)*SIZE + currentX + x] == 1 && world->getTileAt(currentX + x, currentY + y)->cost < INFINITY)
+			    if (realWorld[(currentY + y)*global_width + currentX + x] == 1 && world->getTileAt(currentX + x, currentY + y)->cost < INFINITY)
 			    {
 				    printf("\tInconistancy between maps detected at %d %d\n", currentX+x, currentY+y);
 				    world->inflate(currentX + x, currentY + y, INFINITY);
@@ -80,7 +103,7 @@ namespace ai
 		  world->start = world->getMinSuccessor(world->start).first;
 		  if (world->start != 0){
 			  std::cout << "\tMoved to: (" << world->start->x << ", " << world->start->y << ")" << std::endl;
-			  realWorld[world->start->y * SIZE + world->start->x] = 2;
+			  realWorld[world->start->y * global_width + world->start->x] = 2;
 		  } else{
 			  std::cout << "NULL SUCCESSOR" << std::endl;
 		  }
@@ -96,21 +119,106 @@ namespace ai
   
 	void DSLiteController::MapCallback(const nav_msgs::OccupancyGrid::ConstPtr& map)
 	{
-	  // Add local to global functions
+	  int global_x, global_y, local_x, local_y;
+    int localMapSize = map->info.width * map->info.height; 
+
+	  // Loop through the vision map
+	  for (int index = 0; index < localMapSize; index++) 
+	  {
+	    local_x = AI_Utilities::ConvertIndexToLocalXCoord(index, map->info.width) - ((map->info.width / 2) - 1);
+	    local_y = AI_Utilities::ConvertIndexToLocalYCoord(index, map->info.width) - (map->info.height - 1);
+	    
+		  global_x = cos(orientation)
+				  * local_x
+				  - sin(orientation) * local_y
+				  + AI_Utilities::GetGlobalIndexX(origin_long, long_pos, origin_x, RESOLUTION);
+				  
+		  global_y = sin(orientation)
+				  * local_x
+				  + cos(orientation) * local_y
+				  + AI_Utilities::GetGlobalIndexY(origin_lat, lat_pos, origin_y, RESOLUTION);
+
+		  // Update global map with 0/1 to show that an obstacle dne/exists
+		  realWorld[AI_Utilities::ConvertXYCoordToIndex(global_x,
+				  global_y, global_width)] =
+				  map->data[index];
+	  }
 	}
 	
 	
-	void DSLiteController::GpsCallback(const std_msgs::String::ConstPtr& gps)
+	void DSLiteController::GpsCallback(const sb_msgs::Waypoint::ConstPtr& gps)
 	{
-	  // process gps data, dummy data for now
-	  long_pos = 51.28374830;
-	  lat_pos = 16.939458393;
+	  if (!gps) return; // null check
+	  
+	  long_pos = gps->lon;
+	  lat_pos = gps->lat;
+	  
+	  if (gps_count == 0)
+	  {
+	    origin_long = gps->lon;
+	    origin_lat = gps->lat;
+	    gps_count++; 
+	  }
+	  
+	  else if (gps_count < 10) 
+	  {
+      origin_long += gps->lon;
+      origin_long /= 2;
+      origin_lat += gps->lat;
+      origin_lat /= 2;
+      gps_count++; 
+    }
+    
+    else 
+    {
+      long_pos = gps->lon;
+      lat_pos = gps->lat;
+      // estimate global map position here
+    }
 	}
 	
 	
-	void DSLiteController::CompassCallback(const std_msgs::String::ConstPtr& compass)
+	void DSLiteController::CompassCallback(const sb_msgs::RobotState::ConstPtr& compass)
 	{
-	  // process compass data
-	  orientation = 30.0;
+	  if (!compass) return; // null check
+	  
+	  if (compass_count == 0)
+	  {
+	    global_orientation = compass->compass;
+	  }
+	  
+	  else if (compass_count < 10)
+	  {
+	    global_orientation += compass->compass;
+	    global_orientation /= 2;
+	  }
+	  
+	  else 
+	  {
+	    orientation = compass->compass;
+	    orientation -= global_orientation;
+	    
+	    if (orientation > 180)
+	    {
+	      orientation -= 360;
+	    }
+	    
+	    if (orientation < -180)
+	    {
+	      orientation += 360;
+	    }
+	    
+	    orientation *= AI_Utilities::PI / 180;
+	  }
 	}
+	
+	
+	void DSLiteController::UpdateGlobalMapTest()
+	{
+	  for (int i = 0; i < global_size; i++)
+	  {
+	    global_map.data[i] = realWorld[i];
+	  }
+	}
+	
 }

@@ -1,5 +1,4 @@
 add_subdirectory(Controllers/AI)
-add_subdirectory(AI_Mapping)
 
 find_package(OpenCV REQUIRED)
 
@@ -28,8 +27,8 @@ set(MAIN_SOURCE
 set(MODE_LIBRARIES
 	ai_dijkstra
 	ai_utilities
-	ai_map
 	ai_dstarliteA
+	ai_local_to_global
 	#ai_dstarliteB
 	${OpenCV_LIBS})
 
