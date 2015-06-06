@@ -29,8 +29,8 @@ namespace ai
     theta = 0;
     prev_move = 0;
     avg_count = 0;
-    TargetWaypoint.lon = 49.26268123;
-	  TargetWaypoint.lat = -123.25001402;
+    TargetWaypoint.lon = 42.67833;
+	  TargetWaypoint.lat = -83.19502;
 	  buffWaypoint.lon = 0.0;
 	  buffWaypoint.lat = 0.0;	
 		calibration.lon = 49.26231834;
@@ -81,8 +81,8 @@ namespace ai
   {
   //double lon = 49.262368;
   //double lat = -123.248591;
-  offWaypoint.lon = (49.157435497 - 49.26231834);
-  offWaypoint.lat = (-123.149139703 - (-123.24871396));
+  offWaypoint.lon = 42.406891312 - 42.67823;
+  offWaypoint.lat = (-83.11692477) - (-83.19487);
   }
 
   void GpsController::GpsCallback(const std_msgs::String::ConstPtr& msg)
@@ -127,10 +127,11 @@ namespace ai
  
   bool GpsController::CheckGoal()
   {
-  cout<<fabs(CurrentWaypoint.lon - TargetWaypoint.lon)*100000 <<endl;
-    if ((int)fabs(CurrentWaypoint.lon - TargetWaypoint.lon)*100000 < 2 && (int)fabs(CurrentWaypoint.lon - TargetWaypoint.lon)*100000 > 0){	
-	  cout<<fabs(CurrentWaypoint.lat - TargetWaypoint.lat)*100000 <<endl;
-      if ((int)fabs(CurrentWaypoint.lat - TargetWaypoint.lat)*100000 < 2 && (int)fabs(CurrentWaypoint.lon - TargetWaypoint.lon)*100000 > 0){
+  cout<<fabs(avgWaypoint.lon - TargetWaypoint.lon)*100000 <<endl;
+  cout<<(int)fabs(avgWaypoint.lon - TargetWaypoint.lon)*100000 <<endl;
+    if (fabs(avgWaypoint.lon - TargetWaypoint.lon)*100000 < 2.5 && fabs(avgWaypoint.lon - TargetWaypoint.lon)*100000 > 0){	
+	  cout<<fabs(avgWaypoint.lat - TargetWaypoint.lat)*10000 <<endl;
+      if (fabs(avgWaypoint.lat - TargetWaypoint.lat)*100000 < 2.5 && fabs(avgWaypoint.lon - TargetWaypoint.lon)*100000 > 0){
 	
         return true;
       }
@@ -254,9 +255,9 @@ namespace ai
     sb_msgs::Gps_info data; 
   data.distance = ai::GpsController::CreateDistance();
   data.angle = ai::GpsController::CreateAngle();
-  cout << "Current longitude: " << avgWaypoint.lon << " Current latitude: " << avgWaypoint.lat << endl;
-  cout << "distance" << data.distance << endl;
-  cout << "angle" << data.angle << endl;
+  //cout << "Current longitude: " << avgWaypoint.lon << " Current latitude: " << avgWaypoint.lat << endl;
+  //cout << "distance" << data.distance << endl;
+  //cout << "angle" << data.angle << endl;
   return data; 
   }
 
