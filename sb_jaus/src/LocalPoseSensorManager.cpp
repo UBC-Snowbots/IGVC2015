@@ -6,7 +6,9 @@
 void LocalPoseSensorManager::onPoseChange(std_msgs::String msg) {
 
     JAUS::SetLocalPose localPose;
-
+    std::cout << "LOCAL POSE HAS BEEN CALLED WITH MSG: " << msg << "!" << std::endl;
+    int a;
+    std::cin >> a;
     //X
     localPose.SetX(1.0);
 

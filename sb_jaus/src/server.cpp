@@ -85,9 +85,17 @@ int main(int argc, char* argv[]) {
     discoveryService->SetSubsystemIdentification(JAUS::Subsystem::Vehicle,"Snowbots");
     discoveryService->SetNodeIdentification("Main");
     discoveryService->SetComponentIdentification("Baseline");
+    
+    
+    JAUS::AccessControl* accessControl = (JAUS::AccessControl*)component.GetService(JAUS::AccessControl::Name);
+    accessControl->EnableDebugMessages(true);
+    accessControl->SetAuthorityCode(0);
+    accessControl->SetControllable(true);
     int comp_id = 5000;
     JAUS::Address componentID(comp_id,1,1);
 
+    JAUS::Management* management = (JAUS::Management*)component.GetService(JAUS::Management::Name);
+    
     discoveryService->EnableDebugMessages(true);
     while(component.Initialize(componentID)==false) {
         std::cout << "Failed to initialize [" << componentID.ToString() << "]" << std::endl;

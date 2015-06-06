@@ -31,3 +31,5 @@ void LocalWaypointDriver::setListDriver(JAUS::LocalWaypointListDriver* listDrive
 	this->listDriver = listDriver;
 }
 
+
+
