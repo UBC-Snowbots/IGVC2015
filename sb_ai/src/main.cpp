@@ -25,7 +25,7 @@ ai::ControllerBase* GetController(ros::NodeHandle& nh)
 	else if (param=="vision")
 	{
 	  std::cout << "Running Vision!" << std::endl;
-		return new ai::VisionController();
+		return new ai::VisionController(nh);
 	}
 	else if (param=="lidar")
 	{

@@ -23,9 +23,13 @@ class filter
 
     private:
        int kBlur;
-       
+       cv::vector<cv::Mat> channels;
        cv::Mat imageBlur;
        cv::Mat imageBlur2;
        cv::Mat imageGrey;
+       cv::Mat image_histo;
+       cv::Mat image_H;
+       cv::Mat image_S;
+       cv::Mat image_V;     
        cv::Mat imageThresholded;
 };

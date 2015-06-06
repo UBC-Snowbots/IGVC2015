@@ -1,11 +1,15 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(sb_ai)
 
-find_package(catkin REQUIRED COMPONENTS
+find_package(
+  catkin REQUIRED COMPONENTS
   roscpp
   rospy
   std_msgs
+  genmsg
   sb_msgs
+  cv_bridge
+  image_transport
   nav_msgs
 )
 add_service_files(

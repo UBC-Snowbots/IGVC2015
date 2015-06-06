@@ -153,7 +153,9 @@ int main(int argc, char **argv)
             }
             else {                
                 ROS_INFO("Awaiting for stiched image to display");
-                imshow(CVWINDOW, pano);
+                namedWindow("pano",WINDOW_NORMAL);
+                cvMoveWindow("pano",0,0);
+                imshow("pano", pano);
                 if(waitKey(50) == 27){
                     ROS_INFO("ESC key pressed! Exiting loop now");
                     ROS_WARN("The next run has a higher chance of crashing for unknown reasons");
@@ -191,18 +193,18 @@ int main(int argc, char **argv)
         resize(outputImg,dst,size);//resize image
 
         // Publish Image
-        if(!image_pano.empty()) {
-            msg2 = cv_bridge::CvImage(std_msgs::Header(), "mono8", dst).toImageMsg();
+        //if(!image_pano.empty()) {
+            msg2 = cv_bridge::CvImage(std_msgs::Header(), "mono8", image_pano).toImageMsg();
             pub2.publish(msg2);
             ROS_INFO("Vision published an image");
-            cv::waitKey(1);
-        }
-        if(!outputImg.empty()) {
+        //    cv::waitKey(1);
+       // }
+        //if(!outputImg.empty()) {
             msg = cv_bridge::CvImage(std_msgs::Header(), "mono8", dst).toImageMsg();
             pub.publish(msg);
             ROS_INFO("Vision published an image");
             cv::waitKey(1);
-        }
+       // }
         ros::spinOnce();
         loop_rate.sleep();
 

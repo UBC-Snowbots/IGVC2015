@@ -36,3 +36,14 @@
 		grid.data=data;
 		return grid;
 	}
+
+
+void ConvertSensorImage::printMap(){
+	for(int i = 0; i < height; i++){
+		for(int j = 0; j < width; j++){
+			cout << (int)(data[j * width + i]) << " ";
+		}
+		cout << endl;
+	}
+	cout << endl;
+}
