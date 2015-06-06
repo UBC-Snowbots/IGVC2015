@@ -228,13 +228,13 @@ int main() {
             std::cout << "\033[4;31mID:\033[0m" << std::endl;
             JAUS::QueryIdentification id_query(JAUS::Address(5000,1,1),component.GetComponentID());
             JAUS::ReportIdentification id_response;
-            while(!component.Send(&id_query, &id_response));
+            std::cout << "Return: " << component.Send(&id_query, &id_response) << std::endl;
             std::cout << id_response.GetIdentification() << std::endl;
 	    
 	    JAUS::QueryServices serviceQuery(JAUS::Address(5000,1,1), component.GetComponentID());
 	    JAUS::ReportServices serviceReport;
 	    std::cout << "\033[4;31mWith services:\033[0m" << std::endl;
-	    while(!component.Send(&serviceQuery, &serviceReport));
+	    std::cout << "Return: " << component.Send(&serviceQuery, &serviceReport) << std::endl;
 	    serviceReport.Print();
             break;
         }
@@ -242,7 +242,7 @@ int main() {
             //Query Heartbeat
             JAUS::QueryHeartbeatPulse heart_query(JAUS::Address(5000,1,1),component.GetComponentID());
             JAUS::ReportHeartbeatPulse heart_response;
-            while(!component.Send(&heart_query, &heart_response));
+            std::cout << "Return: " << component.Send(&heart_query, &heart_response) << std::endl;
             std::cout << "\033[4;31mHeart Response:\033[0m";
             heart_response.GetMessageCodeOfResponse();
             break;
@@ -255,7 +255,7 @@ int main() {
             JAUS::CreateEvent event(JAUS::Address(5000,1,1), component.GetComponentID());
             event.SetQueryMessage(&statusQuery);
             event.SetRequestID(1);
-            while(!component.Send(&event, &statusResponse));
+            std::cout << "Return: " << component.Send(&event, &statusResponse) << std::endl;
             statusResponse.Print();
             break;
         }
@@ -264,7 +264,7 @@ int main() {
             std::cout << "\033[4;31mControl Query:\033[0m" << std::endl;
             JAUS::QueryControl controlQuery(JAUS::Address(5000,1,1), component.GetComponentID());
             JAUS::ReportControl controlResponse;
-            while(!component.Send(&controlQuery, &controlResponse));
+            std::cout << "Return: " << component.Send(&controlQuery, &controlResponse) << std::endl;
             controlResponse.Print();
             break;
         }
@@ -290,7 +290,7 @@ int main() {
                 presenceVector |= JAUSPresenceVector::Yaw;
                 local_pose_query.SetPresenceVector(presenceVector);
             }
-            while(!component.Send(&local_pose_query, &local_pose_response));
+            std::cout << "Return: " << component.Send(&local_pose_query, &local_pose_response) << std::endl;
             local_pose_response.PrintMessageBody();
 
             //SO Maybe, MAYBE that didn't work
@@ -299,32 +299,14 @@ int main() {
             JAUS::CreateEvent event(JAUS::Address(5000,1,1), component.GetComponentID());
             event.SetQueryMessage(&local_pose_query);
             event.SetRequestID(1);
-            while(!component.Send(&event, &local_pose_response));
+            std::cout << "Return: " << component.Send(&event, &local_pose_response) << std::endl;
             local_pose_response.Print();
-            break;
-        }
-        case 8: {
-            //Query Global Pose
-            //Unsupported in server (robot) side
-            std::cout << "\033[4;31mGlobal Pose Query:\033[0m" << std::endl;
-            JAUS::QueryGlobalPose global_pose_query(JAUS::Address(5000, 1, 1), component.GetComponentID());
-            {
-                typedef JAUS::QueryGlobalPose::PresenceVector JAUSPresenceVector;
-                ushort presenceVector = 0; //does it work?
-                presenceVector |= JAUSPresenceVector::Latitude;
-                presenceVector |= JAUSPresenceVector::Longitude;
-                presenceVector |= JAUSPresenceVector::Yaw;
-                global_pose_query.SetPresenceVector(presenceVector);
-            }
-            JAUS::ReportGlobalPose global_pose_response;
-            while(!component.Send(&global_pose_query, &global_pose_response));
-            global_pose_response.PrintMessageBody();
             break;
         }
         case 9: {
             //Time to find out if the auth be working
             std::cout << "\033[4;31mControl Attempt:\033[0m" << std::endl;
-            while(!accessControl->RequestComponentControl(JAUS::Address(5000,1,1)));
+            std::cout << "Return: " << accessControl->RequestComponentControl(JAUS::Address(5000,1,1)) << std::endl;
             break;
         }
         case 10: {
@@ -341,7 +323,7 @@ int main() {
 
             //Two potential problems:
             //1. Does setting the pose actually make JAUS reply with the current pose?
-            while(!component.Send(&local_pose_set, &local_pose_response));
+            std::cout << "Return: " << component.Send(&local_pose_set, &local_pose_response) << std::endl;
 
 
             JAUS::Point3D additionToLocation(10,10,0); //X Y Z . How much is 10 X? Fuck if I know
@@ -360,7 +342,7 @@ int main() {
             std::cout << "\033[4;31mSetting Emergency:\033[0m" << std::endl;
             JAUS::SetEmergency setEmergency(JAUS::Address(5000,1,1), component.GetComponentID());
             JAUS::ReportStatus reportStatus;
-            while(!component.Send(&setEmergency, &reportStatus));
+            std::cout << "Return: " << component.Send(&setEmergency, &reportStatus) << std::endl;
             reportStatus.Print();
             break;
         }
@@ -370,7 +352,7 @@ int main() {
             JAUS::ClearEmergency clearEmergency(JAUS::Address(5000,1,1), component.GetComponentID());
             JAUS::ReportStatus reportStatus;
 
-            while(!component.Send(&clearEmergency, &reportStatus));
+            std::cout << "Return: " << component.Send(&clearEmergency, &reportStatus) << std::endl;
             reportStatus.Print();
             break;
         }

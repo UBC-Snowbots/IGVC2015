@@ -26,6 +26,7 @@ include_directories(
 
 add_executable(imagine_lidar src/imagineday_lidar.cpp)
 target_link_libraries(imagine_lidar ${catkin_LIBRARIES})
+add_dependencies(imagine_lidar sb_msgs_generate_messages_cpp)
 
 
 #add_executable(demo_lidar src/demo_code.cpp)
