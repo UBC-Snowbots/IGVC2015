@@ -37,6 +37,7 @@ VisionController::VisionController(ros::NodeHandle& nh):
     
     ROS_INFO("subbing");
     sub = it.subscribe(SUBSCRIBE_TOPIC3, 1, &VisionController::imageCallback, this);
+    
     ROS_INFO("subbed"); 	                           
 }
 
@@ -45,8 +46,10 @@ geometry_msgs::Twist VisionController::Update(){
 	if(!image.empty())
 	{
 		ROS_WARN("image obtained");
-	    detectLines();
+	    //detectLines();
 	    getDirection();
+	    displayWindows();
+
     }else ROS_INFO("image empty");
 	twist.angular.z = steeringOut;
 	twist.linear.y = throttle;
@@ -62,7 +65,9 @@ void VisionController::imageCallback(const sensor_msgs::Image::ConstPtr& msg){
 		ROS_INFO("Recieved an image for the %d time", counter);		
 		image = cv_bridge::toCvShare(msg, "mono8")->image;
 		image_thresholded = image.clone();
-		displayWindows();
+		image_thresholded.convertTo(image_direction, CV_32F);
+		cvtColor(image_direction, image_direction, CV_GRAY2RGB);
+		//displayWindows();
 		//cv::imshow("subscribed", cv_bridge::toCvShare(msg, "mono8")->image);
 		if(cv::waitKey(30) == 27){
 			ROS_INFO("Shutdown event recieved");
@@ -83,10 +88,10 @@ void VisionController::getDirection(void) {
 	int const startRow = image.rows / 2 + distanceBetweenRows*4; //TODO: adjust for camera angle
 	int row = startRow;
 */
-	int rows2Check = 28;
+	int rows2Check = 80;
 	int minConstraint = 10; // need this many, or more point to define a line
-	int distanceBetweenRows = image.rows / 40;
-	int const startRow = image.rows/2+distanceBetweenRows*19; //TODO: adjust for camera angle
+	int distanceBetweenRows = image.rows / rows2Check;
+	int const startRow = image.rows;//image.rows/2+distanceBetweenRows*19; //TODO: adjust for camera angle
 	//int const startRow = distanceBetweenRows*19; 	
 	int row = startRow;
 
@@ -630,9 +635,12 @@ void VisionController::getDirection(void) {
 	void VisionController::displayWindows(void) {
 
 		//Display image
+		if(!image.empty())
+		{
 		namedWindow("Display Image", CV_WINDOW_NORMAL);
 		cvMoveWindow("Display Image", 400, 0);
 		imshow("Display Image", image);
+	    }
 /*
 		//Display blur
 		namedWindow("Blur", CV_WINDOW_NORMAL);
@@ -645,10 +653,12 @@ void VisionController::getDirection(void) {
 		imshow("After Blur", image_blur2);
 */
 		//Display binary threshold thresholded image
+		if(!image_thresholded.empty()){
 		namedWindow("Binary Threshold", CV_WINDOW_NORMAL);
 		cvMoveWindow("Binary Threshold", 720, 300);
 		imshow("Binary Threshold", image_thresholded);
-/*
+	    }
+/* 
 		//Display Hue thresholded image
 		namedWindow("Hue Otsu Threshold", CV_WINDOW_NORMAL);
 		cvMoveWindow("Hue Otsu Threshold", 0, 300);
@@ -678,12 +688,15 @@ void VisionController::getDirection(void) {
 		namedWindow("Canny", CV_WINDOW_NORMAL);
 		cvMoveWindow("Canny", 0, 0);
 		imshow("Canny", image_canny);
-
+*/
 		//Display direction image
+		if(!image_direction.empty())
+		{
 		namedWindow("Direction", CV_WINDOW_NORMAL);
-		cvMoveWindow("Direction", 0, 0);
+		cvMoveWindow("Direction", 0, 600);
 		imshow("Direction", image_direction);
-
+	    }
+/*
 //Display H image
 		namedWindow("Hue", CV_WINDOW_NORMAL);
 		cvMoveWindow("Hue", 720, 600);
@@ -732,7 +745,8 @@ void VisionController::getDirection(void) {
 		pt1.y = row;
 		pt2.x = image.cols;
 		pt2.y = row;
-		line(image_direction, pt1, pt2, CV_RGB(250, 100, 255), 1, CV_AA);
+
+		line(image_direction, pt1, pt2, /*CV_RGB(0, 0, 0)*/ 0, 3, CV_AA);
 	}
 
 //Detects where line are and highlights them using circles

@@ -14,7 +14,7 @@ int const kThreshold = 180; //195
 using namespace std;
 
 filter::filter():
-     kBlur(8)
+     kBlur(13)
  {
  	
  }
