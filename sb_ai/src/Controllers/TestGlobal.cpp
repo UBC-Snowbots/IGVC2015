@@ -35,7 +35,7 @@ float origin_long = 83.195365;
 // Current state variables
 double long_pos = 0; 
 double lat_pos = 0; 
-float orientation = 23 * M_PI / 180;  
+float orientation = 50 * M_PI / 180;  
 int x_pos = 0;
 int y_pos = 0;
   
@@ -68,8 +68,7 @@ void MapCallback(const nav_msgs::OccupancyGrid::ConstPtr& map)
 
 	  // Update global map with 0/1 to show that an obstacle dne/exists
 	  global_i = AI_Utilities::ConvertXYCoordToIndex(global_x, global_y, global_width);
-	  global_map.data[global_i] =
-			  map->data[index];
+	  global_map.data[global_i] = map->data[index];
 			 
 			 /*
 		if (index == 0 || index == 239 || index == 28560 || index == 28799 || index == 28679)

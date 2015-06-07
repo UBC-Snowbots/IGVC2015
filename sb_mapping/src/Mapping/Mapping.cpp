@@ -3,7 +3,7 @@
 Mapping::Mapping(ros::NodeHandle& nh) 
 {
   // Allocate memory for published local map
-  local_map.data.assign(MAP_WIDTH * MAP_HEIGHT, -1);
+  local_map.data.assign(MAP_WIDTH * MAP_HEIGHT, 100); // -1
   local_map.info.width = MAP_WIDTH;
   local_map.info.height = MAP_HEIGHT;
   local_map.info.origin.position.x = 0;
