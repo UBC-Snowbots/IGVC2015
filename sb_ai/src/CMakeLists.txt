@@ -28,7 +28,6 @@ set(MODE_LIBRARIES
 	ai_dijkstra
 	ai_utilities
 	ai_dstarliteA
-	ai_local_to_global
 	#ai_dstarliteB
 	${OpenCV_LIBS})
 
