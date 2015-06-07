@@ -5,8 +5,8 @@ using namespace std;
 using namespace ros; 
 
 namespace ai{
-
 static const std::string PUBLISH_TOPIC2 = "vision_nav";
+static const std::string SUBSCRIBE_TOPIC = "image_normal" 
 const int MSG_QUEUE_SIZE = 20;
 
 int const upperBound = 255;
@@ -30,6 +30,9 @@ VisionController::VisionController():
 	count(0)
 {
 	image = imread("/home/mecanum/Pictures/course1.jpg", 1);
+	ros::NodeHandle nodeHandler;
+	image_transport::ImageTransport imageTransporter(nodeHandler);
+	image_transport::Subscriber transportSub = imageTransporter.subscribe(SUBSCRIBE_TOPIC, 1, imageCallback);
 	//imwrite( "/home/jannicke/Pictures/Image2.jpg", image_direction);
 }
 
@@ -41,6 +44,23 @@ geometry_msgs::Twist VisionController::Update(){
 	count++;
 	return twist;
 }
+
+void imageCallback(const sensor_msgs::ImageConstPtr& msg){
+	static unsigned int counter = 1;
+	try{
+		ROS_INFO("Recieved an image for the %d time", counter);	
+		image_thresholded = cv_bridge::toCvShare(msg, "mono8")->image;
+		cv::imshow(CV_WINDOW, cv_bridge::toCvShare(msg, "mono8")->image);
+		if(cv::waitKey(30) == 27){
+			ROS_INFO("Shutdown event recieved");
+			ros::shutdown();
+		}
+	}catch (cv_bridge::Exception& e){
+		ROS_ERROR("Could not convert from '%s' to 'mono8'.", msg->encoding.c_str());
+	}
+	counter++;
+}
+
 
 
 void VisionController::getDirection(void) {
