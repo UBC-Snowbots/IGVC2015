@@ -24,8 +24,8 @@ static const long S_IN_MS = 1000;
 
 //ros related constants
 static const std::string SUBSCRIBE_TOPIC = "scan";
-static const std::string PUBLISH_TOPIC   = "lidar_nav";
-static const std::string PUBLISH_TOPIC2   = "lidar_vel";
+static const std::string PUBLISH_TOPIC3   = "lidar_nav2";
+static const std::string PUBLISH_TOPIC4   = "lidar_vel2";
 static int LOOP_FREQ = 30;
 
  	// main function
@@ -50,8 +50,8 @@ static int LOOP_FREQ = 30;
 		lidar_state = nh.subscribe(SUBSCRIBE_TOPIC,20,&LidarController::callback,this);
 		
 		//Publisher
-    	CCMD_pub = nh.advertise<geometry_msgs::Twist>(PUBLISH_TOPIC,1);
-		velocity_pub = nh.advertise<geometry_msgs::Vector3>(PUBLISH_TOPIC2, 1);
+    	CCMD_pub = nh.advertise<geometry_msgs::Twist>(PUBLISH_TOPIC3,1);
+		velocity_pub = nh.advertise<geometry_msgs::Vector3>(PUBLISH_TOPIC4, 1);
 
 
 	}
