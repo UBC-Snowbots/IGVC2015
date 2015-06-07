@@ -136,14 +136,14 @@ int main(int argc, char** argv)
 	    if (eStop)
 	    {	
 			cout << "eStop on" << endl;
-			ss << (char)IDENTIFIER_BYTE << "125125";
+			ss << (char)IDENTIFIER_BYTE << "125125125";
 	    } else {  
             //use carCommand and turretCommand
 			ss << (char)IDENTIFIER_BYTE<< twist_y[0] << twist_y[1] << twist_y[2] << twist_z[0] << twist_z[1] << twist_z[2];
 
 	    }
 			cout << ss.str() << endl;
-	    link.writeData(ss.str(), 7); 
+	    link.writeData(ss.str(), 10); 
 	    //delay for sync
 	    usleep(2000000);
 	    

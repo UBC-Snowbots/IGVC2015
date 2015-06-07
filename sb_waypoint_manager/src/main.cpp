@@ -6,6 +6,7 @@
 #include <list>
 #include <fstream>
 
+
 std::list<sb_msgs::MoveCommand> read_file(const std::string& name){
 	std::ifstream in(name.c_str());
 	std::list<sb_msgs::MoveCommand> result;
@@ -54,13 +55,15 @@ void onNewWaypoint(const sb_msgs::Waypoint& pos){
 }
 
 int main(int argc, char** argv){
+
 	ros::init(argc, argv, "waypoint_manager");
-	
+
 	ros::NodeHandle self;
-	
+
 	ros::Rate loop_rate(10);
-	
+
 	publisher = self.advertise<sb_msgs::MoveCommand>("move_command",100);
+
 	self.subscribe("GPS_COORD",100,onNewWaypoint);
 
 	list = read_file("input.txt");
@@ -75,6 +78,7 @@ int main(int argc, char** argv){
 	publisher.publish(current_command);
 	
 	while(ros::ok()){
+		std::cout << "hi";
 		ros::spinOnce();
 		loop_rate.sleep();
 	}
