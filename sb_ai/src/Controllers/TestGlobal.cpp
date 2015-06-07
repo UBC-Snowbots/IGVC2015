@@ -54,13 +54,11 @@ void MapCallback(const nav_msgs::OccupancyGrid::ConstPtr& map)
     local_x = AI_Utilities::ConvertIndexToLocalXCoord(index, map->info.width) - ((map->info.width / 2) - 1);
     local_y = AI_Utilities::ConvertIndexToLocalYCoord(index, map->info.width) - (map->info.height - 1);
     
-	  global_x = cos(orientation)
-			  * local_x
+	  global_x = cos(orientation) * local_x
 			  - sin(orientation) * local_y
 			  + AI_Utilities::GetGlobalIndexX(origin_long, long_pos, origin_x, RESOLUTION);
 			  
-	  global_y = sin(orientation)
-			  * local_x
+	  global_y = sin(orientation) * local_x
 			  + cos(orientation) * local_y
 			  + AI_Utilities::GetGlobalIndexY(origin_lat, lat_pos, origin_y, RESOLUTION);
 
@@ -133,6 +131,7 @@ void CompassCallback(const sb_msgs::RobotState::ConstPtr& compass)
       orientation += 360;
     }
     
+    orientation = 0;
     orientation *= AI_Utilities::PI / 180;
   }
 }
@@ -149,7 +148,7 @@ int main(int argc, char **argv)
 	ros::Subscriber map_sub = nh.subscribe(MAP_SUB_TOPIC, 10, MapCallback);
 	ros::Subscriber gps_sub = nh.subscribe(GPS_SUB_TOPIC, 10, GpsCallback);
 	ros::Subscriber compass_sub = nh.subscribe(COMPASS_SUB_TOPIC, 10, CompassCallback);
-  ros::Publisher global_map_pub = nh.advertise<nav_msgs::OccupancyGrid>("global_map_test", 10);
+  ros::Publisher global_map_pub = nh.advertise<nav_msgs::OccupancyGrid>("global_map_test", 2);
 
 	// Initialize test global map pub
 	global_map.data.assign(global_size, 100);
@@ -162,6 +161,7 @@ int main(int argc, char **argv)
   global_map.info.origin.orientation.w = 0;
   global_map.info.width = global_width;
   global_map.info.height = global_height;
+  global_map.info.resolution = RESOLUTION;
   
   while (ros::ok())
   {

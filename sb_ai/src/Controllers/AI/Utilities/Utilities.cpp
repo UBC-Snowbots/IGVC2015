@@ -93,7 +93,10 @@ namespace AI_Utilities
 
   int GetGlobalIndexX(float gpsOriginLon, float currGpsLon, int globalOriginX, float resolution) 
   {
-    int diff = (currGpsLon - gpsOriginLon) * longLatToMeters;
+  	float longConv = 111412.84 * cos(currGpsLon)
+		- 93.5 * cos(3 * currGpsLon) - 0.118 * cos(5 * currGpsLon);
+    
+    int diff = (currGpsLon - gpsOriginLon) * longConv;
     diff /= resolution;
     diff += globalOriginX;
     return diff;
@@ -102,7 +105,11 @@ namespace AI_Utilities
 
   int GetGlobalIndexY(float gpsOriginLat, float currGpsLat, int globalOriginY, float resolution) 
   {
-    int diff = (currGpsLat - gpsOriginLat) * longLatToMeters;
+  	float latConv = 111132.92 - 559.82 * cos(2 * currGpsLat)
+		+ 1.175 * cos(4 * currGpsLat)
+		- 0.0023 * cos(6 * currGpsLat);
+  
+    int diff = (currGpsLat - gpsOriginLat) * latConv;
     diff /= resolution;
     diff += globalOriginY;
     return diff;
