@@ -11,18 +11,18 @@
 int const kMaxBinary = 255;
 int const kThreshold = 195; //195
 int const kUpperBound = 255;
-int const kLowerBound = 20;
-int const erosion_elem = 0;
-int const erosion_size = 3;
+int const kLowerBound = 200;
+int const erosion_elem = 2;
+int const erosion_size = 1;
 int const dilation_elem = 0;
-int const dilation_size = 12;
+int const dilation_size = 10;
 int const max_elem = 2;
 int const max_kernel_size = 101;
 
 using namespace std;
 
 filter::filter():
-     kBlur(8)
+     kBlur(11)
  {
  	
  }
@@ -63,22 +63,19 @@ cv::Mat filter::getUpdate(cv::Mat inputImage)
 	
     cout<<"filter split image into RGB"<<endl;
     
-    inRange(image_H, 0,20,image_H);
-    inRange(image_S,kLowerBound,kUpperBound,image_S);
+    inRange(image_H, 0,10,image_H);
+    inRange(image_S, 150,255,image_S);
     inRange(image_V, kLowerBound,kUpperBound,image_V);
 
     inRange(image_R, kLowerBound,kUpperBound,image_R);
     inRange(image_G, kLowerBound,kUpperBound,image_G);
-    inRange(image_B, kLowerBound,kUpperBound,image_B);
+    inRange(image_B, 230,255,image_B);
 
 	//cv::medianBlur(imageGrey, imageBlur2, kBlur);
 	//Extract green
-	//image_G = (channels_RGB[1]<50);
+	cv::bitwise_and(image_B,image_G,image_V );
     //inRange(image_V, kLowerBound,kUpperBound,imageThresholded);
 
-    //Extract white
-    inRange(image_V, kLowerBound,kUpperBound,imageThresholded);
-    
     // Dilate
     int erosion_type;
     if( erosion_elem == 0 ){ erosion_type = cv::MORPH_RECT; }
@@ -90,7 +87,7 @@ cv::Mat filter::getUpdate(cv::Mat inputImage)
                                        cv::Point( erosion_size, erosion_size ) );
 
     /// Apply the erosion operation
-    erode( image_H, imageErode, element );
+    erode( image_B, imageErode, element );
 
 	  int dilation_type;
 	  if( dilation_elem == 0 ){ dilation_type = cv::MORPH_RECT; }
@@ -101,7 +98,7 @@ cv::Mat filter::getUpdate(cv::Mat inputImage)
 	                                       cv::Size( 2*dilation_size + 1, 2*dilation_size+1 ),
 	                                       cv::Point( dilation_size, dilation_size ) );
 	  /// Apply the dilation operation
-	  dilate( image_H, imageDilate, element );
+	  dilate( image_B, imageDilate, element );
 
 	  erode(imageDilate,imageBoth, element);
 	  dilate(imageErode,imageBoth2, element);
@@ -127,7 +124,7 @@ cv::Mat filter::getUpdate(cv::Mat inputImage)
 	//Otsu threshold
 	//threshold(image_blur2, image_thresholded, threshold_value, 255 , THRESH_OTSU|THRESH_BINARY  );
 	//image_direction = image_thresholded.clone();
-	outputImage = imageBoth.clone();
+	outputImage = image_B.clone();
 	//Canny Edge detection
 	//cv::Canny(image_thresholded, image_canny, 50, 200, 3);
 	

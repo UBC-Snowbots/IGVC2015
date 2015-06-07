@@ -22,13 +22,13 @@ VisionController::VisionController(ros::NodeHandle& nh):
 	dy(0),
 	steeringOut(0),
 	steering(0),
-	steeringIncrement(0.1), //TODO: is this steering too strong?
-	lowsteeringIncrement(0.05),
+	steeringIncrement(0.3), //TODO: is this steering too strong?
+	lowsteeringIncrement(0.3),
 	priority(0),
 	direction(0),
 	noLinesWait(0),
-	throttle(0.35), // TODO: is this throttle too strong?
-	lowThrottle(0.3),
+	throttle(0.5), // TODO: is this throttle too strong?
+	lowThrottle(0.5),
 	count(0)
 {
 

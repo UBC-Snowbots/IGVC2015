@@ -19,7 +19,7 @@ namespace ai
 	  y_pos = -1;
   
     // Initialize world
-		world = new GridWorld(global_width, INTERSECTION_RADIUS);
+		world = new GridWorld(global_height, global_width, INTERSECTION_RADIUS, GridWorld::Coords(0, 0), GridWorld::Coords(global_width - 1, global_height - 1));
 		
 		realWorld = new int[global_size];
 		for (int i = 0; i < global_size; i++)
