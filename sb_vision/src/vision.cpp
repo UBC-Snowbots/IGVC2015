@@ -167,7 +167,7 @@ int main(int argc, char **argv)
         else if(camera_status[0]) pano = image1;
         else if(camera_status[1]) pano = image2;
         else if(camera_status[2]) pano = image3;
-        else pano = imread("/home/mecanum/Desktop/Image2.jpg", 1);
+        else pano = imread("/home/mecanum/Desktop/Image1.jpg", 1);
         //else pano = imread("/home/mecanum/snowbots_ws/src/IGVC2015/sb_vision/src/Image1.jpg", 1);
 
         //Apply filter to stitched image

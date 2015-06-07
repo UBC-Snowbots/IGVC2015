@@ -38,6 +38,7 @@ include_directories( ${MODE_INCLUDE_DIRS} )
 
 add_executable(sb_ai ${MAIN_HEADERS} ${MAIN_SOURCE})
 add_dependencies(sb_ai sb_msgs_generate_messages_cpp)
+add_dependencies(sb_ai sb_gps_generate_messages_cpp)
 target_link_libraries(sb_ai ${catkin_LIBRARIES} ${MODE_LIBRARIES})
 
 add_executable(global_map Controllers/TestGlobal.cpp)

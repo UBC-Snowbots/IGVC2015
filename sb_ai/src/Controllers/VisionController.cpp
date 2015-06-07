@@ -89,8 +89,8 @@ void VisionController::getDirection(void) {
 */
 	int rows2Check = 80;
 	int minConstraint = 10; // need this many, or more point to define a line
-	int distanceBetweenRows = image.rows / rows2Check;
-	int const startRow = image.rows;//image.rows/2+distanceBetweenRows*19; //TODO: adjust for camera angle
+	int distanceBetweenRows = -image.rows / rows2Check;
+	int const startRow = image.rows/3;//image.rows/2+distanceBetweenRows*19; //TODO: adjust for camera angle
 	//int const startRow = distanceBetweenRows*19; 	
 	int row = startRow;
 
