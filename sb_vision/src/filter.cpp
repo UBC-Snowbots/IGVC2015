@@ -11,7 +11,13 @@
 int const kMaxBinary = 255;
 int const kThreshold = 195; //195
 int const kUpperBound = 255;
-int const kLowerBound = 225;
+int const kLowerBound = 20;
+int const erosion_elem = 0;
+int const erosion_size = 3;
+int const dilation_elem = 0;
+int const dilation_size = 12;
+int const max_elem = 2;
+int const max_kernel_size = 101;
 
 using namespace std;
 
@@ -29,26 +35,89 @@ void filter::testPrint(void)
 cv::Mat filter::getUpdate(cv::Mat inputImage) 
 {
 	image_histo = inputImage.clone();
-	//cv::cvtColor(inputImage, image_histo, CV_RGB2HSV);
+	cv::cvtColor(inputImage, image_histo, CV_RGB2HSV);
+	
 	//Blur Image
 	if (kBlur % 2 == 0) kBlur = kBlur + 1; //Will crash if kBlur is even
-	cv::medianBlur(image_histo, imageBlur2, kBlur);
-    cv::medianBlur(imageBlur2, imageBlur, kBlur);
+	cv::medianBlur(image_histo, imageBlur, kBlur);
+    cv::medianBlur(inputImage, imageBlur2, kBlur);
 
-		//cvtColor(image, image_histo, COLOR_RGB2HSV);
+	//cvtColor(image, image_histo, COLOR_RGB2HSV);
 
-	
 	split(imageBlur, channels);
 
-		// And then if you like
-		image_H = channels[0];
-		image_S = channels[1];
-		image_V = channels[2];
-	//Create grey-scaled version of image
-    cout<<"filter split image"<<endl;
+    // And then if you like
+	image_H = channels[0];
+	image_S = channels[1];
+	image_V = channels[2];
+
+    cout<<"filter split image into HSV"<<endl;
+
+	split(imageBlur2, channels_RGB);
+
+    // And then if you like
+	image_R = channels_RGB[0];
+	image_G = channels_RGB[1];
+	image_B = channels_RGB[2];
+
+	
+    cout<<"filter split image into RGB"<<endl;
+    
+    inRange(image_H, 0,20,image_H);
+    inRange(image_S,kLowerBound,kUpperBound,image_S);
+    inRange(image_V, kLowerBound,kUpperBound,image_V);
+
+    inRange(image_R, kLowerBound,kUpperBound,image_R);
+    inRange(image_G, kLowerBound,kUpperBound,image_G);
+    inRange(image_B, kLowerBound,kUpperBound,image_B);
 
 	//cv::medianBlur(imageGrey, imageBlur2, kBlur);
+	//Extract green
+	//image_G = (channels_RGB[1]<50);
+    //inRange(image_V, kLowerBound,kUpperBound,imageThresholded);
+
+    //Extract white
     inRange(image_V, kLowerBound,kUpperBound,imageThresholded);
+    
+    // Dilate
+    int erosion_type;
+    if( erosion_elem == 0 ){ erosion_type = cv::MORPH_RECT; }
+    else if( erosion_elem == 1 ){ erosion_type = cv::MORPH_CROSS; }
+    else if( erosion_elem == 2) { erosion_type = cv::MORPH_ELLIPSE; }
+
+    element = getStructuringElement( erosion_type,
+                                       cv::Size( 2*erosion_size + 1, 2*erosion_size+1 ),
+                                       cv::Point( erosion_size, erosion_size ) );
+
+    /// Apply the erosion operation
+    erode( image_H, imageErode, element );
+
+	  int dilation_type;
+	  if( dilation_elem == 0 ){ dilation_type = cv::MORPH_RECT; }
+	  else if( dilation_elem == 1 ){ dilation_type = cv::MORPH_CROSS; }
+	  else if( dilation_elem == 2) { dilation_type = cv::MORPH_ELLIPSE; }
+
+	  element = getStructuringElement( dilation_type,
+	                                       cv::Size( 2*dilation_size + 1, 2*dilation_size+1 ),
+	                                       cv::Point( dilation_size, dilation_size ) );
+	  /// Apply the dilation operation
+	  dilate( image_H, imageDilate, element );
+
+	  erode(imageDilate,imageBoth, element);
+	  dilate(imageErode,imageBoth2, element);
+
+    // Erode
+    // White and not green
+    //Mat bin_hue = (chan[2]<20)|(chan[2]>100);  // note: single '|'
+    //Mat bin_sat = (chan[1]<72)|(chan[1]>155);
+    //Mat bin_val = (chan[0]<64)|(chan[1]>155);
+
+    // White and not green
+    //Mat bin_red = (chan[2]<20)|(chan[2]>100);  // note: single '|'
+    //Mat bin_grn = (chan[1]<72)|(chan[1]>155);
+    //Mat bin_blu = (chan[0]<64)|(chan[1]>155);
+
+    //Mat bin = bin_red & bin_grn & bin_blu;  // where all conditions were met
 	//Threshold the image: 3 different options
 	//Regular threshold
 	//threshold(imageBlur2, imageThresholded, kThreshold, kMaxBinary,
@@ -58,7 +127,7 @@ cv::Mat filter::getUpdate(cv::Mat inputImage)
 	//Otsu threshold
 	//threshold(image_blur2, image_thresholded, threshold_value, 255 , THRESH_OTSU|THRESH_BINARY  );
 	//image_direction = image_thresholded.clone();
-	outputImage = imageThresholded.clone();
+	outputImage = imageBoth.clone();
 	//Canny Edge detection
 	//cv::Canny(image_thresholded, image_canny, 50, 200, 3);
 	
@@ -73,12 +142,62 @@ void filter::displayImages(cv::Mat inputImage)
         std::cout<<"size of input outputImage"<<outputImage.rows<<","<<outputImage.cols<<endl;
 	    //Display Input Image
 	    cv::namedWindow("Display Image", CV_WINDOW_NORMAL);
-		cvMoveWindow("Display Image", 0, 300);
+		cvMoveWindow("Display Image", 0, 0);
 		cv::imshow("Display Image", inputImage);
         
 	    //Display direction image
 		cv::namedWindow("Direction", CV_WINDOW_NORMAL);
-		cvMoveWindow("Direction", 400, 0);
+		cvMoveWindow("Direction", 0, 300);
 		cv::imshow("Direction", outputImage);
-        cout<<"displayed the images"<<endl; 
+   
+
+        //Display direction image
+		cv::namedWindow("Image H", CV_WINDOW_NORMAL);
+		cvMoveWindow("Image H", 400, 0);
+		cv::imshow("Image H", image_H);
+   
+
+        //Display direction image
+		cv::namedWindow("Image S", CV_WINDOW_NORMAL);
+		cvMoveWindow("Image S", 400, 300);
+		cv::imshow("Image S", image_S);
+    
+
+        //Display direction image
+		cv::namedWindow("Image V", CV_WINDOW_NORMAL);
+		cvMoveWindow("Image V", 400, 600);
+		cv::imshow("Image V", image_V);
+
+		  //Display direction image
+		cv::namedWindow("Image R", CV_WINDOW_NORMAL);
+		cvMoveWindow("Image R", 800, 0);
+		cv::imshow("Image R", image_R);
+   
+
+        //Display direction image
+		cv::namedWindow("Image G", CV_WINDOW_NORMAL);
+		cvMoveWindow("Image G", 800, 300);
+		cv::imshow("Image G", image_B);
+    
+
+        //Display direction image
+		cv::namedWindow("Image B", CV_WINDOW_NORMAL);
+		cvMoveWindow("Image B", 800, 600);
+		cv::imshow("Image B", image_G);
+
+		cv::namedWindow("Image Erode", CV_WINDOW_NORMAL);
+		cvMoveWindow("Image Erode", 1200, 0);
+		cv::imshow("Image Erode", imageErode);
+ 
+ 		cv::namedWindow("Image Dilate", CV_WINDOW_NORMAL);
+		cvMoveWindow("Image Dilate", 1200, 300);
+		cv::imshow("Image Dilate", imageDilate);
+
+		cv::namedWindow("Image Erode Dilate", CV_WINDOW_NORMAL);
+		cvMoveWindow("Image Erode Dilate", 1600, 0);
+		cv::imshow("Image Erode Dilate", imageBoth2);
+
+		cv::namedWindow("Image Dilate Erode", CV_WINDOW_NORMAL);
+		cvMoveWindow("Image Dilate Erode", 1600, 300);
+		cv::imshow("Image Dilate Erode", imageBoth);
 }

@@ -39,11 +39,10 @@
 
 
 void ConvertSensorImage::printMap(){
+	ROS_INFO("Printing grid, which is %d x %d", height, width);
 	for(int i = 0; i < height; i++){
 		for(int j = 0; j < width; j++){
-			//cout << ((int)(data[j * width + i]) == 0) ? '0':'1' << " ";
-			printf("%d ", ((int)(data[j * width + i]) == 0)? 0:1);
-			
+			cout << static_cast<int>(data[i * width + j]) << " ";
 		}
 		cout << endl;
 	}

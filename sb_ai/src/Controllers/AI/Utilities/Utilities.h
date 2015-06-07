@@ -14,7 +14,6 @@ namespace AI_Utilities
 
   static const float MAX_ANG_VEL = 0.3f;
   static const float MAX_LIN_VEL = 0.3f;
-  static const float longLatToMeters = 0.07871 / 0.000001; // not sure if correct 
   static const float PI = 3.14159265;
   
   geometry_msgs::Twist GetVelocity(Location* next_targets, float elsa_yaw, geometry_msgs::Twist &elsa_command);
