@@ -97,7 +97,9 @@ int main(int argc, char** argv)
 	usleep(10*SECOND);
 		
 	//subscribers and publishers
+
 	Subscriber car_command = n.subscribe(CAR_COMMAND_TOPIC, 1, car_command_callback);
+
 //	Subscriber turret_command = n.subscribe(TURRET_COMMAND_TOPIC, 1, turret_command_callback);
 	Subscriber eStop_topic = n.subscribe(ESTOP_TOPIC, 1, eStop_callback);
 	
@@ -262,11 +264,18 @@ void processData(string data,sb_msgs::RobotState &state)
 //car_command_callback
 void car_command_callback(const geometry_msgs::TwistConstPtr& msg_ptr)
 {
-	mech.twist_y = msg_ptr->linear.y * 125+125; 
-	mech.twist_z = -msg_ptr->angular.z * 125+125;
-
+	ROS_INFO("car command has been called");
+	mech.twist_y = (msg_ptr->linear.y) * 125+125; 
+	mech.twist_z = -(msg_ptr->angular.z) * 125+125;
+    cout<<"callback function running"<<endl;
+    cout<< "linear y:"<<msg_ptr->linear.y <<endl;
+    cout<< "angular z:"<< msg_ptr->angular.z <<endl;
+    cout<< "mech twist_y:"<<mech.twist_y<<endl;
+	cout<< "mech twist_z:"<<mech.twist_z<<endl;
 	sprintf(twist_y,"%03d",mech.twist_y);
 	sprintf(twist_z,"%03d",mech.twist_z);
+	cout<< "twist_y:"<<twist_y<<endl;
+	cout<< "twist_z:"<<twist_z<<endl;
 	ROS_INFO("Twist_y: %s", twist_y);
 	ROS_INFO("Twist_z: %s", twist_z);
 }

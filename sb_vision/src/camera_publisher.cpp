@@ -52,14 +52,13 @@ int main(int argc, char** argv){
 	//Links shutdown process to our custom shutdown function
 	signal(SIGINT, onShutdown);
 
-
 	for(int i = 0; i < CAMERA_AMOUNT ; i++){
 		try{
 			Camera cam(i);
-		cams.push_back(cam);
-		frames.push_back(Mat());
+			cams.push_back(cam);
+			frames.push_back(Mat());
 		}catch(const std::invalid_argument& e){
-			ROS_WARN("FAILED %d", i);
+			ROS_WARN("Failed to connect to Camera %d", i);
 		}			
 
 	}

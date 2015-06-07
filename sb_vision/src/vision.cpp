@@ -72,6 +72,7 @@ int main(int argc, char **argv)
     Mat frame;
     Mat pano;
     Mat image_pano;
+    Mat dst;
     bool camera_status[3]; //false means off, true means on
         
     //IPM Set-up, will put into class itself soon
@@ -111,7 +112,7 @@ int main(int argc, char **argv)
         //TODO: add camera capture allowance for any amount of cameras
         // Read in image from video camera, or other source
         
-        if(camera_status[0]) cap1 >> image1;
+        if(camera_status[0]) cap1 >> image1; 
         if(camera_status[1]) cap2 >> image2;
         if(camera_status[2]) cap3 >> image3;
         
@@ -123,12 +124,12 @@ int main(int argc, char **argv)
         if (image1.empty() || image2.empty() || image3.empty()) {
          ROS_WARN("One of the Mats is empty");   
         }
-      
-	    
+
+     
 
         // Static image for debugging purposes, seem to need an absolute
         // path to the image to avoid crashes
-    	//cv::Mat image = imread("/home/jannicke/Pictures/Image1.jpg", 1);
+    		//cv::Mat image = imread("/home/mecanum/snowbots_ws/src/IGVC2015/sb_vision/src/Image1.jpg", 1);
         //if(!image.data) std::cout<<"NO IMAGE DATA"<<std::endl;
         //else std::cout<<"image data exists"<<std::endl;
         //std::cout<<"image read"<<std::endl;
@@ -166,13 +167,14 @@ int main(int argc, char **argv)
         else if(camera_status[0]) pano = image1;
         else if(camera_status[1]) pano = image2;
         else if(camera_status[2]) pano = image3;
-        else pano = imread("/home/snowbots/Pictures/Image1.jpg", 1);
+        else pano = imread("/home/mecanum/Desktop/Image2.jpg", 1);
+        //else pano = imread("/home/mecanum/snowbots_ws/src/IGVC2015/sb_vision/src/Image1.jpg", 1);
 
         //Apply filter to stitched image
         filter myfilter; //create filter
         image_pano = myfilter.getUpdate(pano);
         myfilter.displayImages(pano);
-        
+        cout<<"filter has been applied"<<endl;
      
 	    // Transform image
 	    IPM ipm( Size(width, height), Size(width, height), origPoints, dstPoints );
@@ -181,30 +183,55 @@ int main(int argc, char **argv)
         {
             cout<<"frame empty" <<endl;
         } 
+        else{
 		// Color Conversion
-		if(frame.channels() == 3)cvtColor(frame, inputImgGray, CV_BGR2GRAY);				 		 
-		else frame.copyTo(inputImgGray);			 		 
-		// Process
-		ipm.applyHomography( frame, outputImg);		 
-		ipm.drawPoints(origPoints, frame );
+        cout<< "num channels"<<frame.channels();
+        //cv::cvtColor(frame, inputImgGray, CV_GRAY2BGR);
         
-        Size size(80,60);//the dst image size,e.g.100x100
-        Mat dst;
-        resize(outputImg,dst,size);//resize image
 
+		if(frame.channels() == 3)cvtColor(frame, inputImgGray, CV_BGR2GRAY);				 		 
+		else frame.copyTo(inputImgGray);	
+        //imshow("gray",inputImgGray);		 		 
+		// Process
+        std::cout<<"size of input inputImageGray"<<inputImgGray.rows<<","<<inputImgGray.cols<<endl;
+        std::cout<<"size of input frame"<<frame.rows<<","<<frame.cols<<endl;
+        Size size_homo(width,height);//the dst image size,e.g.100x100
+        resize(inputImgGray,dst,size_homo);
+        std::cout<<"size of input inputImageGray after resize"<<inputImgGray.rows<<","<<inputImgGray.cols<<endl;
+
+		//ipm.applyHomography( frame, outputImg);	
+        ipm.applyHomography( dst, outputImg);
+        namedWindow("outputimg",WINDOW_NORMAL);
+        cvMoveWindow("outputimg",1600,600);
+        imshow("outputimg",outputImg);
+
+		ipm.drawPoints(origPoints, frame);
+        Size size(80,60);//the dst image size,e.g.100x100
+        resize(outputImg,dst,size);//resize image
+        }
+        
         // Publish Image
-        //if(!image_pano.empty()) {
+        if(!image_pano.empty()) {
             msg2 = cv_bridge::CvImage(std_msgs::Header(), "mono8", image_pano).toImageMsg();
             pub2.publish(msg2);
             ROS_INFO("Vision published an image");
-        //    cv::waitKey(1);
-       // }
-        //if(!outputImg.empty()) {
+            cv::waitKey(1);
+        }
+        if(!dst.empty()) {
+            namedWindow("dst",WINDOW_NORMAL);
+            cvMoveWindow("dst",1600,600);
+            imshow("dst", dst);
+            namedWindow("output Image",WINDOW_NORMAL);
+            cvMoveWindow("output Image",1200,600);
+            imshow("output Image", outputImg);
             msg = cv_bridge::CvImage(std_msgs::Header(), "mono8", dst).toImageMsg();
             pub.publish(msg);
-            ROS_INFO("Vision published an image");
-            cv::waitKey(1);
-       // }
+            ROS_INFO("Vision published a bird image");
+            cv::waitKey(10);
+            }
+       else{
+			ROS_WARN("Image was empty");
+			}
         ros::spinOnce();
         loop_rate.sleep();
 
