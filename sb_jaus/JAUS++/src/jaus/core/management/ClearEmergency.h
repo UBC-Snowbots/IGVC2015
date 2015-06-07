@@ -58,11 +58,11 @@ namespace JAUS
     {
     public:
         ClearEmergency(const Address& dest = Address(), 
-                       const Address& src = Address()) : Message(SET_EMERGENCY, dest, src)
+                       const Address& src = Address()) : Message(CLEAR_EMERGENCY, dest, src)
         {
             mEmergencyCode = 0;
         }
-        ClearEmergency(const ClearEmergency& message) : Message(SET_EMERGENCY)
+        ClearEmergency(const ClearEmergency& message) : Message(CLEAR_EMERGENCY)
         {
             mEmergencyCode = 0;
             *this = message;

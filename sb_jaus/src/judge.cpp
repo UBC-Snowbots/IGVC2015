@@ -132,8 +132,9 @@ public:
     }
 };
 
-int main() {
 
+
+int main() {
 
     JAUS::Component component;
     JAUS::Discovery* discoveryService = nullptr;
@@ -234,8 +235,9 @@ int main() {
             //JAUS::QueryIdentification id_query(JAUS::Address(103,1,1),component.GetComponentID());
             id_query.SetQueryType(JAUS::QueryIdentification::Type::ComponentIdentification);
             JAUS::ReportIdentification id_response;
+	    
             std::cout << "Return: " << component.Send(&id_query, &id_response) << std::endl;
-            std::cout << id_response.GetIdentification() << std::endl;
+	    std::cout << id_response.GetIdentification() << std::endl;
 	    
 	    JAUS::QueryServices serviceQuery(JAUS::Address(0xffff,0xff,0xff), component.GetComponentID());
 	    //JAUS::QueryServices serviceQuery(JAUS::Address(103, 1, 1), component.GetComponentID());
@@ -372,7 +374,7 @@ int main() {
         case 101: {
             //Set Emergency
             std::cout << "\033[4;31mSetting Emergency:\033[0m" << std::endl;
-            JAUS::SetEmergency setEmergency(JAUS::Address(5000,1,1), component.GetComponentID());
+            JAUS::SetEmergency setEmergency(JAUS::Address(103,1,1), component.GetComponentID());
             JAUS::ReportStatus reportStatus;
             std::cout << "Return: " << component.Send(&setEmergency, &reportStatus) << std::endl;
             reportStatus.Print();
@@ -381,7 +383,7 @@ int main() {
         case 102: {
             //Clear Emergency
             std::cout << "\033[4;31mClearing Emergency:\033[0m" << std::endl;
-            JAUS::ClearEmergency clearEmergency(JAUS::Address(5000,1,1), component.GetComponentID());
+            JAUS::ClearEmergency clearEmergency(JAUS::Address(103,1,1), component.GetComponentID());
             JAUS::ReportStatus reportStatus;
 
             std::cout << "Return: " << component.Send(&clearEmergency, &reportStatus) << std::endl;

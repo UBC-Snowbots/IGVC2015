@@ -125,11 +125,11 @@ int main(int argc, char* argv[]) {
             break;
         }
         if(JAUS::Time::GetUtcTimeMs() - displayStatusTimeMs > 500) {
-            /*std::cout << "==================" << std::endl;
+            std::cout << "==================" << std::endl;
             managementService->PrintStatus();
             discoveryService->PrintStatus();
             transportService->PrintStatus();
-            std::cout << std::endl;*/
+            std::cout << std::endl;
             displayStatusTimeMs = JAUS::Time::GetUtcTimeMs();
         }
         ros::spinOnce();
