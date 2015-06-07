@@ -35,7 +35,9 @@ float origin_long = 83.195365;
 // Current state variables
 double long_pos = 0; 
 double lat_pos = 0; 
-float orientation = 50 * M_PI / 180;  
+float orientation = 50 * M_PI / 180; 
+int o_count = 0; 
+int oo_count = 0;
 int x_pos = 0;
 int y_pos = 0;
   
@@ -48,8 +50,11 @@ void MapCallback(const nav_msgs::OccupancyGrid::ConstPtr& map)
   int global_x, global_y, local_x, local_y;
   int localMapSize = map->info.width * map->info.height; 
   int global_i, test;
-  long_pos++;
-  lat_pos++;
+  long_pos++; // test
+  lat_pos++; // test
+  oo_count++;
+  if (oo_count % 10 == 0) { o_count++; }
+  orientation = 50 * o_count * M_PI / 180; 
   
   // Loop through the vision map
   for (int index = 0; index < localMapSize; index++) 
