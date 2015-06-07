@@ -85,18 +85,19 @@ int main(int argc, char* argv[]) {
     discoveryService->SetSubsystemIdentification(JAUS::Subsystem::Vehicle,"Snowbots");
     discoveryService->SetNodeIdentification("Main");
     discoveryService->SetComponentIdentification("Baseline");
+    discoveryService->SetSubsystemsToDiscover(std::set<JAUS::UShort>());
     
     
     JAUS::AccessControl* accessControl = (JAUS::AccessControl*)component.GetService(JAUS::AccessControl::Name);
     accessControl->EnableDebugMessages(true);
     accessControl->SetAuthorityCode(0);
     accessControl->SetControllable(true);
-    int comp_id = 5000;
+    int comp_id = 103;
     JAUS::Address componentID(comp_id,1,1);
 
     JAUS::Management* management = (JAUS::Management*)component.GetService(JAUS::Management::Name);
     
-    discoveryService->EnableDebugMessages(true);
+    //discoveryService->EnableDebugMessages(true);
     while(component.Initialize(componentID)==false) {
         std::cout << "Failed to initialize [" << componentID.ToString() << "]" << std::endl;
         comp_id++;
@@ -106,6 +107,7 @@ int main(int argc, char* argv[]) {
 
     transportService = (JAUS::Transport*) component.GetService(JAUS::Transport::Name);
     transportService->LoadSettings("services.xml");
+    transportService->EnableDebugMessages();
 	
     const JAUS::Address comp_address_id = component.GetComponentID();
     if(!transportService->IsInitialized()) {
@@ -123,11 +125,11 @@ int main(int argc, char* argv[]) {
             break;
         }
         if(JAUS::Time::GetUtcTimeMs() - displayStatusTimeMs > 500) {
-            std::cout << "==================" << std::endl;
+            /*std::cout << "==================" << std::endl;
             managementService->PrintStatus();
             discoveryService->PrintStatus();
             transportService->PrintStatus();
-            std::cout << std::endl;
+            std::cout << std::endl;*/
             displayStatusTimeMs = JAUS::Time::GetUtcTimeMs();
         }
         ros::spinOnce();

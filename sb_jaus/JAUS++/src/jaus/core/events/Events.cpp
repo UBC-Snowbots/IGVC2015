@@ -1023,7 +1023,172 @@ void Events::Receive(const Message* message)
             }
         }
         break;
-    case UPDATE_EVENT:
+    case UPDATE_EVENT:{
+            const UpdateEvent* update = dynamic_cast<const UpdateEvent*>(message);
+            Service::Map children = GetChildServices();
+            Service::Map::iterator citer;
+            Events::Child* child = NULL;
+            Message* queryMessage = NULL;
+            double confirmedPeriodicRate = 0.0;
+            std::string errorMessage;
+            UShort signalEventCode = 0;
+        
+            bool sentResponse = false;
+
+            for(citer = children.begin();
+                citer != children.end();
+                citer++)
+            {
+                child = dynamic_cast<Events::Child*>(citer->second);
+                UShort messageCode = update->GetQueryMessageCode();
+                queryMessage = child? child->CreateMessage(messageCode) : NULL;
+                if(child && queryMessage)
+                {
+                    
+                    if(queryMessage->ReadMessageBody(*update->GetQueryMessage()) < 0)
+                    {
+                        // Failed to read message data.
+                        return;
+                    }
+                    if(child->IsEventSupported(update->GetType(),
+                                                          update->GetRequestedPeriodicRate(),
+                                                          queryMessage,
+                                                          confirmedPeriodicRate,
+                                                          errorMessage) )
+                    {                        
+                        
+                        Subscription::Map::iterator siter;
+                        Subscription subscription;
+                        bool exists = false;
+                        bool full = false;
+                        // Lock data.
+                        {
+                            WriteLock wLock(mEventsMutex);
+                            if(mEvents.size() == 255)
+                            {
+                                full = true;
+                                break;
+                            }
+                            for(siter = mEvents.begin();
+                                siter != mEvents.end();
+                                siter ++)
+                            {
+                                // Keep trying to generate a "unique" subscription ID that is
+                                // not already used for this type of data.
+                                if(siter->second.mpQueryMessage->GetMessageCode() == queryMessage->GetMessageCode())
+                                {
+                                    subscription.mID = siter->second.mID + 1;
+                                }
+                                // See if this event already exists, and if so, add the
+                                // subscriber to it.
+                                Packet queryBody1, queryBody2;
+                                siter->second.mpQueryMessage->WriteMessageBody(queryBody1);
+                                queryMessage->WriteMessageBody(queryBody2);
+                                if(siter->second.mpQueryMessage->GetMessageCode() == queryMessage->GetMessageCode() &&
+                                    siter->second.mpQueryMessage->GetPresenceVector() == queryMessage->GetPresenceVector() &&
+                                    siter->second.mType == update->GetType() &&
+                                    queryBody1.Length() == queryBody2.Length() &&
+                                    memcmp(queryBody1.Ptr(), queryBody2.Ptr(), queryBody1.Length()) == 0)
+                                {
+                                    exists = true;
+                                    Type type = update->GetType();
+                                    if(type == Periodic)
+                                    {
+                                        if(confirmedPeriodicRate > siter->second.mPeriodicRate)
+                                        {
+                                            siter->second.mPeriodicRate = confirmedPeriodicRate;
+                                        }
+                                    }
+                                    // Make sure this source is in our list, just in case.
+                                    siter->second.mClients.insert(message->GetSourceID());
+                                    // Use previous information.
+                                    subscription = siter->second;
+                                    break;
+                                }
+                            }
+                        }
+
+                        // If this is an Update Event message, and
+                        // the event doesn't exist, return error.
+                        if(full || (exists == false || subscription.mType != update->GetType()) )
+                        {
+                            RejectEventRequest reject(update->GetSourceID(), GetComponentID());
+                            if(full)
+                            {
+                                reject.SetResponseCode(RejectEventRequest::ConnectionRefused);
+                                errorMessage = "Reached maximumum number of event subscriptions supported.";
+                            }
+                            else if(subscription.mType != update->GetType())
+                            {
+                                reject.SetResponseCode(RejectEventRequest::InvalidSetup);
+                                errorMessage = "Change of Event Type (Periodic/Every Change) Not Supported";
+                            }
+                            else
+                            {
+                                reject.SetResponseCode(RejectEventRequest::InvalidEventID);
+                            }
+                            reject.SetRequestID(update->GetRequestID());
+                            if(errorMessage.size())
+                            {
+                                reject.SetErrorMessage(errorMessage);
+                            }
+                            Send(&reject);
+                            return;
+                        }
+                        
+                        ConfirmEventRequest confirm(message->GetSourceID(), GetComponentID());
+                        confirm.SetRequestID(update->GetRequestID());
+                        confirm.SetConfirmedPeriodicRate(confirmedPeriodicRate);
+                        confirm.SetEventID(subscription.mID);
+                        if(true == (sentResponse = Send(&confirm)))
+                        {
+                            signalEventCode = subscription.mpQueryMessage->GetMessageCodeOfResponse();
+                        }
+                        // Start periodic timer to either generate periodic
+                        // events, or to verify events are still valid (or re-create subscriptions).
+                        if(subscription.mType == Events::Periodic && mPeriodicTimer.IsActive() == false)
+                        {
+                            std::stringstream tname;
+                            tname << GetComponentID().ToString() << ":Events";
+                            mPeriodicTimer.SetName(tname.str());
+                            mPeriodicTimer.Start(subscription.mPeriodicRate);
+                        }
+                        else if(mPeriodicTimer.IsActive() && 
+                                subscription.mPeriodicRate > mPeriodicTimer.GetFrequency())
+                        {
+                            mPeriodicTimer.ChangeFrequency(subscription.mPeriodicRate);
+                        }
+                    }
+                    
+                    // If the child can create the query message
+                    // then it is the Service that we need to check.
+                    // Make sure to delete any memory we created.
+                    if(queryMessage)
+                    {
+                        delete queryMessage;
+                        queryMessage = NULL;
+                        break;
+                    }   
+                    
+                }
+                if(signalEventCode != 0)
+                {
+                    SignalEvent(signalEventCode, false);
+                }
+            }
+            if(sentResponse == false)
+            {
+                RejectEventRequest reject(message->GetSourceID(), GetComponentID());
+                reject.SetResponseCode(RejectEventRequest::MessageNotSupported);
+                reject.SetRequestID( update->GetRequestID() );
+                if(errorMessage.size())
+                {
+                    reject.SetErrorMessage(errorMessage);
+                }
+                Send(&reject);
+            }
+            break;
+    }
     case CREATE_EVENT:
         {
             const CreateEvent* create = dynamic_cast<const CreateEvent*>(message);
@@ -1043,7 +1208,9 @@ void Events::Receive(const Message* message)
                 citer++)
             {
                 child = dynamic_cast<Events::Child*>(citer->second);
-                if(child && (queryMessage = child->CreateMessage(create->GetQueryMessageCode())) != NULL)
+                UShort messageCode = create->GetQueryMessageCode();
+                queryMessage = child? child->CreateMessage(messageCode) : NULL;
+                if(child && queryMessage)
                 {
                     
                     if(queryMessage->ReadMessageBody(*create->GetQueryMessage()) < 0)

@@ -917,8 +917,10 @@ void Transport::ProcessPacket(Packet& jausPacket,
     // Ignore message not destined for this component.
     if(Address::DestinationMatch(jausHeader.mDestinationID, mComponentID) == false)
     {
+        //std::cout << "Reject: " << jausHeader.mDestinationID.ToString() << std::endl;
         return;
     }
+    //std::cout << "Accept: " <<  << jausHeader.mDestinationID.ToString() << std::endl;
 
     UShort messageCode = 0;
 
@@ -996,7 +998,7 @@ void Transport::ProcessSinglePacket(Packet& packet,
             if(mDebugMessagesFlag)
             {
                 WriteLock printLock(mDebugMessagesMutex);
-                std::cout << "[" << GetServiceID().ToString() << "-" << mComponentID.ToString() << "] - Processing " << message->GetMessageName() << " Message\n";
+                std::cout << "[" << GetServiceID().ToString() << "-" << mComponentID.ToString() << "] - Processing " << message->GetMessageName() << " Message from " << message->GetSourceID().ToString() << " to " << message->GetDestinationID().ToString() << "\n";
             }
             PushMessageToChildren(message);
         }

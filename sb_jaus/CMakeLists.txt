@@ -13,6 +13,8 @@ catkin_package(
 	CATKIN_DEPENDS roscpp std_msgs sb_msgs message_runtime
 )
 
+add_definitions( -g )
+
 include_directories(${catkin_INCLUDE_DIRS})
 
 #ADD_DEFINITIONS( -Wall )
@@ -30,27 +32,16 @@ endif()
 
 include_directories(JAUS++/src)
 
-set(JAUS_LIBS
-	JAUS++/lib/libCxUtils.so
-	JAUS++/lib/libJAUSCore.so
-	JAUS++/lib/libJAUSMobility.so
-	JAUS++/lib/libJAUSEnvironment.so
-)
-
 set(BUILD_JAUS_ONLY yes)
 set(ACTIVE_PROJECT_ROOT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/JAUS++)
 add_subdirectory(JAUS++)
 
 add_executable(jaus_server
 	src/server.cpp
-	src/LocalPoseSensorManager.cpp
 	src/LocalWaypointListDriver.cpp
 	src/LocalWaypointDriver.cpp)
 
 add_executable(jaus_judge src/judge.cpp)
-
-#find_package(Boost REQUIRED COMPONENTS system)
-
 
 target_link_libraries(jaus_server ${catkin_LIBRARIES})
 target_link_libraries(jaus_server JAUSCore JAUSEnvironment JAUSMobility CxUtils)

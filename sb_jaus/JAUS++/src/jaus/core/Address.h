@@ -143,14 +143,21 @@ namespace JAUS
         //  Check if destination ID matches the second ID.
         static inline bool DestinationMatch(const Address& dest, const Address id)
         {
-            if( (dest.mSubsystem == GlobalBroadcast || dest.mSubsystem == id.mSubsystem) &&
+            /*if( (dest.mSubsystem == GlobalBroadcast || dest.mSubsystem == id.mSubsystem) &&
                 (dest.mNode == LocalBroadcast || dest.mNode == id.mNode) &&
-                (dest.mComponent == LocalBroadcast || dest.mComponent == id.mComponent)) 
-            {
-                    return true;
+                (dest.mComponent == LocalBroadcast || dest.mComponent == id.mComponent)) */
+            bool result = false;
+            //std::cout << dest.mSubsystem << ' ' << (unsigned int)dest.mNode << ' ' << (unsigned int)dest.mComponent << ' ';
+            if( dest.mSubsystem == GlobalBroadcast ) result = true;
+            else if( dest.mSubsystem == id.mSubsystem){
+            	if(dest.mNode == LocalBroadcast) result = true;
+            	else if(dest.mNode == id.mNode){
+            		if(dest.mComponent == LocalBroadcast) result = true;
+            		else result = dest.mComponent == id.mComponent;
+            	}
             }
-
-            return false;
+            //std::cout << result << std::endl;
+            return result;
         }
         ////////////////////////////////////////////////////////////////////////////////////
         /// 

@@ -21,6 +21,9 @@
 
 #include <jaus/core/events/CreateEvent.h>
 #include <jaus/core/events/QueryEvents.h>
+#include <jaus/core/events/ReportEvents.h>
+#include <jaus/core/events/UpdateEvent.h>
+#include <jaus/core/events/ConfirmEventRequest.h>
 
 #include <jaus/mobility/drivers/SetLocalWaypoint.h>
 
@@ -146,6 +149,7 @@ int main() {
     discoveryService->SetSubsystemIdentification(JAUS::Subsystem::OtherSubsystem,"SnowBots_JudgeSim");
     discoveryService->SetNodeIdentification("Main");
     discoveryService->SetComponentIdentification("Baseline");
+    discoveryService->SetSubsystemsToDiscover(std::set<JAUS::UShort>());
 
     transportService = (JAUS::Transport*)component.GetService(JAUS::Transport::Name);
     transportService->SetDisconnectTimeMs(10000);
@@ -211,7 +215,7 @@ int main() {
         switch(choice) {
         case 0: {
             //QQ
-            std::cout << "Next time just press CTRL + C. It does same thing" << std::endl;
+            std::cout << "Exiting" << std::endl;
             component.Shutdown();
             exit(0);
         }
@@ -226,12 +230,15 @@ int main() {
         case 2: {
             //Query ID and services because we can
             std::cout << "\033[4;31mID:\033[0m" << std::endl;
-            JAUS::QueryIdentification id_query(JAUS::Address(5000,1,1),component.GetComponentID());
+            JAUS::QueryIdentification id_query(JAUS::Address(0xffff, 0xff, 0xff),component.GetComponentID());
+            //JAUS::QueryIdentification id_query(JAUS::Address(103,1,1),component.GetComponentID());
+            id_query.SetQueryType(JAUS::QueryIdentification::Type::ComponentIdentification);
             JAUS::ReportIdentification id_response;
             std::cout << "Return: " << component.Send(&id_query, &id_response) << std::endl;
             std::cout << id_response.GetIdentification() << std::endl;
 	    
-	    JAUS::QueryServices serviceQuery(JAUS::Address(5000,1,1), component.GetComponentID());
+	    JAUS::QueryServices serviceQuery(JAUS::Address(0xffff,0xff,0xff), component.GetComponentID());
+	    //JAUS::QueryServices serviceQuery(JAUS::Address(103, 1, 1), component.GetComponentID());
 	    JAUS::ReportServices serviceReport;
 	    std::cout << "\033[4;31mWith services:\033[0m" << std::endl;
 	    std::cout << "Return: " << component.Send(&serviceQuery, &serviceReport) << std::endl;
@@ -332,6 +339,31 @@ int main() {
             local_pose_set.AddToPose(additionToLocation, additionToOrientation); //3rd param is time. unsure if needed.
             break;
         }
+	case 11: {
+		JAUS::QueryEvents query(JAUS::Address(5000, 1, 1), component.GetComponentID());
+		query.SetQueryType(JAUS::QueryEvents::AllEvents);
+		JAUS::ReportEvents report;
+		std::cout << "Result: " << component.Send(&query,&report) << std::endl;
+		report.PrintMessageBody();
+		break;
+	}
+	case 12: {
+		JAUS::CreateEvent create(JAUS::Address(103,1,1), component.GetComponentID());
+		create.SetType(JAUS::Events::Type::Periodic);
+		create.SetRequestedPeriodicRate(1);
+		JAUS::QueryLocalPose query(JAUS::Address(103,1,1), component.GetComponentID());
+		create.SetQueryMessage(&query);
+		JAUS::ConfirmEventRequest confirm;
+		std::cout << "Event create: " << component.Send(&create,&confirm) << std::endl;
+		confirm.PrintMessageBody();
+		
+		JAUS::UpdateEvent update(JAUS::Address(103,1,1), component.GetComponentID());
+		update.SetEventID(0);
+		update.SetType(JAUS::Events::Type::Periodic);
+		update.SetRequestedPeriodicRate(0.5);
+		std::cout << "Event update: " << component.Send(&update,&confirm) << std::endl;
+		confirm.PrintMessageBody();
+	}
         case 100: {
             //Attempt Shutdown of Server
             accessControl->Shutdown();

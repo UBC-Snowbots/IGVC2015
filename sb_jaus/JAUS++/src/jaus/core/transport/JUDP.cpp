@@ -542,10 +542,12 @@ void JUDP::ExtractMessages(Packet& buffer,
         JAUS::Header jausHeader;
         Packet::Wrapper subPacket(ptr, length - position);
         jausHeader.Read(*subPacket.GetData());
-        if(jausHeader.IsValid(NULL) == false ||
+        std::string errmsg;
+        if(jausHeader.IsValid(&errmsg) == false ||
            subPacket->Length() < jausHeader.mSize ||
            jausHeader.mSourceID == mComponentID)
         {
+            std::cout << errmsg << ' ' << jausHeader.mSourceID.ToString() << ' ' << jausHeader.mDestinationID.ToString() << '\n';
             break;
         }
         // Update dictionary of remote endpoints.
@@ -569,6 +571,9 @@ void JUDP::ExtractMessages(Packet& buffer,
             // Process the data...
             ProcessPacket(*jausPacket.GetData(),
                           jausHeader);
+        }
+        else{
+        	std::cout << "Reject message /n";
         }
     }
 }
