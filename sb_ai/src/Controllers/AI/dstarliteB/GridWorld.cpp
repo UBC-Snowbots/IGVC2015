@@ -4,18 +4,21 @@
 BEFORE ATTEMPTING TO READ THIS FILE, PLEASE HAVE A BASIC UNDERSTANDING OF 
 MT-D*LITE FROM READING ITS ORIGINAL RESEARCH PAPER'S PSEUDO-CODE.
 */
-GridWorld::GridWorld(unsigned int size, int radius){
-	this->size = size;
+GridWorld::GridWorld(unsigned int length, unsigned int width, int radius,
+	Coords startCoords, Coords goalCoords){
+	this->length = length;
+	this->width = width;
 	this->radius = radius;
 
-	for (unsigned int y = 0; y < size; y++){
-		for (unsigned int x = 0; x < size; x++){
+	for (unsigned int y = 0; y < length; y++){
+		for (unsigned int x = 0; x < width; x++){
 			world.push_back(new Tile(x, y, 10));
 		}
 	}
-
-	goal = getTileAt(0, 0);
-	start = getTileAt(size - 1, size - 1);
+	
+	//In version B, start and goal are switch
+	goal = getTileAt(startCoords.first, startCoords.second);
+	start = getTileAt(goalCoords.first, goalCoords.second);
 
 	//Initializing the pathfinder's default values
 	km = 0;
@@ -252,11 +255,11 @@ void GridWorld::updateVertex(GridWorld::Tile*& tile){
 
 
 bool GridWorld::withinWorld(unsigned int x, unsigned int y) const{
-	return y >= 0 && y < size && x >= 0 && x < size;
+	return y >= 0 && y < length && x >= 0 && x < width;
 }
 
 GridWorld::Tile* GridWorld::getTileAt(unsigned int x, unsigned int y) const{
-	return withinWorld(x, y) ? world[y*size+x] : NULL;
+	return withinWorld(x, y) ? world[y*width+x] : NULL;
 }
 
 std::vector<GridWorld::Tile*> GridWorld::getNeighbours(Tile*& tile){
@@ -390,16 +393,16 @@ void GridWorld::Tile::info() const{
 
 void GridWorld::printWorld() const{
 	std::cout << "H:" << std::endl;
-	for (unsigned int y = 0; y < size; y++){
-		for (unsigned int x = 0; x < size; x++){
+	for (unsigned int y = 0; y < length; y++){
+		for (unsigned int x = 0; x < width; x++){
 			printf("%2.0lf ", getTileAt(x, y)->h);
 		}
 		std::cout << std::endl;
 	}
 
 	std::cout << "C:" << std::endl;
-	for (unsigned int y = 0; y < size; y++){
-		for (unsigned int x = 0; x < size; x++){
+	for (unsigned int y = 0; y < length; y++){
+		for (unsigned int x = 0; x < width; x++){
 			double cost = getTileAt(x, y)->cost;
 			if (cost == PF_INFINITY){
 				printf("-1 ");
@@ -416,16 +419,16 @@ void GridWorld::printWorld() const{
 	}
 
 	std::cout << "G:" << std::endl;
-	for (unsigned int y = 0; y < size; y++){
-		for (unsigned int x = 0; x < size; x++){
+	for (unsigned int y = 0; y < length; y++){
+		for (unsigned int x = 0; x < width; x++){
 			printf("%2.0lf ", getTileAt(x, y)->g == PF_INFINITY ? -1 : getTileAt(x, y)->g);
 		}
 		std::cout << std::endl;
 	}
 
 	std::cout << "RHS:" << std::endl;
-	for (unsigned int y = 0; y < size; y++){
-		for (unsigned int x = 0; x < size; x++){
+	for (unsigned int y = 0; y < length; y++){
+		for (unsigned int x = 0; x < width; x++){
 			printf("%2.0lf ", getTileAt(x, y)->rhs == PF_INFINITY ? -1 : getTileAt(x, y)->rhs);
 		}
 		std::cout << std::endl;
