@@ -31,102 +31,58 @@
 
 namespace ai{
 
-class VisionController: public ControllerBase{
-<<<<<<< HEAD
-	private:
-		cv::Mat image, image_grey, image_filter, image_thresholded, image_canny, image_blur,
-		image_blur2, image_direction;
-		cv::Mat image_H, image_S, image_V, image_R, image_G, image_B, image_histo, image_HThresh, image_SThresh,
-		image_VThresh, image_noG;
-		cv::Mat histogram_H, histogram_S, histogram_V;
+class VisionController: public ControllerBase
+{
+  private:
+    cv::Mat image, image_grey, image_filter, image_thresholded, image_canny, image_blur,
+	    image_blur2, image_direction;
+    cv::Mat image_H, image_S, image_V, image_R, image_G, image_B, image_histo, image_HThresh, image_SThresh,
+	    image_VThresh, image_noG;
+    cv::Mat histogram_H, histogram_S, histogram_V;
 
-		int blur_value;
-		int dx;
-		int dy;
-		float steeringOut;
-		float steering;
-		float steeringIncrement;
-		float lowsteeringIncrement;
-		int priority;
-		float direction;
-		int noLinesWait;
-		float throttle;
-		float lowThrottle;
-		int count;
-		geometry_msgs::Twist twist;
-	public:
-		VisionController();
-		geometry_msgs::Twist Update();
-=======
-private:
-cv::Mat image, image_grey, image_filter, image_thresholded, image_canny, image_blur,
-	image_blur2, image_direction;
-cv::Mat image_H, image_S, image_V, image_R, image_G, image_B, image_histo, image_HThresh, image_SThresh,
-	image_VThresh, image_noG;
-cv::Mat histogram_H, histogram_S, histogram_V;
+    int blur_value;
+    int dx;
+    int dy;
+    float steeringOut;
+    float steering;
+    float steeringIncrement;
+    float lowsteeringIncrement;
+    int priority;
+    float direction;
+    int noLinesWait;
+    float throttle;
+    float lowThrottle;
+    int count;
+    geometry_msgs::Twist twist;
+    image_transport::Subscriber sub;
 
-int blur_value;
-int dx;
-int dy;
-float steeringOut;
-float steering;
-float steeringIncrement;
-float lowsteeringIncrement;
-int priority;
-float direction;
-int noLinesWait;
-float throttle;
-float lowThrottle;
-int count;
-geometry_msgs::Twist twist;
-image_transport::Subscriber sub;
+    //image_transport::ImageTransport imageTransporter(ros::NodeHandle& nh);
+    //image_transport::Subscriber transportSub;
 
-//image_transport::ImageTransport imageTransporter(ros::NodeHandle& nh);
-//image_transport::Subscriber transportSub;
+  public:
+    VisionController(ros::NodeHandle &nh);
+    geometry_msgs::Twist Update();
 
-public:
-VisionController(ros::NodeHandle &nh);
-geometry_msgs::Twist Update();
+    void imageCallback( const sensor_msgs::Image::ConstPtr& );
+    void detectLines(void);
+    void findcentre(int);
+    int findcentre1(int);
+    int findcentre2(int);
+    void drawLine(int);
+    int countLines(int, bool);
+    void dump(const cv::Mat&, const char*);
+    cv::Mat showHistogram(const cv::Mat&);
+    cv::Mat showHistogram2(const cv::Mat&);
+    cv::Mat showHistogram3(const cv::Mat&);
+    cv::Mat showHistogram4(const cv::Mat &inImage, int, int);
+    void showHSVHistograms(cv::Mat);
+    void displayWindows(void);
+    void filterImage(void);
+    void getDirection(void);
+    float calculateDirection1();
+    float chiSquared(cv::Mat,cv::Mat, float, float, int, int);
+    void simpleDir();
+  };
 
-void imageCallback( const sensor_msgs::Image::ConstPtr& );
-void detectLines(void);
-void findcentre(int);
-int findcentre1(int);
-int findcentre2(int);
-void drawLine(int);
-int countLines(int, bool);
-void dump(const cv::Mat&, const char*);
-cv::Mat showHistogram(const cv::Mat&);
-cv::Mat showHistogram2(const cv::Mat&);
-cv::Mat showHistogram3(const cv::Mat&);
-cv::Mat showHistogram4(const cv::Mat &inImage, int, int);
-void showHSVHistograms(cv::Mat);
-void displayWindows(void);
-void filterImage(void);
-void getDirection(void);
-float calculateDirection1();
-float chiSquared(cv::Mat,cv::Mat, float, float, int, int);
-void simpleDir();
-};
->>>>>>> b42b066edfed19ed8991346da278d2dc4cfbc435
-
-		void detectLines(void);
-		void findcentre(int);
-		int findcentre1(int);
-		int findcentre2(int);
-		void drawLine(int);
-		int countLines(int, bool);
-		void dump(const cv::Mat&, const char*);
-		cv::Mat showHistogram(const cv::Mat&);
-		cv::Mat showHistogram2(const cv::Mat&);
-		cv::Mat showHistogram3(const cv::Mat&);
-		cv::Mat showHistogram4(const cv::Mat &inImage, int, int);
-		void showHSVHistograms(cv::Mat);
-		void displayWindows(void);
-		void getDirection(void);
-		float calculateDirection1();
-		float chiSquared(cv::Mat,cv::Mat, float, float, int, int);
-		void simpleDir();
-	};
 }
 

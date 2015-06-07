@@ -6,11 +6,7 @@ using namespace ros;
 
 namespace ai{
 static const std::string PUBLISH_TOPIC2 = "vision_nav";
-<<<<<<< HEAD
-static const std::string SUBSCRIBE_TOPIC = "image_normal" 
-=======
 static const std::string SUBSCRIBE_TOPIC3 ="image_normal";
->>>>>>> b42b066edfed19ed8991346da278d2dc4cfbc435
 const int MSG_QUEUE_SIZE = 20;
 
 int const upperBound = 255;
@@ -35,21 +31,14 @@ VisionController::VisionController(ros::NodeHandle& nh):
 	lowThrottle(0.3),
 	count(0)
 {
-<<<<<<< HEAD
-	image = imread("/home/mecanum/Pictures/course1.jpg", 1);
-	ros::NodeHandle nodeHandler;
-	image_transport::ImageTransport imageTransporter(nodeHandler);
-	image_transport::Subscriber transportSub = imageTransporter.subscribe(SUBSCRIBE_TOPIC, 1, imageCallback);
-	//imwrite( "/home/jannicke/Pictures/Image2.jpg", image_direction);
-=======
+
 	//image = imread("/home/mecanum/Pictures/course1.jpg", 1);
 	image_transport::ImageTransport it(nh);
     
     ROS_INFO("subbing");
     sub = it.subscribe(SUBSCRIBE_TOPIC3, 1, &VisionController::imageCallback, this);
     
-    ROS_INFO("subbed"); 	                           
->>>>>>> b42b066edfed19ed8991346da278d2dc4cfbc435
+    ROS_INFO("subbed"); 	                      
 }
 
 geometry_msgs::Twist VisionController::Update(){
@@ -68,14 +57,7 @@ geometry_msgs::Twist VisionController::Update(){
 	return twist;
 }
 
-<<<<<<< HEAD
-void imageCallback(const sensor_msgs::ImageConstPtr& msg){
-	static unsigned int counter = 1;
-	try{
-		ROS_INFO("Recieved an image for the %d time", counter);	
-		image_thresholded = cv_bridge::toCvShare(msg, "mono8")->image;
-		cv::imshow(CV_WINDOW, cv_bridge::toCvShare(msg, "mono8")->image);
-=======
+
 void VisionController::imageCallback(const sensor_msgs::Image::ConstPtr& msg){
 	static unsigned int counter = 1;
 	ROS_INFO("image callback run");
@@ -87,7 +69,6 @@ void VisionController::imageCallback(const sensor_msgs::Image::ConstPtr& msg){
 		cvtColor(image_direction, image_direction, CV_GRAY2RGB);
 		//displayWindows();
 		//cv::imshow("subscribed", cv_bridge::toCvShare(msg, "mono8")->image);
->>>>>>> b42b066edfed19ed8991346da278d2dc4cfbc435
 		if(cv::waitKey(30) == 27){
 			ROS_INFO("Shutdown event recieved");
 			ros::shutdown();
@@ -98,10 +79,6 @@ void VisionController::imageCallback(const sensor_msgs::Image::ConstPtr& msg){
 	counter++;
 }
 
-<<<<<<< HEAD
-
-=======
->>>>>>> b42b066edfed19ed8991346da278d2dc4cfbc435
 
 void VisionController::getDirection(void) {
 /*
