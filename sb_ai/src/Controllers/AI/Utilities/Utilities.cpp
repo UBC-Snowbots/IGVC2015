@@ -100,7 +100,7 @@ namespace AI_Utilities
     float diff = (currGpsLon - gpsOriginLon) * (0.01/787.1);
     diff /= resolution;
     diff += globalOriginX;
-    return (int) diff;
+    return globalOriginX + currGpsLon;//(int) diff;
   }
 
 
@@ -115,7 +115,7 @@ namespace AI_Utilities
     float diff = (currGpsLat - gpsOriginLat) * (0.01/787.1);
     diff /= resolution;
     diff += globalOriginY;
-    return (int) diff;
+    return globalOriginY + currGpsLat;//(int) diff;
   }
 
 
