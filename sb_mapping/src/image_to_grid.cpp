@@ -41,7 +41,9 @@
 void ConvertSensorImage::printMap(){
 	for(int i = 0; i < height; i++){
 		for(int j = 0; j < width; j++){
-			cout << (int)(data[j * width + i]) << " ";
+			//cout << ((int)(data[j * width + i]) == 0) ? '0':'1' << " ";
+			printf("%d ", ((int)(data[j * width + i]) == 0)? 0:1);
+			
 		}
 		cout << endl;
 	}
