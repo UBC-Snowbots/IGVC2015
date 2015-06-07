@@ -24,11 +24,11 @@ namespace AI_Utilities
 
 	int GetGlobalIndexY(float gpsOriginLat, float currGpsLat, int globalOriginY, float resolution);
 
-	uint8_t ConvertIndexToLocalXCoord(uint8_t index, uint8_t width);
+	int ConvertIndexToLocalXCoord(int index, int width);
 
-	uint8_t ConvertIndexToLocalYCoord(uint8_t index, uint8_t width);
+	int ConvertIndexToLocalYCoord(int index, int width);
 
-	uint8_t ConvertXYCoordToIndex(uint8_t x, uint8_t y, uint8_t width);
+	int ConvertXYCoordToIndex(int x, int y, int width);
 }
 
 

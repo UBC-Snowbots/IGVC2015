@@ -65,8 +65,8 @@ namespace AI_Utilities
 
   void TransformLocalToGlobal(nav_msgs::OccupancyGrid local, nav_msgs::OccupancyGrid global, float theta) 
   {
-	  uint8_t xGlobalVisionCoord;
-	  uint8_t yGlobalVisionCoord;
+	  int xGlobalVisionCoord;
+	  int yGlobalVisionCoord;
 
     uint32_t localMapSize = local.info.width * local.info.height; 
 
@@ -93,44 +93,48 @@ namespace AI_Utilities
 
   int GetGlobalIndexX(float gpsOriginLon, float currGpsLon, int globalOriginX, float resolution) 
   {
-  	float longConv = 111412.84 * cos(currGpsLon)
-		- 93.5 * cos(3 * currGpsLon) - 0.118 * cos(5 * currGpsLon);
-    
-    int diff = (currGpsLon - gpsOriginLon) * longConv;
+    /*int diff = (currGpsLon - gpsOriginLon);
+  	diff = 111412.84 * cos(diff)
+		- 93.5 * cos(3 * diff) - 0.118 * cos(5 * diff);
+    */
+    float diff = (currGpsLon - gpsOriginLon) * (0.01/787.1);
     diff /= resolution;
     diff += globalOriginX;
-    return diff;
+    return (int) diff;
   }
 
 
   int GetGlobalIndexY(float gpsOriginLat, float currGpsLat, int globalOriginY, float resolution) 
   {
-  	float latConv = 111132.92 - 559.82 * cos(2 * currGpsLat)
-		+ 1.175 * cos(4 * currGpsLat)
-		- 0.0023 * cos(6 * currGpsLat);
-  
-    int diff = (currGpsLat - gpsOriginLat) * latConv;
+  /*
+    int diff = currGpsLat - gpsOriginLat;
+  	diff = 111132.92 - 559.82 * cos(2 * diff)
+		+ 1.175 * cos(4 * diff)
+		- 0.0023 * cos(6 * diff);
+  */
+    float diff = (currGpsLat - gpsOriginLat) * (0.01/787.1);
     diff /= resolution;
     diff += globalOriginY;
-    return diff;
+    return (int) diff;
   }
 
 
-  uint8_t ConvertIndexToLocalXCoord(uint8_t index, uint8_t width) 
+  int ConvertIndexToLocalXCoord(int index, int width) 
   {
 	  return index % width;
   }
 
 
-  uint8_t ConvertIndexToLocalYCoord(uint8_t index, uint8_t width) 
+  int ConvertIndexToLocalYCoord(int index, int width) 
   {
 	  return index / width;
   }
 
 
-  uint8_t ConvertXYCoordToIndex(uint8_t x, uint8_t y, uint8_t width) 
+  int ConvertXYCoordToIndex(int x, int y, int width) 
   {
-	  return y * width + x;
+    int index = y * width + x;  
+	  return index; 
   }
 
 }

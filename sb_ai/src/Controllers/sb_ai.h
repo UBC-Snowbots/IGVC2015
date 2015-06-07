@@ -19,9 +19,9 @@ static const std::string MODE_PARAM = "mode";
 
 // Variable hacks for pathfinding map
 // All are relative to global map position, not gps position
-static const float START_ANGLE = 90.0;
-static const float START_POS_X = 0.5; // From left side of map
-static const float START_POS_Y = 0.8; // From top of map
+static const float START_ANGLE = 0.0;
+static const float START_POS_X = 0.2; // From left side of map
+static const float START_POS_Y = 0.2; // From top of map
 static const float MAP_PADDING = 20; // Padding on all sides (m)
 static const float MAP_WIDTH = 200; // meters
 static const float MAP_HEIGHT = 100; // meters

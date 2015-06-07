@@ -29,25 +29,11 @@ void Mapping::VisionMapCallback(const sensor_msgs::Image::ConstPtr& map)
 
 
 void Mapping::LidarMapCallback(const nav_msgs::OccupancyGrid::ConstPtr& map)
-{
-/*
-  int start_x, end_x, start_y, end_y, diff;
-  diff = (MAP_WIDTH - l_width)/2;
-  start_x = diff;
-  end_x = MAP_WIDTH - diff;
-  diff = MAP_HEIGHT - l_height;
-  start_y = diff;
-  end_y = MAP_HEIGHT;
-  
-  int i, j, j_end;
-  j = start_y * MAP_WIDTH + start_x;
-  j_end = end_y * MAP_WIDTH + end_x;
-  */
-  // if (map->data[i] > local_map.data[j]) { local_map.data[j] = map->data[i]; }
-  
+{  
   for (int i = 0; i < MAP_WIDTH * MAP_HEIGHT; i++)
   {
-    local_map.data[i] = map->data[i]; 
+    //local_map.data[i] = map->data[i]; 
+    local_map.data[i] = 100; // just for testing
   }
 }
 

@@ -27,14 +27,14 @@ int compass_count = 0;
 int global_width = (MAP_WIDTH + MAP_PADDING * 2) / RESOLUTION;
 int global_height = (MAP_HEIGHT + MAP_PADDING * 2) / RESOLUTION;
 int global_size = global_width * global_height;
-int origin_x = (int) global_width * START_POS_X;
-int origin_y = (int) global_height * START_POS_Y;
-float origin_lat = 0;
-float origin_long = 0;
+int origin_x = (int) (global_width * START_POS_X);
+int origin_y = (int) (global_height * START_POS_Y);
+float origin_lat = 42.677969;
+float origin_long = 83.195365;
 
 // Current state variables
-float long_pos = 0.0f; 
-float lat_pos = 0.0f; 
+float long_pos = origin_long; 
+float lat_pos = origin_lat; 
 float orientation = 0.0f;  
 int x_pos = 0;
 int y_pos = 0;
@@ -47,31 +47,49 @@ void MapCallback(const nav_msgs::OccupancyGrid::ConstPtr& map)
 {
   int global_x, global_y, local_x, local_y;
   int localMapSize = map->info.width * map->info.height; 
-
+  int global_i, test;
   // Loop through the vision map
   for (int index = 0; index < localMapSize; index++) 
   {
     local_x = AI_Utilities::ConvertIndexToLocalXCoord(index, map->info.width) - ((map->info.width / 2) - 1);
-    local_y = AI_Utilities::ConvertIndexToLocalYCoord(index, map->info.width) - (map->info.height - 1);
+
+    local_y = (map->info.height - 1) - AI_Utilities::ConvertIndexToLocalYCoord(index, map->info.width);
     
 	  global_x = cos(orientation) * local_x
-			  - sin(orientation) * local_y
-			  + AI_Utilities::GetGlobalIndexX(origin_long, long_pos, origin_x, RESOLUTION);
+			        - sin(orientation) * local_y
+			        + AI_Utilities::GetGlobalIndexX(origin_long, long_pos, origin_x, RESOLUTION);
 			  
 	  global_y = sin(orientation) * local_x
-			  + cos(orientation) * local_y
-			  + AI_Utilities::GetGlobalIndexY(origin_lat, lat_pos, origin_y, RESOLUTION);
+			        + cos(orientation) * local_y
+			        + AI_Utilities::GetGlobalIndexY(origin_lat, lat_pos, origin_y, RESOLUTION);
 
 	  // Update global map with 0/1 to show that an obstacle dne/exists
-	  global_map.data[AI_Utilities::ConvertXYCoordToIndex(global_x,
-			  global_y, global_width)] =
+	  global_i = AI_Utilities::ConvertXYCoordToIndex(global_x, global_y, global_width);
+	  global_map.data[global_i] =
 			  map->data[index];
+			  
+		/*
+		if (index == 0 || index == 239 || index == 28560 || index == 28799 || index == 28679)
+		{ 
+		  std::cout << "Index: " << index << std::endl;
+		  std::cout << "Global index: " << AI_Utilities::ConvertXYCoordToIndex(global_x, global_y, global_width) << std::endl;
+		  std::cout << "Global x: " << global_x << ", Global y: " << global_y << std::endl;
+		  std::cout << "Local x: " << local_x << ", Local y: " << local_y << std::endl;
+		}
+    */
   }
 }
 
 
+// 42.677969 lat
+// 83.195365 long
 void GpsCallback(const sb_msgs::Waypoint::ConstPtr& gps)
 {
+  //lat_pos -= 0.0001;
+  //long_pos += 0.0001;
+  //std::cout << "Lat: " << lat_pos << ", Long: " << long_pos << std::endl;
+  return;
+
   if (!gps) { ROS_INFO("Null gps data."); return; } // null check
   
   long_pos = gps->lon;
@@ -103,6 +121,10 @@ void GpsCallback(const sb_msgs::Waypoint::ConstPtr& gps)
 
 void CompassCallback(const sb_msgs::RobotState::ConstPtr& compass)
 {
+  orientation = 180;
+  orientation *= AI_Utilities::PI / 180;
+  return;
+
   if (!compass) { ROS_INFO("Null compass data."); return; } // null check
   
   if (compass_count == 0)
@@ -131,7 +153,7 @@ void CompassCallback(const sb_msgs::RobotState::ConstPtr& compass)
       orientation += 360;
     }
     
-    orientation = 0;
+    orientation = 75;
     orientation *= AI_Utilities::PI / 180;
   }
 }
@@ -151,7 +173,7 @@ int main(int argc, char **argv)
   ros::Publisher global_map_pub = nh.advertise<nav_msgs::OccupancyGrid>("global_map_test", 2);
 
 	// Initialize test global map pub
-	global_map.data.assign(global_size, 100);
+	global_map.data.assign(global_size, 0);
 	global_map.info.origin.position.x = 0;
 	global_map.info.origin.position.y = 0;
 	global_map.info.origin.position.z = 0;
