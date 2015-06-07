@@ -26,6 +26,10 @@ include_directories(
 
 add_subdirectory(src)
 
+add_executable(global_map src/Controllers/TestGlobal.cpp)
+target_link_libraries(global_map ai_utilities ${catkin_LIBRARIES})
+add_dependencies(global_map sb_msgs_generate_messages_cpp)
+
 
 
 

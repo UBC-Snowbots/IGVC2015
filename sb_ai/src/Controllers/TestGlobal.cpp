@@ -14,8 +14,8 @@ static const std::string COMPASS_SUB_TOPIC = "robot_state";
 // Variable hacks for pathfinding map
 // All are relative to global map position, not gps position
 static const float START_ANGLE = 90.0;
-static const float START_POS_X = 0.5; // From left side of map
-static const float START_POS_Y = 0.8; // From top of map
+static const float START_POS_X = 0.2; // From left side of map
+static const float START_POS_Y = 0.2; // From top of map
 static const float MAP_PADDING = 20; // Padding on all sides (m)
 static const float MAP_WIDTH = 200; // meters
 static const float MAP_HEIGHT = 100; // meters
@@ -27,15 +27,15 @@ int compass_count = 0;
 int global_width = (MAP_WIDTH + MAP_PADDING * 2) / RESOLUTION;
 int global_height = (MAP_HEIGHT + MAP_PADDING * 2) / RESOLUTION;
 int global_size = global_width * global_height;
-int origin_x = (int) (global_width * START_POS_X);
-int origin_y = (int) (global_height * START_POS_Y);
+int origin_x = (global_width * START_POS_X);
+int origin_y = (global_height * START_POS_Y);
 float origin_lat = 42.677969;
 float origin_long = 83.195365;
 
 // Current state variables
-float long_pos = origin_long; 
-float lat_pos = origin_lat; 
-float orientation = 0.0f;  
+double long_pos = origin_long; 
+double lat_pos = origin_lat; 
+float orientation = 23 * M_PI / 180;  
 int x_pos = 0;
 int y_pos = 0;
   
@@ -48,6 +48,11 @@ void MapCallback(const nav_msgs::OccupancyGrid::ConstPtr& map)
   int global_x, global_y, local_x, local_y;
   int localMapSize = map->info.width * map->info.height; 
   int global_i, test;
+      long_pos += 0.000001;
+    lat_pos += 0.000001;
+    
+  std::cout << "Long pos: " << long_pos << std::endl;
+  
   // Loop through the vision map
   for (int index = 0; index < localMapSize; index++) 
   {
@@ -67,16 +72,16 @@ void MapCallback(const nav_msgs::OccupancyGrid::ConstPtr& map)
 	  global_i = AI_Utilities::ConvertXYCoordToIndex(global_x, global_y, global_width);
 	  global_map.data[global_i] =
 			  map->data[index];
-			  
-		/*
+			 
+			 /*
 		if (index == 0 || index == 239 || index == 28560 || index == 28799 || index == 28679)
 		{ 
 		  std::cout << "Index: " << index << std::endl;
 		  std::cout << "Global index: " << AI_Utilities::ConvertXYCoordToIndex(global_x, global_y, global_width) << std::endl;
 		  std::cout << "Global x: " << global_x << ", Global y: " << global_y << std::endl;
 		  std::cout << "Local x: " << local_x << ", Local y: " << local_y << std::endl;
-		}
-    */
+		}*/
+		
   }
 }
 
@@ -85,8 +90,8 @@ void MapCallback(const nav_msgs::OccupancyGrid::ConstPtr& map)
 // 83.195365 long
 void GpsCallback(const sb_msgs::Waypoint::ConstPtr& gps)
 {
-  //lat_pos -= 0.0001;
-  //long_pos += 0.0001;
+  lat_pos -= 0.0001;
+  long_pos += 0.0001;
   //std::cout << "Lat: " << lat_pos << ", Long: " << long_pos << std::endl;
   return;
 
@@ -121,8 +126,9 @@ void GpsCallback(const sb_msgs::Waypoint::ConstPtr& gps)
 
 void CompassCallback(const sb_msgs::RobotState::ConstPtr& compass)
 {
-  orientation = 180;
+  orientation = 0;
   orientation *= AI_Utilities::PI / 180;
+  std::cout << orientation << std::endl;
   return;
 
   if (!compass) { ROS_INFO("Null compass data."); return; } // null check
@@ -170,7 +176,7 @@ int main(int argc, char **argv)
 	ros::Subscriber map_sub = nh.subscribe(MAP_SUB_TOPIC, 10, MapCallback);
 	ros::Subscriber gps_sub = nh.subscribe(GPS_SUB_TOPIC, 10, GpsCallback);
 	ros::Subscriber compass_sub = nh.subscribe(COMPASS_SUB_TOPIC, 10, CompassCallback);
-  ros::Publisher global_map_pub = nh.advertise<nav_msgs::OccupancyGrid>("global_map_test", 2);
+  ros::Publisher global_map_pub = nh.advertise<nav_msgs::OccupancyGrid>("global_map_test", 10);
 
 	// Initialize test global map pub
 	global_map.data.assign(global_size, 0);
@@ -187,6 +193,7 @@ int main(int argc, char **argv)
   
   while (ros::ok())
   {
+    //std::cout << "Long: " << long_pos << ", Lat: " << lat_pos << std::endl;
     global_map_pub.publish(global_map);
     ros::spinOnce();
     loop_rate.sleep();
