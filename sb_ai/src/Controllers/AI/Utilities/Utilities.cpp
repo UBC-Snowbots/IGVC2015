@@ -62,5 +62,76 @@ namespace AI_Utilities
     return elsa_command;
   }
 
+
+  void TransformLocalToGlobal(nav_msgs::OccupancyGrid local, nav_msgs::OccupancyGrid global, float theta) 
+  {
+	  uint8_t xGlobalVisionCoord;
+	  uint8_t yGlobalVisionCoord;
+
+    uint32_t localMapSize = local.info.width * local.info.height; 
+
+	  // Loop through the vision map
+	  for (int index = 0; index < localMapSize; index++) 
+	  {
+
+		  xGlobalVisionCoord = cos(theta)
+				  * ConvertIndexToLocalXCoord(index, local.info.width)
+				  - sin(theta) * ConvertIndexToLocalYCoord(index, local.info.width)
+				  + local.info.origin.position.x;
+		  yGlobalVisionCoord = sin(theta)
+				  * ConvertIndexToLocalXCoord(index, local.info.width)
+				  + cos(theta) * ConvertIndexToLocalYCoord(index, local.info.width)
+				  + local.info.origin.position.y;
+
+		  // Update global map with 0/1 to show that an obstacle dne/exists
+		  global.data[ConvertXYCoordToIndex(xGlobalVisionCoord,
+				  yGlobalVisionCoord, global.info.width)] =
+				  local.data[index];
+	  }
+  }
+
+
+  int GetGlobalIndexX(float gpsOriginLon, float currGpsLon, int globalOriginX, float resolution) 
+  {
+  	float longConv = 111412.84 * cos(currGpsLon)
+		- 93.5 * cos(3 * currGpsLon) - 0.118 * cos(5 * currGpsLon);
+    
+    int diff = (currGpsLon - gpsOriginLon) * longConv;
+    diff /= resolution;
+    diff += globalOriginX;
+    return diff;
+  }
+
+
+  int GetGlobalIndexY(float gpsOriginLat, float currGpsLat, int globalOriginY, float resolution) 
+  {
+  	float latConv = 111132.92 - 559.82 * cos(2 * currGpsLat)
+		+ 1.175 * cos(4 * currGpsLat)
+		- 0.0023 * cos(6 * currGpsLat);
+  
+    int diff = (currGpsLat - gpsOriginLat) * latConv;
+    diff /= resolution;
+    diff += globalOriginY;
+    return diff;
+  }
+
+
+  uint8_t ConvertIndexToLocalXCoord(uint8_t index, uint8_t width) 
+  {
+	  return index % width;
+  }
+
+
+  uint8_t ConvertIndexToLocalYCoord(uint8_t index, uint8_t width) 
+  {
+	  return index / width;
+  }
+
+
+  uint8_t ConvertXYCoordToIndex(uint8_t x, uint8_t y, uint8_t width) 
+  {
+	  return y * width + x;
+  }
+
 }
                   

@@ -36,3 +36,15 @@
 		grid.data=data;
 		return grid;
 	}
+
+
+void ConvertSensorImage::printMap(){
+	ROS_INFO("Printing grid, which is %d x %d", height, width);
+	for(int i = 0; i < height; i++){
+		for(int j = 0; j < width; j++){
+			cout << static_cast<int>(data[i * width + j]) << " ";
+		}
+		cout << endl;
+	}
+	cout << endl;
+}

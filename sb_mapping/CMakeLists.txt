@@ -10,6 +10,8 @@ find_package(
   sb_msgs
 )
 
+add_subdirectory(src/Mapping)
+
 generate_messages(
   DEPENDENCIES
   std_msgs 
@@ -25,8 +27,8 @@ include_directories(
  ${catkin_INCLUDE_DIRS}
 )
 
-add_executable(hector_lidar_mapping src/HectorMapping/hector_lidar_mapping.cpp)
-target_link_libraries( hector_lidar_mapping ${catkin_LIBRARIES})
+add_executable(sb_mapping src/main.cpp)
+target_link_libraries( sb_mapping ${catkin_LIBRARIES} mapping)
 
 add_executable(image_to_grid_test_publisher src/image_to_grid_test_publisher.cpp)
 target_link_libraries(image_to_grid_test_publisher ${catkin_LIBRARIES})

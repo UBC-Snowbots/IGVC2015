@@ -30,6 +30,7 @@ public:
 		void info() const;
 	};
 	typedef std::pair<GridWorld::Tile*, double> TilePair;
+	typedef std::pair<unsigned int, unsigned int> Coords;
 
 	bool withinWorld(unsigned int x, unsigned int y) const;
 	bool static compareKeys(const KeyPair& left, const KeyPair& right);
@@ -64,4 +65,5 @@ public:
 	void printWorld() const;
 	void updateCost(unsigned int x, unsigned int y, double cost);
 	void inflate(unsigned int x, unsigned int y, double cost);
+	std::vector<Coords> getTraversal();
 };

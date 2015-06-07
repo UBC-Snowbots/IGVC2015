@@ -20,7 +20,7 @@ namespace ai
     // Publishers
     gps_pub = nh.advertise<sb_msgs::Gps_info>(GPS_PUB_TOPIC,50);
     coord_pub = nh.advertise<sb_msgs::Waypoint>(WAYPOINT_PUB_TOPIC, 100);
-    
+    jaus = nh.subscribe(MOVE_COMMAND_TOPIC,1,&GpsController::CommandReceiver, this);
     client = nh.serviceClient<sb_gps::Gps_Service>(GPS_SERV_TOPIC);
   
     // Initialize variables
@@ -29,16 +29,17 @@ namespace ai
     theta = 0;
     prev_move = 0;
     avg_count = 0;
-    TargetWaypoint.lon = 49.26238123;
-	  TargetWaypoint.lat = -123.24871402;
+    TargetWaypoint.lon = 42.67797;
+	  TargetWaypoint.lat = -83.19537;
 	  buffWaypoint.lon = 0.0;
 	  buffWaypoint.lat = 0.0;	
 		calibration.lon = 49.26231834;
 		calibration.lat = -123.24871396; //The point we are calibrating on
-	  
+	  roboSpeed = 0.4;
 	  // Set precision of the numbers we print
 	  cout.precision(13);
-		GpsController::calibrate();
+		//GpsController::calibrate();
+		GpsController::StartGps();
   }
   
   
@@ -54,6 +55,12 @@ namespace ai
 	*/
 
 		    GpsController::calcwaypoint();
+				if (avgWaypoint.lon == 0.0 || avgWaypoint.lat == 0.0){
+					cout << "current coord are zero"<<endl;
+					twist_msg = GetTwistMsg(0);
+					return twist_msg;
+				} 
+				else{
 			  ROS_INFO ("Position:");
 			  cout << "Current longitude: " << avgWaypoint.lon << " Current latitude: " << avgWaypoint.lat << endl;
 				
@@ -66,7 +73,7 @@ namespace ai
 				coord_pub.publish(CurrentWaypoint);
 			  next_move = NextMoveLogic(pub_data.distance,pub_data.angle);
 			  twist_msg = GetTwistMsg(next_move);
-			  return twist_msg;
+			  return twist_msg;}
 				//Published Data
 		  
 
@@ -75,14 +82,28 @@ namespace ai
 	//dont include sleep, loop, spin 
   }
 
+	void GpsController::CommandReceiver(const sb_msgs::MoveCommand& command){
+	TargetWaypoint.lon = command.lat;
+	TargetWaypoint.lat = command.lon;
+	GpsController::makeSpeed(command.spd);
+
+}
+	void GpsController::makeSpeed (double speed){
+	if (speed > 2.0 || speed < 0.0)
+	ROS_ERROR("wtf, why");
+	else 
+	roboSpeed = speed/2.0; 
+	}	
 
   void GpsController::StartGps() /*double lon, double, lat */
   {
   //double lon = 49.262368;
   //double lat = -123.248591;
-  offWaypoint.lon = (49.157435497 - 49.26231834);
-  offWaypoint.lat = (-123.149139703 - (-123.24871396));
+  offWaypoint.lon = 42.406891312 - 42.67823;
+  offWaypoint.lat = (-83.11692477) - (-83.19487);
   }
+
+
 
   void GpsController::GpsCallback(const std_msgs::String::ConstPtr& msg)
   {
@@ -126,10 +147,11 @@ namespace ai
  
   bool GpsController::CheckGoal()
   {
-  cout<<fabs(CurrentWaypoint.lon - TargetWaypoint.lon)*100000 <<endl;
-    if ((int)fabs(CurrentWaypoint.lon - TargetWaypoint.lon)*100000 < 2 && (int)fabs(CurrentWaypoint.lon - TargetWaypoint.lon)*100000 > 0){	
-	  cout<<fabs(CurrentWaypoint.lat - TargetWaypoint.lat)*100000 <<endl;
-      if ((int)fabs(CurrentWaypoint.lat - TargetWaypoint.lat)*100000 < 2 && (int)fabs(CurrentWaypoint.lon - TargetWaypoint.lon)*100000 > 0){
+  cout<<fabs(avgWaypoint.lon - TargetWaypoint.lon)*100000 <<endl;
+  cout<<(int)fabs(avgWaypoint.lon - TargetWaypoint.lon)*100000 <<endl;
+    if (fabs(avgWaypoint.lon - TargetWaypoint.lon)*100000 < 2.5 && fabs(avgWaypoint.lon - TargetWaypoint.lon)*100000 > 0){	
+	  cout<<fabs(avgWaypoint.lat - TargetWaypoint.lat)*10000 <<endl;
+      if (fabs(avgWaypoint.lat - TargetWaypoint.lat)*100000 < 2.5 && fabs(avgWaypoint.lon - TargetWaypoint.lon)*100000 > 0){
 	
         return true;
       }
@@ -253,9 +275,9 @@ namespace ai
     sb_msgs::Gps_info data; 
   data.distance = ai::GpsController::CreateDistance();
   data.angle = ai::GpsController::CreateAngle();
-  cout << "Current longitude: " << avgWaypoint.lon << " Current latitude: " << avgWaypoint.lat << endl;
-  cout << "distance" << data.distance << endl;
-  cout << "angle" << data.angle << endl;
+  //cout << "Current longitude: " << avgWaypoint.lon << " Current latitude: " << avgWaypoint.lat << endl;
+  //cout << "distance" << data.distance << endl;
+  //cout << "angle" << data.angle << endl;
   return data; 
   }
 
@@ -302,18 +324,26 @@ void GpsController::calcwaypoint (void){
 	 printf ("Calculating Next Waypoint. . . .");
 	 int i = 0;
 	while ( i < 10) {
+
 		if (msg_flag){
 					setWaypoints(buffWaypoint,(buffWaypoint.lon +CurrentWaypoint.lon),(buffWaypoint.lat+CurrentWaypoint.lat));
 		i++;
 			}
-		else
-			cout << "\b\b\b\b\b\b\b . . . .";
-		}	
-		setWaypoints (avgWaypoint, buffWaypoint.lon/10.0, avgWaypoint.lat/10.0);
+		else{
+			printf("\b\b\b\b\b\b\b. . . .");	
+		break;}
+	}
+	
+		setWaypoints (avgWaypoint, buffWaypoint.lon/10.0, buffWaypoint.lat/10.0);
+	setWaypoints (buffWaypoint, 0.0, 0.0);
 	print(35, "NextPoint: ", avgWaypoint.lon, avgWaypoint.lat);
 	return;
 
 	
+}
+
+void GpsController::calcwaypoint (int i){
+	setWaypoints(avgWaypoint, 49.26248123,-123.24881402);
 }
 
 //end of namespace

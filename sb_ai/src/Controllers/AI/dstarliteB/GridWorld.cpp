@@ -28,6 +28,32 @@ GridWorld::GridWorld(unsigned int size, int radius){
 	open.push_back(start);
 }
 
+std::vector<GridWorld::Coords> GridWorld::getTraversal(){
+	std::vector<GridWorld::Coords> resultantPath;
+
+	while (start != goal){
+		if (goal->rhs == PF_INFINITY){
+			std::cout << "\tPathfinder: NO PATH EXIST" << std::endl;
+			break;
+		}
+
+		goal = goal->successor;
+		if (goal != 0){
+			//printf("\tMoved to (%u, %u)\n", world->goal->x, world->goal->y);
+			resultantPath.push_back(Coords(goal->x, goal->y));
+		}
+		else{
+			printf("\tPathfinder: Unable to find next tile\n");
+			return;
+		}
+
+		scanMap();
+		counter++;
+	}
+	return resultantPath;
+}
+
+
 /*
 This method handles the inflation of surrounding tiles. When an obsticle
 is detected, the surrounding tile's cost can be inflated to make the robot

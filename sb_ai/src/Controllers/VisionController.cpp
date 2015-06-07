@@ -6,51 +6,88 @@ using namespace ros;
 
 namespace ai{
 static const std::string PUBLISH_TOPIC2 = "vision_nav";
+<<<<<<< HEAD
 static const std::string SUBSCRIBE_TOPIC = "image_normal" 
+=======
+static const std::string SUBSCRIBE_TOPIC3 ="image_normal";
+>>>>>>> b42b066edfed19ed8991346da278d2dc4cfbc435
 const int MSG_QUEUE_SIZE = 20;
 
 int const upperBound = 255;
 int const lowerBound = 180;
 int const max_BINARY_value = 255;
 int const threshold_value = 195;
+//const sensor_msgs::ImageConstPtr& msg;
 
-VisionController::VisionController():
+
+VisionController::VisionController(ros::NodeHandle& nh):
 	blur_value(8),
 	dx(0),
 	dy(0),
 	steeringOut(0),
 	steering(0),
-	steeringIncrement(0.18), //TODO: is this steering too strong?
-	lowsteeringIncrement(0.18),
+	steeringIncrement(0.1), //TODO: is this steering too strong?
+	lowsteeringIncrement(0.05),
 	priority(0),
 	direction(0),
 	noLinesWait(0),
 	throttle(0.35), // TODO: is this throttle too strong?
-	lowThrottle(0.35),
+	lowThrottle(0.3),
 	count(0)
 {
+<<<<<<< HEAD
 	image = imread("/home/mecanum/Pictures/course1.jpg", 1);
 	ros::NodeHandle nodeHandler;
 	image_transport::ImageTransport imageTransporter(nodeHandler);
 	image_transport::Subscriber transportSub = imageTransporter.subscribe(SUBSCRIBE_TOPIC, 1, imageCallback);
 	//imwrite( "/home/jannicke/Pictures/Image2.jpg", image_direction);
+=======
+	//image = imread("/home/mecanum/Pictures/course1.jpg", 1);
+	image_transport::ImageTransport it(nh);
+    
+    ROS_INFO("subbing");
+    sub = it.subscribe(SUBSCRIBE_TOPIC3, 1, &VisionController::imageCallback, this);
+    
+    ROS_INFO("subbed"); 	                           
+>>>>>>> b42b066edfed19ed8991346da278d2dc4cfbc435
 }
 
 geometry_msgs::Twist VisionController::Update(){
-	detectLines();
-	getDirection();
+	//imageCallback();
+	if(!image.empty())
+	{
+		ROS_WARN("image obtained");
+	    //detectLines();
+	    getDirection();
+	    displayWindows();
+    }else ROS_INFO("image empty");
 	twist.angular.z = steeringOut;
+	twist.linear.y = throttle;
 	ROS_INFO("Vision Published a twist : y linear- %f, z angular - %f",twist.linear.y,twist.angular.z);
 	count++;
 	return twist;
 }
 
+<<<<<<< HEAD
 void imageCallback(const sensor_msgs::ImageConstPtr& msg){
 	static unsigned int counter = 1;
 	try{
 		ROS_INFO("Recieved an image for the %d time", counter);	
 		image_thresholded = cv_bridge::toCvShare(msg, "mono8")->image;
 		cv::imshow(CV_WINDOW, cv_bridge::toCvShare(msg, "mono8")->image);
+=======
+void VisionController::imageCallback(const sensor_msgs::Image::ConstPtr& msg){
+	static unsigned int counter = 1;
+	ROS_INFO("image callback run");
+	try{
+		ROS_INFO("Recieved an image for the %d time", counter);		
+		image = cv_bridge::toCvShare(msg, "mono8")->image;
+		image_thresholded = image.clone();
+		image_thresholded.convertTo(image_direction, CV_32F);
+		cvtColor(image_direction, image_direction, CV_GRAY2RGB);
+		//displayWindows();
+		//cv::imshow("subscribed", cv_bridge::toCvShare(msg, "mono8")->image);
+>>>>>>> b42b066edfed19ed8991346da278d2dc4cfbc435
 		if(cv::waitKey(30) == 27){
 			ROS_INFO("Shutdown event recieved");
 			ros::shutdown();
@@ -61,7 +98,10 @@ void imageCallback(const sensor_msgs::ImageConstPtr& msg){
 	counter++;
 }
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> b42b066edfed19ed8991346da278d2dc4cfbc435
 
 void VisionController::getDirection(void) {
 /*
@@ -71,10 +111,10 @@ void VisionController::getDirection(void) {
 	int const startRow = image.rows / 2 + distanceBetweenRows*4; //TODO: adjust for camera angle
 	int row = startRow;
 */
-	int rows2Check = 28;
+	int rows2Check = 80;
 	int minConstraint = 10; // need this many, or more point to define a line
-	int distanceBetweenRows = image.rows / 40;
-	int const startRow = image.rows/2+distanceBetweenRows*19; //TODO: adjust for camera angle
+	int distanceBetweenRows = -image.rows / rows2Check;
+	int const startRow = image.rows/3;//image.rows/2+distanceBetweenRows*19; //TODO: adjust for camera angle
 	//int const startRow = distanceBetweenRows*19; 	
 	int row = startRow;
 
@@ -485,7 +525,7 @@ void VisionController::getDirection(void) {
 			//	noLinesWait = 0;
 			//}
 		}
-		if (priority == 1) {cout<<" ABOUT TO HIT LINE" << endl; return;}
+		if (priority == 1) {cout<<" ABOUT TO HIT LINE" << endl;return;}
 		if (priority == -1) {cout<<"NO LINES DETECTED FOR EXTENDED PEROID SWITCHING TO GPS" << endl; return;}
 		// Otherwise perform direction test and move
 
@@ -575,20 +615,22 @@ void VisionController::getDirection(void) {
 	 cout<<"Direction: "<<direction<<endl;*/
 
 	void VisionController::detectLines(void) {
+		ROS_INFO("detectLines started");
 		int row = image.rows / 2 - 52; // starting row for checking direction
 		int betweenRow = 10;
 		int x = 0;
 		int y = 0;
-
+        ROS_INFO("image loaded");
 
 		int numLines = 0;
 		for (int i = 0; i <= 1; i++) {
 			//Draw lines on thresholded image, where it is being checked
 			drawLine(row);
+			ROS_INFO("line drawn");
 			//findcentre(row);
 			numLines = countLines(row, 0); // how many lanes are detected
 			if (numLines == 0)
-				cout << "Error: No lines visible" << endl; //direction will stay as before
+				ROS_INFO("Error: No lines visible"); //direction will stay as before
 			if (numLines >= 3)
 				cout << "Error: Noise, more than 3 lines detected" << endl; //direction will stay as before
 			if (numLines == 2) {
@@ -616,9 +658,12 @@ void VisionController::getDirection(void) {
 	void VisionController::displayWindows(void) {
 
 		//Display image
+		if(!image.empty())
+		{
 		namedWindow("Display Image", CV_WINDOW_NORMAL);
 		cvMoveWindow("Display Image", 400, 0);
 		imshow("Display Image", image);
+	    }
 /*
 		//Display blur
 		namedWindow("Blur", CV_WINDOW_NORMAL);
@@ -629,12 +674,14 @@ void VisionController::getDirection(void) {
 		namedWindow("After Blur", CV_WINDOW_NORMAL);
 		cvMoveWindow("After Blur", 400, 300);
 		imshow("After Blur", image_blur2);
-
+*/
 		//Display binary threshold thresholded image
+		if(!image_thresholded.empty()){
 		namedWindow("Binary Threshold", CV_WINDOW_NORMAL);
 		cvMoveWindow("Binary Threshold", 720, 300);
 		imshow("Binary Threshold", image_thresholded);
-
+	    }
+/* 
 		//Display Hue thresholded image
 		namedWindow("Hue Otsu Threshold", CV_WINDOW_NORMAL);
 		cvMoveWindow("Hue Otsu Threshold", 0, 300);
@@ -666,9 +713,12 @@ void VisionController::getDirection(void) {
 		imshow("Canny", image_canny);
 */
 		//Display direction image
+		if(!image_direction.empty())
+		{
 		namedWindow("Direction", CV_WINDOW_NORMAL);
-		cvMoveWindow("Direction", 0, 0);
+		cvMoveWindow("Direction", 0, 600);
 		imshow("Direction", image_direction);
+	    }
 /*
 //Display H image
 		namedWindow("Hue", CV_WINDOW_NORMAL);
@@ -718,7 +768,8 @@ void VisionController::getDirection(void) {
 		pt1.y = row;
 		pt2.x = image.cols;
 		pt2.y = row;
-		line(image_direction, pt1, pt2, CV_RGB(250, 100, 255), 1, CV_AA);
+
+		line(image_direction, pt1, pt2, /*CV_RGB(0, 0, 0)*/ 0, 3, CV_AA);
 	}
 
 //Detects where line are and highlights them using circles

@@ -17,13 +17,13 @@
 #include <cv_bridge/cv_bridge.h>
 
 const static std::string CV_WINDOW = "Image Subscriber Example";
-const static std::string TOPIC = "image";
+const static std::string TOPIC = "image_normal";
 
 void imageCallback(const sensor_msgs::ImageConstPtr& msg){
 	static unsigned int counter = 1;
 	try{
 		ROS_INFO("Recieved an image for the %d time", counter);		
-		cv::imshow(CV_WINDOW, cv_bridge::toCvShare(msg, "bgr8")->image);
+		cv::imshow(CV_WINDOW, cv_bridge::toCvShare(msg, "mono8")->image);
 		if(cv::waitKey(30) == 27){
 			ROS_INFO("Shutdown event recieved");
 			ros::shutdown();

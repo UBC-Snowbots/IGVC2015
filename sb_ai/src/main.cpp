@@ -9,7 +9,7 @@
 #include "Controllers/VisionController.hpp"
 #include "Controllers/LidarController.hpp"
 #include "Controllers/GpsController.hpp"
-//#include "Controllers/DSLiteController.hpp"
+#include "Controllers/DSLiteController.hpp"
 
 ai::ControllerBase* GetController(ros::NodeHandle& nh)
 {
@@ -25,7 +25,7 @@ ai::ControllerBase* GetController(ros::NodeHandle& nh)
 	else if (param=="vision")
 	{
 	  std::cout << "Running Vision!" << std::endl;
-		return new ai::VisionController();
+		return new ai::VisionController(nh);
 	}
 	else if (param=="lidar")
 	{
@@ -37,11 +37,11 @@ ai::ControllerBase* GetController(ros::NodeHandle& nh)
 	  std::cout << "Running GPS!" << std::endl;
 	  return new ai::GpsController(nh);
 	}
-	//else if (param=="dslite")
-	//{ 
-	//  std::cout << "Running D* Lite!" << std::endl;
-	//	return new ai::DSLiteController(nh);
-	//}
+	else if (param=="dslite")
+	{ 
+	  std::cout << "Running D* Lite!" << std::endl;
+		return new ai::DSLiteController(nh);
+	}
 	else
 	{
 		std::cout << "Invalid " << MODE_PARAM << " '" << param << "'." << std::endl;
@@ -52,6 +52,7 @@ ai::ControllerBase* GetController(ros::NodeHandle& nh)
 	std::cout << "\tlidar" << std::endl;
 	std::cout << "\tvision" << std::endl;
 	std::cout << "\tgps" << std::endl;
+	std::cout << "\tdislite" << std::endl;
 	std::cout << "Defaulting to dijkstra" << std::endl;
 	return new ai::DijkstraController(nh);
 }
@@ -68,8 +69,8 @@ int main(int argc, char **argv)
 
 	ros::Rate loop_rate(controller->GetClockSpeed());
 
-	while (ros::ok()) {
-
+	while (ros::ok()) 
+	{
 		car_pub.publish(controller->Update());	
 		ros::spinOnce();	
 		loop_rate.sleep();	
