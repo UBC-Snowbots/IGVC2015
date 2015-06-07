@@ -238,34 +238,50 @@ namespace ai
 		return distance;
 	}	
 
-  double GpsController::CreateAngle(void){
-		double dx = (TargetWaypoint.lon - CurrentWaypoint.lon)*111302.62;
-		double dy = (TargetWaypoint.lat - CurrentWaypoint.lat)*110574.61;
-		long double theta, GeoNorth;
+  int GpsController::CreateAngle(void){
+		double dx = (TargetWaypoint.lon - avgWaypoint.lon)*111302.62;
+		double dy = (TargetWaypoint.lat - avgWaypoint.lat)*110574.61;
+		int GeoNorth;
 		int quad; 
 		//1.converting magnetic north to geo north 
-		GeoNorth = angleCompass - MAG_DECL;
-		if (GeoNorth < -179)
-				GeoNorth = 180 + (GeoNorth + 179);
+		theta = 0;
+		cout << "angleCompass" << angleCompass << endl;
+		GeoNorth = angleCompass -  MAG_DECL;
+		cout << "Geonorth: " << GeoNorth << endl;
+		/*if (GeoNorth < -179)
+				GeoNorth = 180 + (GeoNorth + 179);*/
 		//2.Move 0 to north of robot
-		GeoNorth = GeoNorth - 90;
-		if (GeoNorth < 180) 
-				GeoNorth = 180 + (GeoNorth + 179);
+		/*GeoNorth = GeoNorth - 90; //+, - ?
+		if (GeoNorth < -179) 
+				GeoNorth = 360 + (GeoNorth);*/
 		//3.Decide Qudrant using deltalon, deltalat
 		if (dx > 0 && dy > 0) quad = 1;
 		else if (dx > 0 && dy < 0) quad = 2; 
 		else if (dx < 0 && dy < 0) quad = 3; 
 		else quad = 4; 
 		//4.Arctan dy/dx to find angle from "x-axis" (E-W)
-		if (quad == 1 || quad == 4)
+		if (quad == 1){
 		theta = atan(dx/dy);
-		else 
-		theta = 90 + atan(dy/dx);
+		cout << "atan" << atan(dx/dy);
+		cout << "theta" << atan(dx/dy);		
+		}
+		else if ( quad == 4){
+		theta = atan(-dx/dy);
+		}
+		else if (quad == 2){
+		theta = 90 + atan(-dy/dx);
+		cout << "atan" << atan(dx/dy);
+		cout << "theta" << atan(dx/dy);	
+	}
+		else {
+			theta = atan(dy/dx);
+			}
 		//5.How much GeoNorth needs to rotate left or right to get to theta
 		if (GeoNorth > theta) 
-			theta = theta - GeoNorth; 
-		else theta = GeoNorth - theta;
-
+			theta = GeoNorth - theta;
+		else theta = theta - GeoNorth; 
+		cout << "THEANGLEDFSFSDFS: " << theta << endl;
+		theta -=81;
 		return theta;
   }
 
@@ -283,6 +299,7 @@ namespace ai
 
   void GpsController::CompassCallback(const sb_msgs::RobotState::ConstPtr& state){
 	  angleCompass = state->compass;
+		cout << "angleCompass: " << angleCompass << endl;
   }
 
 	void GpsController::print (int color, const std::string& message){cout << "\033[1;" << color << "m" << message << "\033[0m" << endl;}

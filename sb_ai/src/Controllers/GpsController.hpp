@@ -31,12 +31,12 @@ namespace ai
   
     static const double EARTH_RADIUS = 6371000.0; 
     static const double PI = 3.14159265; 
-		static const double MAG_DECL = 11.034; //Magnetic declination
+		static const double MAG_DECL = 7.28; //Magnetic declination
   
-    double angleCompass;
+    int angleCompass;
     bool moveStatus, goal, msg_flag;
     double d; //distance in metres from currentWaypoint to targetWaypoint
-    double theta; //theta is the angle the robot needs to turn from currentWaypoint to targetWaypoint
+    int theta; //theta is the angle the robot needs to turn from currentWaypoint to targetWaypoint
 		double roboSpeed;//speed at which robot is commanded to move at
     sb_msgs::Waypoint CurrentWaypoint, LastWaypoint, offWaypoint, buffWaypoint, avgWaypoint, TargetWaypoint, calibration;
     geometry_msgs::Twist twist_msg;
@@ -57,7 +57,7 @@ namespace ai
     int NextMoveLogic(double distance, double angle);
     geometry_msgs::Twist GetTwistMsg(int next_move);
     double CreateDistance();
-    double CreateAngle();
+    int CreateAngle();
     sb_msgs::Gps_info Createdata();
 		void setWaypoints (sb_msgs::Waypoint& wp, double lon, double lat);
 		void setWaypoints (sb_msgs::Waypoint& wp1, sb_msgs::Waypoint& wp2);

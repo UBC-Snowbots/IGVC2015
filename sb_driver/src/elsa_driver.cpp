@@ -141,7 +141,7 @@ int main(int argc, char** argv)
 
 	    }
 			cout << ss.str() << endl;
-	    link.writeData(ss.str(), 10); 
+	    link.writeData(ss.str(), 7); 
 	    //delay for sync
 	    usleep(2000000);
 	    
@@ -253,10 +253,11 @@ void processData(string data,sb_msgs::RobotState &state)
   
 	state.RightVelo = (float) (right/1000);
 	state.LeftVelo = (float) (left/1000);
+	cout << compass_d << endl;
 	state.compass = (int) compass_d;
 
 //	state.RightVelo.push_back(float(right)/1000);
-//	state.LeftVelo.push_back(float(left)/1000);
+//	statee.LeftVelo.push_back(float(left)/1000);
 }
 
 //car_command_callback

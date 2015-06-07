@@ -10,7 +10,7 @@ string[] battery_names # the name of each battery
 uint32[] batteries    # integer values of battery levels
 uint32 odometer   # integer value of odometer ticks since last poll
 
-uint16 compass  #compass headign in degrees
+int32 compass  #compass headign in degrees
 float32 RightVelo #right wheel velocity in m/s
 float32 LeftVelo #left wheel velocity in m/s
 

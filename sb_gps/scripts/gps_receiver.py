@@ -34,7 +34,7 @@ def main ():
 	serv = rospy.Service('GPS_SERVICE', Gps_Service, handle_gps_service)
 	rospy.init_node('sb_gps')
 	rate = rospy.Rate(10) # 10HZ
-	link = serial.Serial(port="/dev/ttyUSB2",baudrate=1000000)
+	link = serial.Serial(port="/dev/ttyUSB0",baudrate=1000000)
 	while not rospy.is_shutdown():
 		rospy.loginfo(link.readline())
 		pub.publish(link.readline())
