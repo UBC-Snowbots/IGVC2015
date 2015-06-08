@@ -31,7 +31,7 @@ bool at_waypoint(const sb_msgs::MoveCommand& pt){
 	srv.request.lat2 = pt.lat;
 	srv.request.lon2 = pt.lon;
 	if(ros::service::call("GPS_SERVICE",srv)){
-		if(srv.response.distance < 11){
+		if(srv.response.distance < 4){
 			return true;
 		}
 	}else{
@@ -42,16 +42,6 @@ bool at_waypoint(const sb_msgs::MoveCommand& pt){
 
 void onNewWaypoint(const sb_msgs::Waypoint& pos){
 	position = pos;
-	if(at_waypoint(current_command)){
-		if(list.empty()){
-			std::cout << "reached end of waypoints" << std::endl;
-			current_command.spd = 0;
-		}else{
-			current_command = list.front();
-			list.pop_front();
-			publisher.publish(current_command);
-		}
-	}
 }
 
 int main(int argc, char** argv){
@@ -79,11 +69,19 @@ int main(int argc, char** argv){
 
 	
 	while(ros::ok()){
-	publisher.publish(current_command);
+		if(at_waypoint(current_command)){
+			if(list.empty()){
+				std::cout << "reached end of waypoints" << std::endl;
+				current_command.spd = 0;
+			}else{
+				current_command = list.front();
+				list.pop_front();
+			}
+		}
+		publisher.publish(current_command);
 		ros::spinOnce();
 		loop_rate.sleep();
 	}
-	
 	return 0;
 }
 

@@ -22,7 +22,6 @@ namespace ai
     coord_pub = nh.advertise<sb_msgs::Waypoint>(WAYPOINT_PUB_TOPIC, 100);
     jaus = nh.subscribe(MOVE_COMMAND_TOPIC,1,&GpsController::CommandReceiver, this);
     client = nh.serviceClient<sb_gps::Gps_Service>(GPS_SERV_TOPIC);
-  
     // Initialize variables
     msg_flag = false;
     d = 0;
@@ -168,11 +167,11 @@ namespace ai
 	  cout << "Arrived at waypoint" << endl;
 		  return 0;}
 	  else{
-		  if (angle > -2){
+		  if (angle > -5){
 			  cout << "turn right" << endl;
 			  return 4; 
 			  }
-		  else if (angle < 2){
+		  else if (angle < 5){
 			  cout << "turn left" << endl;	
 			  return -4;
 			  }
@@ -310,6 +309,7 @@ namespace ai
   //cout << "angle" << data.angle << endl;
   return data; 
   }
+
 
   void GpsController::CompassCallback(const sb_msgs::RobotState::ConstPtr& state){
 	  angleCompass = state->compass;

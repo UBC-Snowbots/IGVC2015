@@ -50,7 +50,7 @@ void LocalLidarMap::LidarCallback(const sensor_msgs::LaserScan::ConstPtr& scan)
   
       x = range * sin(theta);
       x /= MAP_RESOLUTION;
-      x += map_width / 2;
+      x += (map_width / 2);
       y = range * cos(theta);
       y /= MAP_RESOLUTION;
       int index = (int) y*map_width + x;

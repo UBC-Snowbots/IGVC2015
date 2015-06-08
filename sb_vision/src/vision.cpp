@@ -38,8 +38,14 @@ static const string VISION_NODE_NAME = "vision";
 const int MSG_QUEUE_SIZE = 20;
 
 //VideoCapture cap1(0);
-VideoCapture cap1("/home/mecanum/Pictures/crop.mov"); //CHANGE THIS 
+
+
+//VideoCapture cap1("/home/jechli/Documents/Snowbots2015/src/IGVC2015/sb_vision/src/Videos/course.mov"); //For Jen
+
+VideoCapture cap1("/home/mecanum/Pictures/croptwo.mov"); //CHANGE THIS 
+
 //VideoCapture cap1("/home/mecanum/Videos/sample-course.mp4");
+
 VideoCapture cap2;
 VideoCapture cap3;
 
