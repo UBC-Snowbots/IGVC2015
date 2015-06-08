@@ -3,6 +3,7 @@
 #include "AI/Utilities/Utilities.h"
 #include "sb_msgs/RobotState.h"
 #include "sb_msgs/Waypoint.h"
+#include "sb_gps/Gps_Service.h"
 
 // Constant variables
 static const std::string AI_NODE_NAME = "ai";
@@ -10,6 +11,7 @@ static const std::string PUB_TOPIC = "lidar_nav";
 static const std::string MAP_SUB_TOPIC = "local_map";
 static const std::string GPS_SUB_TOPIC = "GPS_COORD";
 static const std::string COMPASS_SUB_TOPIC = "robot_state";
+static const std::string GPS_SERV_TOPIC = "GPS_SERVICE";
 
 // Variable hacks for pathfinding map
 // All are relative to global map position, not gps position
@@ -45,16 +47,22 @@ float global_orientation = 0; // assigned after we get gps reading
 nav_msgs::OccupancyGrid global_map;
 
 
+void GetCoordDisplacements(double &x, double &y)
+{
+  x = (long_pos - origin_long) * 111302.62;
+  y = (lat_pos - origin_lat) * 110574.61;
+}
+
 void MapCallback(const nav_msgs::OccupancyGrid::ConstPtr& map)
 {
   int global_x, global_y, local_x, local_y;
   int localMapSize = map->info.width * map->info.height; 
   int global_i, test;
   long_pos++; // test
-  lat_pos++; // test
-  oo_count++;
-  if (oo_count % 10 == 0) { o_count++; }
-  orientation = 50 * o_count * M_PI / 180; 
+  //lat_pos++; // test
+  //oo_count++;
+  //if (oo_count % 10 == 0) { o_count++; }
+  //orientation = 50 * o_count * M_PI / 180; 
   
   // Loop through the vision map
   for (int index = 0; index < localMapSize; index++) 
@@ -75,15 +83,6 @@ void MapCallback(const nav_msgs::OccupancyGrid::ConstPtr& map)
 	  global_i = AI_Utilities::ConvertXYCoordToIndex(global_x, global_y, global_width);
 	  global_map.data[global_i] = map->data[index];
 			 
-			 /*
-		if (index == 0 || index == 239 || index == 28560 || index == 28799 || index == 28679)
-		{ 
-		  std::cout << "Index: " << index << std::endl;
-		  std::cout << "Global index: " << AI_Utilities::ConvertXYCoordToIndex(global_x, global_y, global_width) << std::endl;
-		  std::cout << "Global x: " << global_x << ", Global y: " << global_y << std::endl;
-		  std::cout << "Local x: " << local_x << ", Local y: " << local_y << std::endl;
-		}*/
-		
   }
 }
 

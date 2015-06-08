@@ -32,11 +32,7 @@ void Mapping::LidarMapCallback(const nav_msgs::OccupancyGrid::ConstPtr& map)
 {  
   for (int i = 0; i < MAP_WIDTH * MAP_HEIGHT; i++)
   {
-    //local_map.data[i] = map->data[i];
-   // if (i % 13 == 4) { local_map.data[i] = 0; } 
-   // else { local_map.data[i] = 100; } // just for testing
-    
-    local_map.data[i] = 100;
+    local_map.data[i] = map->data[i];
   }
 }
 
