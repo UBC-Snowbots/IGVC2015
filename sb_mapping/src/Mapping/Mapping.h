@@ -11,13 +11,14 @@
 // Hardcoded values
 #define MAP_WIDTH 240 
 #define MAP_HEIGHT 120
+#define VISION_OFFSET 20
 
 class Mapping
 {
   private:
   
     // Local maps
-    nav_msgs::OccupancyGrid local_map, vision_map;
+    nav_msgs::OccupancyGrid local_map, vision_map;	
     
     // Subscribers, publishers
     ros::Subscriber vision_sub, lidar_sub;
