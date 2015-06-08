@@ -16,7 +16,7 @@ class filter
     public:
        filter();
        cv::Mat outputImage;
-       cv::Mat getUpdate(cv::Mat inputImage); 
+       cv::Mat getUpdate(cv::Mat inputImage,int mapping); 
        void displayImages(cv::Mat inputImage);
        void testPrint(void);
        //cv::Mat inputImage;

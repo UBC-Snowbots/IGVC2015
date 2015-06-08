@@ -73,6 +73,7 @@ void VisionController::imageCallback(const sensor_msgs::Image::ConstPtr& msg){
 		//cv::imshow("subscribed", cv_bridge::toCvShare(msg, "mono8")->image);
 		if(cv::waitKey(30) == 27){
 			ROS_INFO("Shutdown event recieved");
+
 			ros::shutdown();
 		}
 	}catch (cv_bridge::Exception& e){
@@ -91,7 +92,7 @@ void VisionController::getDirection(void) {
 	int row = startRow;
 */
 	int rows2Check = 100;
-	int minConstraint = 20; // need this many, or more point to define a line
+	int minConstraint = 40; // need this many, or more point to define a line
 	int distanceBetweenRows = -image.rows / rows2Check;
 	int const startRow = 0;//image.rows/3;//image.rows/2+distanceBetweenRows*19; //TODO: adjust for camera angle
 	//int const startRow = distanceBetweenRows*19; 	
@@ -143,8 +144,8 @@ void VisionController::getDirection(void) {
 					centre.y = row;
 					//cout << "Point at = " << centre << endl;
 
-					circle(image_direction, centre, 20, CV_RGB(250, 100, 255),
-							1, 8, 0);
+					//circle(image_direction, centre, 20, CV_RGB(250, 100, 255),
+					//		1, 8, 0);
 					//cout << "Current Value: " << currentValue << " Last Value"
 					//		<< lastValue << endl;
 
@@ -458,17 +459,19 @@ void VisionController::getDirection(void) {
 		bool RoL = (slope1 < -minSlope)||(slope1 > minSlope );
 		bool LoR = (slope2 < -minSlope)||(slope2 > minSlope );
 		bool RoR = (slope3 < -minSlope)||(slope3 > minSlope );
-		/*bool LoL = ((slope0!=0) && (chiSquared0 <CHISQUAREDTHRESH)); // these values we chosen to reduce errors
-		bool RoL = ((slope1!=0) && (chiSquared1 <CHISQUAREDTHRESH));
-		bool LoR = ((slope2!=0) && (chiSquared2 <CHISQUAREDTHRESH));
-		bool RoR = ((slope3!=0) && (chiSquared3 <CHISQUAREDTHRESH));*/
 		bool R; //  right line detected?
 		bool L; // left line detected?
 
 		if (LoL && RoL) L = 1;
 		if (LoR && RoR) R = 1;
 
-		// Perform HitTest if hit set  to 1 & move away
+        cout<<"Lines detected"<<endl;
+        if(LoL) cout<<"Left of Left"<<endl;
+        if(RoL) cout <<"Right of Left"<<endl;
+        if(LoR) cout << "Left of Right" <<endl;
+        if(RoR) cout <<"Right of Right" <<endl;
+        /*
+		// Perform HitTest if hit set to 1 & move away
 		int robotPosy = image_thresholded.cols + 30; //TODO: alter this parameter
 		if(LoL||RoL||LoR||RoR) priority = 0;
 		if (LoL && ((robotPosy - yIntercept0)/ slope0) > 1/3*image_thresholded.cols){
@@ -509,54 +512,113 @@ void VisionController::getDirection(void) {
 			//	noLinesWait = 0;
 			//}
 		}
+		*/
 		//if (priority == 1) {cout<<" ABOUT TO HIT LINE" << endl;return;}
 		//if (priority == -1) {cout<<"NO LINES DETECTED FOR EXTENDED PEROID SWITCHING TO GPS" << endl; return;}
 		// Otherwise perform direction test and move
 
-		float leftSlope = 0;
-		float rightSlope = 0;
+		double leftSlope;
+		double rightSlope;
+		double left_y_intercept;
+		double right_y_intercept; 
+		double x_cross;
 
-		if (L)leftSlope = (slope0+slope1)/2;
-		else if (LoL || RoL) leftSlope = (slope0+slope1)/2;
-		if (R) rightSlope = (slope2+slope3)/2;
-		else if (LoR || RoR) rightSlope = (slope2+slope3)/2;
-
-		if (L && R) direction = (leftSlope + rightSlope)/2;
-		else if (LoL||RoL||LoR||RoR) direction = (leftSlope + rightSlope)/2;
-        
-        //New steering function
-         
-
-
-		if (direction > 0)
-			{
-
-			steering = steeringIncrement;
-			cout<< "GOING LEFT"<<endl;
-			}
-		if (direction < 0){
-			steering = -steeringIncrement;
-			cout<<"GOING RIGHT"<<endl;
+	    if (L) 
+		{
+		  leftSlope = (slope0+slope1)/2;
+		  left_y_intercept =(yIntercept0+yIntercept1)/2;
 		}
+		else if (LoL)
+		{ 
+			leftSlope = slope0;
+			left_y_intercept = yIntercept0;
+		}
+		else if (LoR)
+		{ 
+			leftSlope = slope1;
+			left_y_intercept = yIntercept1;
+		}
+		if (R) 
+		{
+		  rightSlope = (slope2+slope3)/2;
+		  right_y_intercept =(yIntercept2+yIntercept3)/2;
+		}
+		else if (LoR)
+		{ 
+			rightSlope = slope2;
+			right_y_intercept = yIntercept2;
+		}
+		else if (RoR)
+		{ 
+			rightSlope = slope3;
+			right_y_intercept = yIntercept3;
+		}
+			
+
+
+       	if ((L && R) ||((LoL || RoL) && (LoR || RoR)))
+		{
+			cout<<"Two lines detected"<<endl;
+			//direction = (leftSlope + rightSlope)/2;
+			//TODO: calculate direction
+			x_cross = (left_y_intercept-right_y_intercept)/(rightSlope-leftSlope);
+			direction =  image.cols/2-x_cross; //  left if positive, right if negative
+		}
+		else {
+		if (L || LoL || RoL)
+		{
+	 		cout<<"One line on left"<<endl;
+            //TODO:Calculate direction 
+            if((left_y_intercept>(image.cols/3)) && (leftSlope>0)) 
+            	direction = - left_y_intercept + image.cols/2;
+            else direction = 0;
+		}
+	    if(R ||LoR||RoR)
+	    {
+	    	cout<<"One line on right"<<endl;
+	    	if((right_y_intercept<(image.cols*2.0/3)) && (leftSlope<0)) 
+            	direction = - right_y_intercept + image.cols/2;
+            else direction = 0;
+		}
+		else if (!LoL&& !RoL && !LoR && !RoR)
+        {
+        	cout<<"No lines detected"<<endl;
+			direction = 0;
+		}
+		else cout <<"unaccounted logic"<<endl;
+        }
+        //New steering function
+        cout << "direction:" << direction<<endl;
+
+        // Steer according to direction 
+		if ((direction > 0)&&(direction <10))
+			steering = lowsteeringIncrement;
+		else if (direction > 10) 
+			steering = steeringIncrement;
+		else if ((direction < 0)&&(direction > -10))
+			steering = -lowsteeringIncrement;
+		else if ((direction < 0))
+			steering = -steeringIncrement;
+	
+	
 		if (direction == 0 ) {
 			steering = 0;
-			cout<<"GOING STRAIGHT"<<endl;
 		}
+
+		//Cap steering at maximum value
 		if (steering > 1)
 			steering = 1;
 		if (steering < -1)
 			steering = -1;
-
-
+        
+        cout<<"steering:"<<steering<< endl;
 		steeringOut = steering;
-		//if (steering < 0)cout << "HEADING RIGHT" << endl;
-		//if (steering > 0)cout << "HEADING LEFT" << endl;
-		//if (steering == 0)cout << "HEADING STRAIGHT" << endl;
+		if (steering < 0)cout << "HEADING RIGHT" << endl;
+		if (steering > 0)cout << "HEADING LEFT" << endl;
+		if (steering == 0)cout << "HEADING STRAIGHT" << endl;
 
 		cout << "Steering = " << steeringOut << endl;
 		cout << "Throttle = " << throttle <<endl;
-
-
 
 	}
 	/*
@@ -776,8 +838,8 @@ void VisionController::getDirection(void) {
 				Point centre;
 				centre.x = i;
 				centre.y = row;
-				circle(image_direction, centre, 5, CV_RGB(250, 100, 255), 1, 8,
-						0);
+				//circle(image_direction, centre, 5, CV_RGB(250, 100, 255), 1, 8,
+				//		0);
 				sum = sum + i;
 				count++;
 			}
@@ -787,7 +849,7 @@ void VisionController::getDirection(void) {
 		Point centre;
 		centre.x = average;
 		centre.y = row;
-		circle(image_direction, centre, 10, CV_RGB(250, 100, 255), 1, 8, 0);
+		//circle(image_direction, centre, 10, CV_RGB(250, 100, 255), 1, 8, 0);
 	}
 
 //Improved version of find direction when exactly 1 lane has been detected
@@ -821,7 +883,7 @@ void VisionController::getDirection(void) {
 		Point centre;
 		centre.x = centreLane;
 		centre.y = row;
-		circle(image_direction, centre, 20, CV_RGB(250, 100, 255), 1, 8, 0);
+		//circle(image_direction, centre, 20, CV_RGB(250, 100, 255), 1, 8, 0);
 		return centreLane;
 	}
 
@@ -865,7 +927,7 @@ void VisionController::getDirection(void) {
 		Point centre;
 		centre.x = centreLane;
 		centre.y = row;
-		circle(image_direction, centre, 20, CV_RGB(250, 100, 255), 1, 8, 0);
+		//circle(image_direction, centre, 20, CV_RGB(250, 100, 255), 1, 8, 0);
 		return centreLane;
 	}
 

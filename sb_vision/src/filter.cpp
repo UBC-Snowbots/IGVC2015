@@ -32,7 +32,7 @@ void filter::testPrint(void)
 	std::cout << "Filter test print \n" << std::endl;
 }
 
-cv::Mat filter::getUpdate(cv::Mat inputImage) 
+cv::Mat filter::getUpdate(cv::Mat inputImage, int mapping) 
 {
 	image_histo = inputImage.clone();
 	cv::cvtColor(inputImage, image_histo, CV_RGB2HSV);
@@ -73,7 +73,13 @@ cv::Mat filter::getUpdate(cv::Mat inputImage)
 
 	//cv::medianBlur(imageGrey, imageBlur2, kBlur);
 	//Extract green
-	//cv::bitwise_and(image_B,image_G,image_V );
+	//cv::bitwise_and(image_B,image_G,image_V );((
+	if(mapping)
+	{
+	cv::bitwise_not(image_S,image_S);
+	cv::bitwise_and(image_S,image_G,image_G);
+    
+    }
     //inRange(image_V, kLowerBound,kUpperBound,imageThresholded);
 
     // Dilate
@@ -137,12 +143,12 @@ void filter::displayImages(cv::Mat inputImage)
 {
 	    std::cout<<"size of input image"<<inputImage.rows<<","<<inputImage.cols<<endl;
         std::cout<<"size of input outputImage"<<outputImage.rows<<","<<outputImage.cols<<endl;
-	    /*
+	    
 	    //Display Input Image
 	    cv::namedWindow("Display Image", CV_WINDOW_NORMAL);
 		cvMoveWindow("Display Image", 0, 0);
 		cv::imshow("Display Image", inputImage);
-        
+        /*
 	    //Display direction image
 		cv::namedWindow("Direction", CV_WINDOW_NORMAL);
 		cvMoveWindow("Direction", 0, 300);
