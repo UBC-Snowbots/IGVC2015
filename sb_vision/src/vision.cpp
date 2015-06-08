@@ -33,18 +33,18 @@ using namespace ros;
 using namespace std; 
 
 static const string VISION_NODE_NAME = "vision";
-static const std::string CVWINDOW = "Sticher Window";
+//static const std::string CVWINDOW = "Sticher Window";
 //static const string PUBLISH_TOPIC = "image";
 const int MSG_QUEUE_SIZE = 20;
 
-VideoCapture cap1(0);
-//VideoCapture cap1("/home/mecanum/Pictures/crop.mov");
+//VideoCapture cap1(0);
+VideoCapture cap1("/home/mecanum/Pictures/croptwo.mov"); //CHANGE THIS 
 VideoCapture cap2;
 VideoCapture cap3;
 
 static const unsigned int CAMERA_AMOUNT = 1;
 
-void onShutdown(int sig);
+void onShutdown(void);
 bool connectToCamera(VideoCapture& camera);
 int sum_cam(bool camera_status[]);
 
@@ -66,13 +66,14 @@ int main(int argc, char **argv)
     Stitcher stitcher = Stitcher::createDefault(true);
     int counter = 0;
     int errorCounter = 0;
-    namedWindow(CVWINDOW);
+    //namedWindow(CVWINDOW);
 
     Mat inputImg, inputImgGray;
 	Mat outputImg;
     Mat frame;
     Mat pano;
     Mat image_pano;
+    Mat image_pano2;
     Mat dst;
     bool camera_status[3]; //false means off, true means on
         
@@ -107,7 +108,7 @@ int main(int argc, char **argv)
         // Read in image from video camera, or other source
           //create camera status array
        //if(!cap1.isOpened())cout<<"cap1 is not opened"<<endl;
-       camera_status[0] = 1; //connectToCamera(cap1);//cap1.isOpened();
+       camera_status[0] = cap1.isOpened();//CHANGE THIS//1; //connectToCamera(cap1);//cap1.isOpened();
        camera_status[1] = connectToCamera(cap2);
        camera_status[2] = connectToCamera(cap3);
 
@@ -156,13 +157,9 @@ int main(int argc, char **argv)
                 namedWindow("pano",WINDOW_NORMAL);
                 cvMoveWindow("pano",0,0);
                 imshow("pano", pano);
-                if(waitKey(1) == 27){
-                    ROS_INFO("ESC key pressed! Exiting loop now");
-                    ROS_WARN("The next run has a higher chance of crashing for unknown reasons");
-                    //break;
-                    }
             }
         }
+
         else if(camera_status[0]) pano = image1;
         else if(camera_status[1]) pano = image2;
         else if(camera_status[2]) pano = image3;
@@ -171,13 +168,14 @@ int main(int argc, char **argv)
 
         //Apply filter to stitched image
         filter myfilter; //create filter
-        image_pano = myfilter.getUpdate(pano);
+        image_pano = myfilter.getUpdate(pano,0);
+        image_pano2 = myfilter.getUpdate(pano,0);
         myfilter.displayImages(pano);
         cout<<"filter has been applied"<<endl;
      
 	    // Transform image
 	    IPM ipm( Size(width, height), Size(width, height), origPoints, dstPoints );
-		frame = image_pano;
+		frame = image_pano2;
 		if( frame.empty() )
         {
             cout<<"frame empty" <<endl;
@@ -214,7 +212,7 @@ int main(int argc, char **argv)
             msg2 = cv_bridge::CvImage(std_msgs::Header(), "mono8", image_pano).toImageMsg();
             pub2.publish(msg2);
             ROS_INFO("Vision published an image");
-            cv::waitKey(1);
+            if(waitKey(1)==13)onShutdown();
         }
         if(!dst.empty()) {
             namedWindow("dst",WINDOW_NORMAL);
@@ -231,6 +229,7 @@ int main(int argc, char **argv)
        else{
 			ROS_WARN("Image was empty");
 			}
+
         ros::spinOnce();
         loop_rate.sleep();
 
@@ -245,11 +244,12 @@ int main(int argc, char **argv)
 This function handles the releasing of objects when this node is
 requested or forced (via CTRL+C) to shutdown.
 */
-void onShutdown(int sig){
-    destroyWindow(CVWINDOW);
+void onShutdown(){
+    //destroyWindow(CVWINDOW);
     cap1.release();
     cap2.release();
     cap3.release();
+    destroyAllWindows();
     ROS_INFO("All objects should have been released, proper shutdown complete");
     ros::shutdown();
 }
