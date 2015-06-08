@@ -272,7 +272,7 @@ namespace ai
 			theta = theta - GeoNorth;
 		else theta = GeoNorth - theta; 
 		return theta;
-  }
+  }}
 
   sb_msgs::Gps_info GpsController::Createdata()
   {

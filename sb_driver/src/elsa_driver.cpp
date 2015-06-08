@@ -265,13 +265,13 @@ void processData(string data,sb_msgs::RobotState &state)
 //car_command_callback
 void car_command_callback(const geometry_msgs::TwistConstPtr& msg_ptr)
 {
-<<<<<<< HEAD
+
 	cout << *msg_ptr << endl;	
 	cout << "y: " << msg_ptr->linear.y << "z: " << msg_ptr->angular.z << endl;
 	mech.twist_y = msg_ptr->linear.y * 125+125; 
 	mech.twist_z = -msg_ptr->angular.z * 125+125;
 
-=======
+
 	ROS_INFO("car command has been called");
 	mech.twist_y = (msg_ptr->linear.y) * 125+125; 
 	mech.twist_z = -(msg_ptr->angular.z) * 125+125;
@@ -280,7 +280,6 @@ void car_command_callback(const geometry_msgs::TwistConstPtr& msg_ptr)
     cout<< "angular z:"<< msg_ptr->angular.z <<endl;
     cout<< "mech twist_y:"<<mech.twist_y<<endl;
 	cout<< "mech twist_z:"<<mech.twist_z<<endl;
->>>>>>> ef713548e2cbaa05c0f675fb07d9bea00cdf6fa3
 	sprintf(twist_y,"%03d",mech.twist_y);
 	sprintf(twist_z,"%03d",mech.twist_z);
 	cout<< "twist_y:"<<twist_y<<endl;
