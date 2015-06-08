@@ -54,7 +54,7 @@ namespace ai
 
     void StartGps();
     bool CheckGoal();
-    int NextMoveLogic(double distance, double angle);
+    int NextMoveLogic(double distance, int angle);
     geometry_msgs::Twist GetTwistMsg(int next_move);
     double CreateDistance();
     int CreateAngle();

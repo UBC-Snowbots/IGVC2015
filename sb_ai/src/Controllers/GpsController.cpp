@@ -29,9 +29,8 @@ namespace ai
     theta = 0;
     prev_move = 0;
     avg_count = 0;
-    TargetWaypoint.lon = 42.67797;
-	  TargetWaypoint.lat = -83.19537;
-	  buffWaypoint.lon = 0.0;
+    TargetWaypoint.lon = 42.67823	;
+	  TargetWaypoint.lat = -83.19487;
 	  buffWaypoint.lat = 0.0;	
 		calibration.lon = 49.26231834;
 		calibration.lat = -123.24871396; //The point we are calibrating on
@@ -53,7 +52,7 @@ namespace ai
 	  }
 	  else { cout << "\033[1;31m" << "Service Failed" << "\033[0m" << endl; }
 	*/
-
+				usleep (250000);
 		    GpsController::calcwaypoint();
 				if (avgWaypoint.lon == 0.0 || avgWaypoint.lat == 0.0){
 					cout << "current coord are zero"<<endl;
@@ -73,6 +72,7 @@ namespace ai
 				coord_pub.publish(CurrentWaypoint);
 			  next_move = NextMoveLogic(pub_data.distance,pub_data.angle);
 			  twist_msg = GetTwistMsg(next_move);
+				cout << twist_msg << endl;
 			  return twist_msg;}
 				//Published Data
 		  
@@ -162,24 +162,24 @@ namespace ai
       return false;
   }
 
-  int GpsController::NextMoveLogic (double distance, double angle){
+  int GpsController::NextMoveLogic (double distance, int angle){
 	  int next_move; 
 	  if (CheckGoal()) {
 	  cout << "Arrived at waypoint" << endl;
 		  return 0;}
 	  else{
-		  if (angle < 0.0){
+		  if (angle > -2){
 			  cout << "turn right" << endl;
-			  return 2; 
+			  return 4; 
 			  }
-		  else if (angle > 0.0){
+		  else if (angle < 2){
 			  cout << "turn left" << endl;	
-			  return -2;
+			  return -4;
 			  }
 		  else{
 			  if (distance > 100){
 				  cout << "forward quickly" << endl;
-				  return 50;
+				  return 40;
 				if (distance < 0){
 					cout << "Distance was not calculated" << distance << endl;
 					return 0;
@@ -187,7 +187,7 @@ namespace ai
 			  }
 			  else if (distance < 100){
 				  cout << "forward slowly" << endl;
-				  return 20;
+				  return 40;
 			  }
 			  else 
 				  cout << "Error in NextMoveLogic: " << distance << endl;
@@ -211,6 +211,7 @@ namespace ai
 	  return twist;
 	  }
 	  else if (next_move < 10){
+		twist.linear.y = 0.2;
 	  twist.angular.z = (double)next_move/10;
 	  return twist;
 	  }
@@ -245,43 +246,31 @@ namespace ai
 		int quad; 
 		//1.converting magnetic north to geo north 
 		theta = 0;
-		cout << "angleCompass" << angleCompass << endl;
-		GeoNorth = angleCompass -  MAG_DECL;
-		cout << "Geonorth: " << GeoNorth << endl;
-		/*if (GeoNorth < -179)
-				GeoNorth = 180 + (GeoNorth + 179);*/
-		//2.Move 0 to north of robot
-		/*GeoNorth = GeoNorth - 90; //+, - ?
-		if (GeoNorth < -179) 
-				GeoNorth = 360 + (GeoNorth);*/
-		//3.Decide Qudrant using deltalon, deltalat
+		GeoNorth = angleCompass - (MAG_DECL+90);
+		if (GeoNorth < -179)
+				GeoNorth = 180 + (GeoNorth + 179);
 		if (dx > 0 && dy > 0) quad = 1;
 		else if (dx > 0 && dy < 0) quad = 2; 
 		else if (dx < 0 && dy < 0) quad = 3; 
 		else quad = 4; 
 		//4.Arctan dy/dx to find angle from "x-axis" (E-W)
 		if (quad == 1){
-		theta = atan(dx/dy);
-		cout << "atan" << atan(dx/dy);
-		cout << "theta" << atan(dx/dy);		
+		theta = atan(dx/dy);	
 		}
 		else if ( quad == 4){
 		theta = atan(-dx/dy);
 		}
 		else if (quad == 2){
 		theta = 90 + atan(-dy/dx);
-		cout << "atan" << atan(dx/dy);
-		cout << "theta" << atan(dx/dy);	
 	}
 		else {
 			theta = atan(dy/dx);
 			}
 		//5.How much GeoNorth needs to rotate left or right to get to theta
-		if (GeoNorth > theta) 
-			theta = GeoNorth - theta;
-		else theta = theta - GeoNorth; 
-		cout << "THEANGLEDFSFSDFS: " << theta << endl;
-		theta -=81;
+		if (GeoNorth > theta){
+			if (theta < 0)  
+			theta = theta - GeoNorth;
+		else theta = GeoNorth - theta; 
 		return theta;
   }
 
@@ -299,7 +288,6 @@ namespace ai
 
   void GpsController::CompassCallback(const sb_msgs::RobotState::ConstPtr& state){
 	  angleCompass = state->compass;
-		cout << "angleCompass: " << angleCompass << endl;
   }
 
 	void GpsController::print (int color, const std::string& message){cout << "\033[1;" << color << "m" << message << "\033[0m" << endl;}

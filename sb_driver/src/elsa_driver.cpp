@@ -263,6 +263,8 @@ void processData(string data,sb_msgs::RobotState &state)
 //car_command_callback
 void car_command_callback(const geometry_msgs::TwistConstPtr& msg_ptr)
 {
+	cout << *msg_ptr << endl;	
+	cout << "y: " << msg_ptr->linear.y << "z: " << msg_ptr->angular.z << endl;
 	mech.twist_y = msg_ptr->linear.y * 125+125; 
 	mech.twist_z = -msg_ptr->angular.z * 125+125;
 

@@ -72,13 +72,14 @@ int main(int argc, char** argv){
 		std::cout << "input empty, exit immediately" << std::endl;
 		return 0;
 	}
+	std::cout <<  "fdfsdfasfdsa " << list.front() << std::endl;
 	current_command = list.front();
 	list.pop_front();
 	
-	publisher.publish(current_command);
+
 	
 	while(ros::ok()){
-		std::cout << "hi";
+	publisher.publish(current_command);
 		ros::spinOnce();
 		loop_rate.sleep();
 	}
