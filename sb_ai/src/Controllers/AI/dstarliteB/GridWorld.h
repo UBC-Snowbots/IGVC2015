@@ -48,7 +48,9 @@ public:
 	std::vector<Tile*> getNeighbours(Tile*& tile);
 
 	//------------------------------------------------
-	unsigned int size;
+	unsigned int length;
+	unsigned int width;
+
 	int radius;
 	double km;
 
@@ -60,7 +62,7 @@ public:
 	std::vector<Tile*> world;
 
 
-	GridWorld(unsigned int size, int radius);
+	GridWorld(unsigned int length, unsigned int width, int radius, Coords startCoords, Coords goalCoords);
 	void printWorld() const;
 	void updateCost(unsigned int x, unsigned int y, double cost);
 	void inflate(unsigned int x, unsigned int y, double cost);

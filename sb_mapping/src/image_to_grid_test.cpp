@@ -10,8 +10,8 @@ void chatterCallback(const sensor_msgs::Image::ConstPtr& msg)
 int main(int argc, char **argv)
 {
 	ros::init(argc, argv, "imagelistener");
-        ros::NodeHandle n;
-        ros::Subscriber sub = n.subscribe("image_bird", 1000, chatterCallback);
+	ros::NodeHandle n;
+	ros::Subscriber sub = n.subscribe("image_bird", 1000, chatterCallback);
 	ros::spin();
 	return 0;	
 }

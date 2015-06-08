@@ -37,9 +37,11 @@ static const std::string CVWINDOW = "Sticher Window";
 //static const string PUBLISH_TOPIC = "image";
 const int MSG_QUEUE_SIZE = 20;
 
-VideoCapture cap1;
+VideoCapture cap1(0);
+//VideoCapture cap1("/home/mecanum/Pictures/crop.mov");
 VideoCapture cap2;
 VideoCapture cap3;
+
 static const unsigned int CAMERA_AMOUNT = 1;
 
 void onShutdown(int sig);
@@ -48,6 +50,7 @@ int sum_cam(bool camera_status[]);
 
 int main(int argc, char **argv)
 {
+
 	ros::init(argc,argv, VISION_NODE_NAME);
 	ros::NodeHandle n;
 	ros::Rate loop_rate(10);
@@ -57,8 +60,6 @@ int main(int argc, char **argv)
     sensor_msgs::ImagePtr msg;
 	sensor_msgs::ImagePtr msg2;
     //signal(SIGINT, onShutdown);  
-
-
 
     Mat image1, image2, image3;         
     std::vector<Mat> imgs;
@@ -72,6 +73,7 @@ int main(int argc, char **argv)
     Mat frame;
     Mat pano;
     Mat image_pano;
+    Mat dst;
     bool camera_status[3]; //false means off, true means on
         
     //IPM Set-up, will put into class itself soon
@@ -95,23 +97,21 @@ int main(int argc, char **argv)
     dstPoints.push_back( Point2f(width, height) );
     dstPoints.push_back( Point2f(width, 0) );
     dstPoints.push_back( Point2f(0, 0) );
-	
-    
-    //create camera status array
-    camera_status[0] = connectToCamera(cap1);
-    camera_status[1] = connectToCamera(cap2);
-    camera_status[2] = connectToCamera(cap3);
 
-    if(!connectToCamera(cap1) && !connectToCamera(cap2) && !connectToCamera(cap3))
-    ROS_INFO("Unable to connect to any camera, using file as input");
+ 
     
     
 	while(ros::ok())
     {
         //TODO: add camera capture allowance for any amount of cameras
         // Read in image from video camera, or other source
-        
-        if(camera_status[0]) cap1 >> image1;
+          //create camera status array
+       //if(!cap1.isOpened())cout<<"cap1 is not opened"<<endl;
+       camera_status[0] = 1; //connectToCamera(cap1);//cap1.isOpened();
+       camera_status[1] = connectToCamera(cap2);
+       camera_status[2] = connectToCamera(cap3);
+
+        if(camera_status[0]) cap1 >> image1; 
         if(camera_status[1]) cap2 >> image2;
         if(camera_status[2]) cap3 >> image3;
         
@@ -123,12 +123,12 @@ int main(int argc, char **argv)
         if (image1.empty() || image2.empty() || image3.empty()) {
          ROS_WARN("One of the Mats is empty");   
         }
-      
-	    
+
+     
 
         // Static image for debugging purposes, seem to need an absolute
         // path to the image to avoid crashes
-    	//cv::Mat image = imread("/home/jannicke/Pictures/Image1.jpg", 1);
+    		//cv::Mat image = imread("/home/mecanum/snowbots_ws/src/IGVC2015/sb_vision/src/Image1.jpg", 1);
         //if(!image.data) std::cout<<"NO IMAGE DATA"<<std::endl;
         //else std::cout<<"image data exists"<<std::endl;
         //std::cout<<"image read"<<std::endl;
@@ -156,7 +156,7 @@ int main(int argc, char **argv)
                 namedWindow("pano",WINDOW_NORMAL);
                 cvMoveWindow("pano",0,0);
                 imshow("pano", pano);
-                if(waitKey(50) == 27){
+                if(waitKey(1) == 27){
                     ROS_INFO("ESC key pressed! Exiting loop now");
                     ROS_WARN("The next run has a higher chance of crashing for unknown reasons");
                     //break;
@@ -166,13 +166,14 @@ int main(int argc, char **argv)
         else if(camera_status[0]) pano = image1;
         else if(camera_status[1]) pano = image2;
         else if(camera_status[2]) pano = image3;
-        else pano = imread("/home/snowbots/Pictures/Image1.jpg", 1);
+        else pano = imread("/home/mecanum/Desktop/Image1.jpg", 1);
+        //else pano = imread("/home/mecanum/snowbots_ws/src/IGVC2015/sb_vision/src/Image1.jpg", 1);
 
         //Apply filter to stitched image
         filter myfilter; //create filter
         image_pano = myfilter.getUpdate(pano);
         myfilter.displayImages(pano);
-        
+        cout<<"filter has been applied"<<endl;
      
 	    // Transform image
 	    IPM ipm( Size(width, height), Size(width, height), origPoints, dstPoints );
@@ -181,30 +182,55 @@ int main(int argc, char **argv)
         {
             cout<<"frame empty" <<endl;
         } 
+        else{
 		// Color Conversion
-		if(frame.channels() == 3)cvtColor(frame, inputImgGray, CV_BGR2GRAY);				 		 
-		else frame.copyTo(inputImgGray);			 		 
-		// Process
-		ipm.applyHomography( frame, outputImg);		 
-		ipm.drawPoints(origPoints, frame );
+        cout<< "num channels"<<frame.channels();
+        //cv::cvtColor(frame, inputImgGray, CV_GRAY2BGR);
         
-        Size size(80,60);//the dst image size,e.g.100x100
-        Mat dst;
-        resize(outputImg,dst,size);//resize image
 
+		if(frame.channels() == 3)cvtColor(frame, inputImgGray, CV_BGR2GRAY);				 		 
+		else frame.copyTo(inputImgGray);	
+        //imshow("gray",inputImgGray);		 		 
+		// Process
+        std::cout<<"size of input inputImageGray"<<inputImgGray.rows<<","<<inputImgGray.cols<<endl;
+        std::cout<<"size of input frame"<<frame.rows<<","<<frame.cols<<endl;
+        Size size_homo(width,height);//the dst image size,e.g.100x100
+        resize(inputImgGray,dst,size_homo);
+        std::cout<<"size of input inputImageGray after resize"<<inputImgGray.rows<<","<<inputImgGray.cols<<endl;
+
+		//ipm.applyHomography( frame, outputImg);	
+        ipm.applyHomography( dst, outputImg);
+        namedWindow("outputimg",WINDOW_NORMAL);
+        cvMoveWindow("outputimg",1600,600);
+        imshow("outputimg",outputImg);
+
+		ipm.drawPoints(origPoints, frame);
+        Size size(80,60);//the dst image size,e.g.100x100
+        resize(outputImg,dst,size);//resize image
+        }
+        
         // Publish Image
-        //if(!image_pano.empty()) {
+        if(!image_pano.empty()) {
             msg2 = cv_bridge::CvImage(std_msgs::Header(), "mono8", image_pano).toImageMsg();
             pub2.publish(msg2);
             ROS_INFO("Vision published an image");
-        //    cv::waitKey(1);
-       // }
-        //if(!outputImg.empty()) {
+            cv::waitKey(1);
+        }
+        if(!dst.empty()) {
+            namedWindow("dst",WINDOW_NORMAL);
+            cvMoveWindow("dst",1600,600);
+            imshow("dst", dst);
+            namedWindow("output Image",WINDOW_NORMAL);
+            cvMoveWindow("output Image",1200,600);
+            imshow("output Image", outputImg);
             msg = cv_bridge::CvImage(std_msgs::Header(), "mono8", dst).toImageMsg();
             pub.publish(msg);
-            ROS_INFO("Vision published an image");
+            ROS_INFO("Vision published a bird image");
             cv::waitKey(1);
-       // }
+            }
+       else{
+			ROS_WARN("Image was empty");
+			}
         ros::spinOnce();
         loop_rate.sleep();
 
@@ -236,7 +262,7 @@ Once a connection is established, the connected camera will occupied
 the lowest deviceID avalible, making the next connection ID predictable
 */
 bool connectToCamera(VideoCapture& camera){
-    static unsigned int occupiedID = 1;
+    static unsigned int occupiedID = 0;
     
     camera.set(CV_CAP_PROP_FPS, 20);
     
