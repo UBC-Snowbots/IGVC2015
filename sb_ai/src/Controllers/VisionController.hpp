@@ -39,6 +39,7 @@ class VisionController: public ControllerBase
     cv::Mat image_H, image_S, image_V, image_R, image_G, image_B, image_histo, image_HThresh, image_SThresh,
 	    image_VThresh, image_noG;
     cv::Mat histogram_H, histogram_S, histogram_V;
+    cv::Mat image_direction32;
 
     int blur_value;
     int dx;

@@ -73,7 +73,7 @@ cv::Mat filter::getUpdate(cv::Mat inputImage)
 
 	//cv::medianBlur(imageGrey, imageBlur2, kBlur);
 	//Extract green
-	cv::bitwise_and(image_B,image_G,image_V );
+	//cv::bitwise_and(image_B,image_G,image_V );
     //inRange(image_V, kLowerBound,kUpperBound,imageThresholded);
 
     // Dilate
@@ -124,7 +124,7 @@ cv::Mat filter::getUpdate(cv::Mat inputImage)
 	//Otsu threshold
 	//threshold(image_blur2, image_thresholded, threshold_value, 255 , THRESH_OTSU|THRESH_BINARY  );
 	//image_direction = image_thresholded.clone();
-	outputImage = image_B.clone();
+	outputImage = image_G.clone();
 	//Canny Edge detection
 	//cv::Canny(image_thresholded, image_canny, 50, 200, 3);
 	
@@ -137,6 +137,7 @@ void filter::displayImages(cv::Mat inputImage)
 {
 	    std::cout<<"size of input image"<<inputImage.rows<<","<<inputImage.cols<<endl;
         std::cout<<"size of input outputImage"<<outputImage.rows<<","<<outputImage.cols<<endl;
+	    /*
 	    //Display Input Image
 	    cv::namedWindow("Display Image", CV_WINDOW_NORMAL);
 		cvMoveWindow("Display Image", 0, 0);
@@ -147,7 +148,7 @@ void filter::displayImages(cv::Mat inputImage)
 		cvMoveWindow("Direction", 0, 300);
 		cv::imshow("Direction", outputImage);
    
-
+        
         //Display direction image
 		cv::namedWindow("Image H", CV_WINDOW_NORMAL);
 		cvMoveWindow("Image H", 400, 0);
@@ -174,13 +175,13 @@ void filter::displayImages(cv::Mat inputImage)
         //Display direction image
 		cv::namedWindow("Image G", CV_WINDOW_NORMAL);
 		cvMoveWindow("Image G", 800, 300);
-		cv::imshow("Image G", image_B);
+		cv::imshow("Image G", image_G);
     
 
         //Display direction image
 		cv::namedWindow("Image B", CV_WINDOW_NORMAL);
 		cvMoveWindow("Image B", 800, 600);
-		cv::imshow("Image B", image_G);
+		cv::imshow("Image B", image_B);
 
 		cv::namedWindow("Image Erode", CV_WINDOW_NORMAL);
 		cvMoveWindow("Image Erode", 1200, 0);
@@ -197,4 +198,5 @@ void filter::displayImages(cv::Mat inputImage)
 		cv::namedWindow("Image Dilate Erode", CV_WINDOW_NORMAL);
 		cvMoveWindow("Image Dilate Erode", 1600, 300);
 		cv::imshow("Image Dilate Erode", imageBoth);
+		*/
 }

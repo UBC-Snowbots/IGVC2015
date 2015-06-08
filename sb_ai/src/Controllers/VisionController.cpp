@@ -13,6 +13,8 @@ int const upperBound = 255;
 int const lowerBound = 180;
 int const max_BINARY_value = 255;
 int const threshold_value = 195;
+int const kChiHigher = 5000;
+int const kChiLower = 0;
 //const sensor_msgs::ImageConstPtr& msg;
 
 
@@ -22,13 +24,13 @@ VisionController::VisionController(ros::NodeHandle& nh):
 	dy(0),
 	steeringOut(0),
 	steering(0),
-	steeringIncrement(0.3), //TODO: is this steering too strong?
-	lowsteeringIncrement(0.3),
+	steeringIncrement(0.1), //TODO: is this steering too strong?
+	lowsteeringIncrement(0.1),
 	priority(0),
 	direction(0),
 	noLinesWait(0),
-	throttle(0.5), // TODO: is this throttle too strong?
-	lowThrottle(0.5),
+	throttle(0.2), // TODO: is this throttle too strong?
+	lowThrottle(0.2),
 	count(0)
 {
 
@@ -65,8 +67,8 @@ void VisionController::imageCallback(const sensor_msgs::Image::ConstPtr& msg){
 		ROS_INFO("Recieved an image for the %d time", counter);		
 		image = cv_bridge::toCvShare(msg, "mono8")->image;
 		image_thresholded = image.clone();
-		image_thresholded.convertTo(image_direction, CV_32F);
-		cvtColor(image_direction, image_direction, CV_GRAY2RGB);
+		image_thresholded.convertTo(image_direction32, CV_32F);
+		cvtColor(image_direction32, image_direction, CV_GRAY2RGB);
 		//displayWindows();
 		//cv::imshow("subscribed", cv_bridge::toCvShare(msg, "mono8")->image);
 		if(cv::waitKey(30) == 27){
@@ -88,10 +90,10 @@ void VisionController::getDirection(void) {
 	int const startRow = image.rows / 2 + distanceBetweenRows*4; //TODO: adjust for camera angle
 	int row = startRow;
 */
-	int rows2Check = 80;
-	int minConstraint = 10; // need this many, or more point to define a line
+	int rows2Check = 100;
+	int minConstraint = 20; // need this many, or more point to define a line
 	int distanceBetweenRows = -image.rows / rows2Check;
-	int const startRow = image.rows/3;//image.rows/2+distanceBetweenRows*19; //TODO: adjust for camera angle
+	int const startRow = 0;//image.rows/3;//image.rows/2+distanceBetweenRows*19; //TODO: adjust for camera angle
 	//int const startRow = distanceBetweenRows*19; 	
 	int row = startRow;
 
@@ -276,17 +278,18 @@ void VisionController::getDirection(void) {
 		float xIntercept0 = -yIntercept0 / slope0;
 		//cout << "xIntercept0 = " << xIntercept0 << endl;
 
-		//if(yIntercept0 != 0)chiSquared0 = chiSquared(Xchecked0,Ychecked0, yIntercept0, slope0, X0Count,0);
-
+		if(yIntercept0 != 0)chiSquared0 = chiSquared(Xchecked0,Ychecked0, yIntercept0, slope0, X0Count,0);
+        //cout<<"chiSquared0:"<<chiSquared0<<endl;
 		//if ((yIntercept0 != 0) && (chiSquared0 < CHISQUAREDTHRESH)){
 			//Draw Line
-		if(yIntercept0 != 0){
+		if ((yIntercept0 != 0)&& (chiSquared0 > kChiLower) &&(chiSquared0 < kChiHigher )){
+		//if(yIntercept0 != 0){
 			Point Intercept0 = Point(xIntercept0, 0);
 			Point Intercept640 = Point((640 - yIntercept0) / slope0, 640);
 			line(image_direction, Intercept0, Intercept640,
-					CV_RGB(250, 100, 255), 1, CV_AA);
+					CV_RGB(250, 100, 255), 10, CV_AA);
 
-		}
+		}else slope0 = 0;
 	}
 		// 1 aka Right of Left
 		Mat Xchecked1;
@@ -322,16 +325,17 @@ void VisionController::getDirection(void) {
 			float xIntercept1 = -yIntercept1 / slope1;
 		//	cout << "xIntercept1 = " << xIntercept1 << endl;
 
-		//if(yIntercept1 != 0)chiSquared1 = chiSquared(Xchecked1,Ychecked1, yIntercept1, slope1, X1Count,1);
-
+		if(yIntercept1 != 0)chiSquared1 = chiSquared(Xchecked1,Ychecked1, yIntercept1, slope1, X1Count,1);
+        //cout<<"chiSquared1:"<<chiSquared1<<endl;
 		//	if ((yIntercept1 != 0) && (chiSquared1 < CHISQUAREDTHRESH)) {
-			if(yIntercept1 != 0){
+			if ((yIntercept1 != 0)&& (chiSquared1 > kChiLower) &&(chiSquared1 < kChiHigher )){
+			//if(yIntercept1 != 0){
 				//Draw Line
 				Point Intercept0 = Point(xIntercept1, 0);
 				Point Intercept640 = Point((640 - yIntercept1) / slope1, 640);
 				line(image_direction, Intercept0, Intercept640,
-						CV_RGB(250, 100, 255), 1, CV_AA);
-			}
+						CV_RGB(250, 100, 255), 10, CV_AA);
+			}else slope1 = 0;
 		}
 		// 2 aka Left of Right
 		Mat Xchecked2;
@@ -370,15 +374,17 @@ void VisionController::getDirection(void) {
 			float xIntercept2 = -yIntercept2 / slope2;
 		//	cout << "xIntercept2 = " << xIntercept2 << endl;
 
-			//if(yIntercept2 != 0)chiSquared2 = chiSquared(Xchecked2,Ychecked2, yIntercept2, slope2, X2Count,2);
+			if(yIntercept2 != 0)chiSquared2 = chiSquared(Xchecked2,Ychecked2, yIntercept2, slope2, X2Count,2);
+			//cout<<"chiSquared2:"<<chiSquared2<<endl;
 			//if ((yIntercept2 != 0)&&(chiSquared2 < CHISQUAREDTHRESH)) {
-			if(yIntercept2 != 0){
+			//if(yIntercept2 != 0){
+			if ((yIntercept2 != 0)&& (chiSquared2 > kChiLower) &&(chiSquared2 < kChiHigher )){
 				//Draw Line
 				Point Intercept0 = Point(xIntercept2, 0);
 				Point Intercept640 = Point((640 - yIntercept2) / slope2, 640);
 				line(image_direction, Intercept0, Intercept640,
-						CV_RGB(250, 100, 255), 1, CV_AA);
-			}
+						CV_RGB(250, 100, 255), 10, CV_AA);
+			}else slope2 = 0;
 		}
 		//3 aka Right of Right
 
@@ -414,15 +420,16 @@ void VisionController::getDirection(void) {
 		//	cout << "yIntercept3 = " << yIntercept3 << endl;
 			float xIntercept3 = -yIntercept3 / slope3;
 		//	cout << "xIntercept3 = " << xIntercept3 << endl;
-		//	if(yIntercept3 != 0)chiSquared3 = chiSquared(Xchecked3,Ychecked3, yIntercept3, slope3, X3Count,3);
-		//	if ((yIntercept3 != 0)&&(chiSquared3 < CHISQUAREDTHRESH)) {
-			if(yIntercept3 != 0){
+			if(yIntercept3 != 0)chiSquared3 = chiSquared(Xchecked3,Ychecked3, yIntercept3, slope3, X3Count,3);
+		    //cout<<"chiSquared3:"<<chiSquared3<<endl;
+			if ((yIntercept3 != 0)&& (chiSquared3 > kChiLower) &&(chiSquared3 < kChiHigher )) {
+		//	if(yIntercept3 != 0){
 				//Draw Line
 				Point Intercept0 = Point(xIntercept3, 0);
 				Point Intercept640 = Point((640 - yIntercept3) / slope3, 640);
 				line(image_direction, Intercept0, Intercept640,
-						CV_RGB(250, 100, 255), 1, CV_AA);
-			}
+						CV_RGB(250, 100, 255), 10, CV_AA);
+			}else slope3 = 0;
 
 		}
 
@@ -446,11 +453,11 @@ void VisionController::getDirection(void) {
 			cout << "Slope 3:"<< slope3<<endl;
 
 		// Crikey!
-		float minSlope = 0.01;
-		bool LoL = (slope0 > -minSlope)&&(slope0 < minSlope ); // these values we chosen to reduce errors
-		bool RoL = (slope1 > -minSlope)&&(slope1 < minSlope );
-		bool LoR = (slope2 > -minSlope)&&(slope2 < minSlope );
-		bool RoR = (slope3 > -minSlope)&&(slope3 < minSlope );
+		float minSlope = 0.0001;
+		bool LoL = (slope0 < -minSlope)||(slope0 > minSlope ); // these values we chosen to reduce errors
+		bool RoL = (slope1 < -minSlope)||(slope1 > minSlope );
+		bool LoR = (slope2 < -minSlope)||(slope2 > minSlope );
+		bool RoR = (slope3 < -minSlope)||(slope3 > minSlope );
 		/*bool LoL = ((slope0!=0) && (chiSquared0 <CHISQUAREDTHRESH)); // these values we chosen to reduce errors
 		bool RoL = ((slope1!=0) && (chiSquared1 <CHISQUAREDTHRESH));
 		bool LoR = ((slope2!=0) && (chiSquared2 <CHISQUAREDTHRESH));
@@ -502,20 +509,24 @@ void VisionController::getDirection(void) {
 			//	noLinesWait = 0;
 			//}
 		}
-		if (priority == 1) {cout<<" ABOUT TO HIT LINE" << endl;return;}
-		if (priority == -1) {cout<<"NO LINES DETECTED FOR EXTENDED PEROID SWITCHING TO GPS" << endl; return;}
+		//if (priority == 1) {cout<<" ABOUT TO HIT LINE" << endl;return;}
+		//if (priority == -1) {cout<<"NO LINES DETECTED FOR EXTENDED PEROID SWITCHING TO GPS" << endl; return;}
 		// Otherwise perform direction test and move
 
 		float leftSlope = 0;
 		float rightSlope = 0;
 
 		if (L)leftSlope = (slope0+slope1)/2;
-		else if (LoL || RoL) leftSlope = slope0+slope1;
+		else if (LoL || RoL) leftSlope = (slope0+slope1)/2;
 		if (R) rightSlope = (slope2+slope3)/2;
-		else if (LoR || RoR) rightSlope = slope2+slope3;
+		else if (LoR || RoR) rightSlope = (slope2+slope3)/2;
 
 		if (L && R) direction = (leftSlope + rightSlope)/2;
 		else if (LoL||RoL||LoR||RoR) direction = (leftSlope + rightSlope)/2;
+        
+        //New steering function
+         
+
 
 		if (direction > 0)
 			{
@@ -535,6 +546,7 @@ void VisionController::getDirection(void) {
 			steering = 1;
 		if (steering < -1)
 			steering = -1;
+
 
 		steeringOut = steering;
 		//if (steering < 0)cout << "HEADING RIGHT" << endl;
@@ -635,12 +647,12 @@ void VisionController::getDirection(void) {
 	void VisionController::displayWindows(void) {
 
 		//Display image
-		if(!image.empty())
-		{
-		namedWindow("Display Image", CV_WINDOW_NORMAL);
-		cvMoveWindow("Display Image", 400, 0);
-		imshow("Display Image", image);
-	    }
+		//if(!image.empty())
+		//{
+		//namedWindow("Display Image", CV_WINDOW_NORMAL);
+		//cvMoveWindow("Display Image", 400, 0);
+		//imshow("Display Image", image);
+	    //}
 /*
 		//Display blur
 		namedWindow("Blur", CV_WINDOW_NORMAL);
@@ -746,7 +758,7 @@ void VisionController::getDirection(void) {
 		pt2.x = image.cols;
 		pt2.y = row;
 
-		line(image_direction, pt1, pt2, /*CV_RGB(0, 0, 0)*/ 0, 3, CV_AA);
+		//line(image_direction, pt1, pt2, /*CV_RGB(0, 0, 0)*/ 0, 3, CV_AA);
 	}
 
 //Detects where line are and highlights them using circles
@@ -1137,7 +1149,7 @@ float VisionController::chiSquared(Mat Xchecked1,Mat Ychecked1, float yIntercept
 			 }
 			 float sigma = deltax/X1Count;
 			 chisquared = deltax/(X1Count * pow(sigma,2));
-			 cout << "CHI-SQUARED"<<num<<":" <<  1/chisquared <<endl;
+			 cout << "chisquared"<<num<<":" <<  1/chisquared <<endl;
 			 return 1/chisquared;
 }
 

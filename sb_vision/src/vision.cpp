@@ -37,8 +37,8 @@ static const std::string CVWINDOW = "Sticher Window";
 //static const string PUBLISH_TOPIC = "image";
 const int MSG_QUEUE_SIZE = 20;
 
-//VideoCapture cap1;
-VideoCapture cap1("/home/mecanum/Pictures/crop.mov");
+VideoCapture cap1(0);
+//VideoCapture cap1("/home/mecanum/Pictures/crop.mov");
 VideoCapture cap2;
 VideoCapture cap3;
 
@@ -106,8 +106,8 @@ int main(int argc, char **argv)
         //TODO: add camera capture allowance for any amount of cameras
         // Read in image from video camera, or other source
           //create camera status array
-       if(!cap1.isOpened())cout<<"cap1 is not opened"<<endl;
-       camera_status[0] = cap1.isOpened();//connectToCamera(cap1);
+       //if(!cap1.isOpened())cout<<"cap1 is not opened"<<endl;
+       camera_status[0] = 1; //connectToCamera(cap1);//cap1.isOpened();
        camera_status[1] = connectToCamera(cap2);
        camera_status[2] = connectToCamera(cap3);
 
@@ -262,7 +262,7 @@ Once a connection is established, the connected camera will occupied
 the lowest deviceID avalible, making the next connection ID predictable
 */
 bool connectToCamera(VideoCapture& camera){
-    static unsigned int occupiedID = 1;
+    static unsigned int occupiedID = 0;
     
     camera.set(CV_CAP_PROP_FPS, 20);
     
