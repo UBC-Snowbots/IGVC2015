@@ -4,7 +4,7 @@ using namespace cv;
 using namespace std; 
 using namespace ros; 
 
-namespace ai{
+namespace basic{
 static const std::string PUBLISH_TOPIC2 = "vision_nav";
 static const std::string SUBSCRIBE_TOPIC3 ="image_normal";
 const int MSG_QUEUE_SIZE = 20;
@@ -29,6 +29,7 @@ VisionController::VisionController(ros::NodeHandle& nh):
 	priority(0),
 	direction(0),
 	noLinesWait(0),
+	anyLines(1),
 	throttle(0.2), // TODO: is this throttle too strong?
 	lowThrottle(0.2),
 	count(0)
@@ -459,8 +460,8 @@ void VisionController::getDirection(void) {
 		bool RoL = (slope1 < -minSlope)||(slope1 > minSlope );
 		bool LoR = (slope2 < -minSlope)||(slope2 > minSlope );
 		bool RoR = (slope3 < -minSlope)||(slope3 > minSlope );
-		bool R; //  right line detected?
-		bool L; // left line detected?
+		bool R = 0; //  right line detected?
+		bool L = 0; // left line detected?
 
 		if (LoL && RoL) L = 1;
 		if (LoR && RoR) R = 1;
@@ -559,6 +560,7 @@ void VisionController::getDirection(void) {
        	if ((L && R) ||((LoL || RoL) && (LoR || RoR)))
 		{
 			cout<<"Two lines detected"<<endl;
+			noLinesWait=0;
 			//direction = (leftSlope + rightSlope)/2;
 			//TODO: calculate direction
 			x_cross = (left_y_intercept-right_y_intercept)/(rightSlope-leftSlope);
@@ -568,6 +570,7 @@ void VisionController::getDirection(void) {
 		if (L || LoL || RoL)
 		{
 	 		cout<<"One line on left"<<endl;
+	 		noLinesWait=0;
             //TODO:Calculate direction 
             if((left_y_intercept>(image.cols/3)) && (leftSlope>0)) 
             	direction = - left_y_intercept + image.cols/2;
@@ -576,6 +579,7 @@ void VisionController::getDirection(void) {
 	    if(R ||LoR||RoR)
 	    {
 	    	cout<<"One line on right"<<endl;
+	    	noLinesWait=0;
 	    	if((right_y_intercept<(image.cols*2.0/3)) && (leftSlope<0)) 
             	direction = - right_y_intercept + image.cols/2;
             else direction = 0;
@@ -584,9 +588,14 @@ void VisionController::getDirection(void) {
         {
         	cout<<"No lines detected"<<endl;
 			direction = 0;
+			noLinesWait++;
 		}
 		else cout <<"unaccounted logic"<<endl;
         }
+
+        if(noLinesWait > 100) anyLines = 0;
+        cout <<"noLinesWait:"<<noLinesWait<<endl;
+        cout << "anyLines:"<< anyLines<<endl;
         //New steering function
         cout << "direction:" << direction<<endl;
 
@@ -599,8 +608,10 @@ void VisionController::getDirection(void) {
 			steering = -lowsteeringIncrement;
 		else if ((direction < 0))
 			steering = -steeringIncrement;
-	
-	
+	    if((abs(direction) > 0)&&(abs(direction)<10)) priority = 0;
+	    if((abs(direction) > 10)&&(abs(direction)<100)) priority = 0.5;
+        if((abs(direction) > 100)) priority = 1;
+
 		if (direction == 0 ) {
 			steering = 0;
 		}
@@ -1220,6 +1231,16 @@ void VisionController::simpleDir()
 	// check across middle
 
 	// take average o
+}
+
+int VisionController::getVisionStatus(void)
+{
+	return anyLines;
+}
+
+double VisionController::getPriority(void)
+{
+	return priority;
 }
 
 }

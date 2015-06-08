@@ -559,6 +559,7 @@ void VisionController::getDirection(void) {
        	if ((L && R) ||((LoL || RoL) && (LoR || RoR)))
 		{
 			cout<<"Two lines detected"<<endl;
+			noLinesWait=0;
 			//direction = (leftSlope + rightSlope)/2;
 			//TODO: calculate direction
 			x_cross = (left_y_intercept-right_y_intercept)/(rightSlope-leftSlope);
@@ -568,6 +569,7 @@ void VisionController::getDirection(void) {
 		if (L || LoL || RoL)
 		{
 	 		cout<<"One line on left"<<endl;
+	 		noLinesWait=0;
             //TODO:Calculate direction 
             if((left_y_intercept>(image.cols/3)) && (leftSlope>0)) 
             	direction = - left_y_intercept + image.cols/2;
@@ -576,6 +578,7 @@ void VisionController::getDirection(void) {
 	    if(R ||LoR||RoR)
 	    {
 	    	cout<<"One line on right"<<endl;
+	    	noLinesWait=0;
 	    	if((right_y_intercept<(image.cols*2.0/3)) && (leftSlope<0)) 
             	direction = - right_y_intercept + image.cols/2;
             else direction = 0;
@@ -584,9 +587,12 @@ void VisionController::getDirection(void) {
         {
         	cout<<"No lines detected"<<endl;
 			direction = 0;
+			noLinesWait++;
 		}
 		else cout <<"unaccounted logic"<<endl;
         }
+
+        if(noLinesWait > 15) anyLines = 0;
         //New steering function
         cout << "direction:" << direction<<endl;
 
@@ -1221,6 +1227,8 @@ void VisionController::simpleDir()
 
 	// take average o
 }
+
+
 
 }
 

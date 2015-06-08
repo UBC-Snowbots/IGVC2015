@@ -130,7 +130,7 @@ cv::Mat filter::getUpdate(cv::Mat inputImage, int mapping)
 	//Otsu threshold
 	//threshold(image_blur2, image_thresholded, threshold_value, 255 , THRESH_OTSU|THRESH_BINARY  );
 	//image_direction = image_thresholded.clone();
-	outputImage = image_G.clone();
+	outputImage = image_G.clone(); // orginal image G testing fake driver only
 	//Canny Edge detection
 	//cv::Canny(image_thresholded, image_canny, 50, 200, 3);
 	
@@ -148,7 +148,7 @@ void filter::displayImages(cv::Mat inputImage)
 	    cv::namedWindow("Display Image", CV_WINDOW_NORMAL);
 		cvMoveWindow("Display Image", 0, 0);
 		cv::imshow("Display Image", inputImage);
-        /*
+     
 	    //Display direction image
 		cv::namedWindow("Direction", CV_WINDOW_NORMAL);
 		cvMoveWindow("Direction", 0, 300);
@@ -204,5 +204,5 @@ void filter::displayImages(cv::Mat inputImage)
 		cv::namedWindow("Image Dilate Erode", CV_WINDOW_NORMAL);
 		cvMoveWindow("Image Dilate Erode", 1600, 300);
 		cv::imshow("Image Dilate Erode", imageBoth);
-		*/
+		
 }

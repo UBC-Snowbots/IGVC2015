@@ -22,9 +22,9 @@
 #define GPS_SERV_TOPIC "GPS_SERVICE"
 #define MOVE_COMMAND_TOPIC "move_command"
 
-namespace ai
+namespace basic
 {
-  class GpsController: public ai::ControllerBase
+  class GpsController: public basic::ControllerBase
   {
   
   private:
@@ -72,6 +72,7 @@ namespace ai
 		void calcwaypoint(int i);
 		void CommandReceiver(const sb_msgs::MoveCommand& command);
 		void makeSpeed (double speed);
+    
 	  
   public:
   	
@@ -79,6 +80,7 @@ namespace ai
 	  void GpsCallback(const std_msgs::String::ConstPtr& msg); // gpsSubHandle
 	  void CompassCallback(const sb_msgs::RobotState::ConstPtr& msg); // compassSubHandle
 	  geometry_msgs::Twist Update();
+      int lastWaypoint(void); //NEED THIS
   };
 }
 

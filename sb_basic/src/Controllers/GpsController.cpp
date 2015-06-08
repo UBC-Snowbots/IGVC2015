@@ -10,7 +10,7 @@
 
 using namespace std; 
 
-namespace ai
+namespace basic
 {
   GpsController::GpsController(ros::NodeHandle& nh)
   {
@@ -278,8 +278,8 @@ namespace ai
   {
 
     sb_msgs::Gps_info data; 
-  data.distance = ai::GpsController::CreateDistance();
-  data.angle = ai::GpsController::CreateAngle();
+  data.distance = basic::GpsController::CreateDistance();
+  data.angle = basic::GpsController::CreateAngle();
   //cout << "Current longitude: " << avgWaypoint.lon << " Current latitude: " << avgWaypoint.lat << endl;
   //cout << "distance" << data.distance << endl;
   //cout << "angle" << data.angle << endl;
@@ -351,8 +351,15 @@ void GpsController::calcwaypoint (int i){
 	setWaypoints(avgWaypoint, 49.26248123,-123.24881402);
 }
 
+//NEED THIS
+int GpsController::lastWaypoint (void){
+	return 0;
+}
 //end of namespace
 }
+
+
+
 
 
 
