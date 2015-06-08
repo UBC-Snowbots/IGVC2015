@@ -244,35 +244,60 @@ namespace ai
 		double dy = (TargetWaypoint.lat - avgWaypoint.lat)*110574.61;
 		int GeoNorth;
 		int quad; 
+		int offset = 0;
 		//1.converting magnetic north to geo north 
 		theta = 0;
-		GeoNorth = angleCompass - (MAG_DECL+90);
-		if (GeoNorth < -179)
-				GeoNorth = 180 + (GeoNorth + 179);
+		GeoNorth = angleCompass;
+		cout << "Angle: " << GeoNorth;
+		//GeoNorth -= MAG;
+		GeoNorth -= 90;
+		if (GeoNorth < -180 && GeoNorth > -270){
+				GeoNorth +=360;
+		} // Translate North to 0 correctly 
+		cout << " Becomes :" << GeoNorth << endl;
 		if (dx > 0 && dy > 0) quad = 1;
 		else if (dx > 0 && dy < 0) quad = 2; 
 		else if (dx < 0 && dy < 0) quad = 3; 
 		else quad = 4; 
-		//4.Arctan dy/dx to find angle from "x-axis" (E-W)
+
+		GeoNorth += offset;
 		if (quad == 1){
-		theta = atan(dx/dy);	
+		theta = -atan(dx/dy)*180/PI;	
 		}
 		else if ( quad == 4){
-		theta = atan(-dx/dy);
+		theta = atan(-dx/dy)*180/PI;
 		}
 		else if (quad == 2){
-		theta = 90 + atan(-dy/dx);
-	}
+		theta = -(90 + atan(-dy/dx)*180/PI);
+		}
 		else {
-			theta = atan(dy/dx);
-			}
-		//5.How much GeoNorth needs to rotate left or right to get to theta
-		if (GeoNorth > theta){
-			if (theta < 0)  
-			theta = theta - GeoNorth;
-		else theta = GeoNorth - theta; 
+			theta = 90+atan(dy/dx)*180/PI;
+		}
+		cout << "Theta independent is: " << theta;
+		if (GeoNorth < 0 && theta > 0){
+				theta = fabs (GeoNorth) + fabs(theta);}
+		else if (GeoNorth < 0.0 && theta < 0.0){
+				if (GeoNorth < theta ) 
+						theta = fabs(GeoNorth - theta);
+				else 
+						theta = theta - GeoNorth; 				
+				} 
+		else if (GeoNorth > 0.0 && theta >0.0){
+				if (GeoNorth < theta) 
+						theta = theta - GeoNorth;
+				else
+						theta = theta - GeoNorth; 
+				}
+		else {// when GeoNorth > 0.0 && theta < 0.0
+				theta = -fabs(GeoNorth + fabs(theta));
+	}
+
+		if (theta < -180 && theta > -270){
+				theta +=360;
+		} 
+		cout << " Relative to Robot Direction is: " << theta << endl;;
 		return theta;
-  }}
+  }
 
   sb_msgs::Gps_info GpsController::Createdata()
   {

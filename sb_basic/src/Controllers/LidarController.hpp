@@ -12,7 +12,7 @@
 #include <sb_msgs/CarCommand.h>
 #include "ControllerBase.hpp"
 
-namespace ai{
+namespace basic{
 
 class LidarController: public ControllerBase{
 
@@ -20,6 +20,7 @@ private:
 	// some flags
 	int danger;
 	int backup;
+	double priority;
 
 	// some variables
 	long timeDiffce;	// currently in  milliseconds
@@ -54,6 +55,7 @@ public:
 
     geometry_msgs::Vector3 calculateVelocity(geometry_msgs::Vector3 dist1, geometry_msgs::Vector3 dist2);
 
+    double getPriority(void);
 };
 
 

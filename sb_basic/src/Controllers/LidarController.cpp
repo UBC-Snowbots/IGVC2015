@@ -3,7 +3,7 @@
  using namespace ros;
  using namespace std;
 
- namespace ai{
+ namespace basic{
  
  //Global constatns
 static const double PI		 = 3.1415265;
@@ -296,6 +296,11 @@ static int LOOP_FREQ = 30;
 
 		return result;
 	}
-	
+double LidarController::getPriority(void)
+{
+	return (danger*1.0/2);
 }
+
+}
+
 

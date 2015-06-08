@@ -54,6 +54,7 @@ class VisionController: public ControllerBase
     float throttle;
     float lowThrottle;
     int count;
+    int anyLines;
     geometry_msgs::Twist twist;
     image_transport::Subscriber sub;
 
@@ -65,6 +66,7 @@ class VisionController: public ControllerBase
     geometry_msgs::Twist Update();
 
     void imageCallback( const sensor_msgs::Image::ConstPtr& );
+    int getVisionStatus(void);
     void detectLines(void);
     void findcentre(int);
     int findcentre1(int);

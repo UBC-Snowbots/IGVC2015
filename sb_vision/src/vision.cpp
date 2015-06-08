@@ -38,7 +38,12 @@ static const string VISION_NODE_NAME = "vision";
 const int MSG_QUEUE_SIZE = 20;
 
 //VideoCapture cap1(0);
-VideoCapture cap1("/home/jechli/Documents/Snowbots2015/src/IGVC2015/sb_vision/src/Videos/course.mov"); //CHANGE THIS 
+
+//VideoCapture cap1("/home/jechli/Documents/Snowbots2015/src/IGVC2015/sb_vision/src/Videos/course.mov"); //For Jen
+
+VideoCapture cap1("/home/mecanum/Pictures/croptwo.mov"); //CHANGE THIS 
+//VideoCapture cap1("/home/mecanum/Videos/sample-course.mp4");
+
 VideoCapture cap2;
 VideoCapture cap3;
 
@@ -85,13 +90,14 @@ int main(int argc, char **argv)
     int wf = width/1920; //width scale factor
     int hf = height/1080; //height scale factor
     vector<Point2f> origPoints;
-    origPoints.push_back( Point2f(0, height) );
-    origPoints.push_back( Point2f(width, height) );
+    origPoints.push_back( Point2f(0-100, height) );
+    origPoints.push_back( Point2f(width+100, height) );
     //origPoints.push_back( Point2f(width/2+450, 580) );
     //origPoints.push_back( Point2f(width/2-250, 580) );
-    origPoints.push_back( Point2f(width/2+450*wf, 620*hf) );
-    origPoints.push_back( Point2f(width/2-250*wf, 620*hf) );
-
+    //origPoints.push_back( Point2f(width/2+450*wf, 620*hf) )//GOOD
+    //origPoints.push_back( Point2f(width/2-250*wf, 620*hf) );//GOOD
+    origPoints.push_back( Point2f(width/2+250*wf, 620*hf) );//GOOD
+    origPoints.push_back( Point2f(width/2-250*wf, 620*hf) );//GOOD
     // The 4-points correspondences in the destination image
     vector<Point2f> dstPoints;
     dstPoints.push_back( Point2f(0, height) );
@@ -108,7 +114,7 @@ int main(int argc, char **argv)
         // Read in image from video camera, or other source
           //create camera status array
        //if(!cap1.isOpened())cout<<"cap1 is not opened"<<endl;
-       camera_status[0] = cap1.isOpened();//CHANGE THIS//1; //connectToCamera(cap1);//cap1.isOpened();
+       camera_status[0] = 0;//cap1.isOpened();//CHANGE THIS//1; //connectToCamera(cap1);//cap1.isOpened();
        camera_status[1] = connectToCamera(cap2);
        camera_status[2] = connectToCamera(cap3);
 

@@ -29,7 +29,7 @@
 #include <cv_bridge/cv_bridge.h>
 
 
-namespace ai{
+namespace basic{
 
 class VisionController: public ControllerBase
 {
@@ -51,9 +51,11 @@ class VisionController: public ControllerBase
     int priority;
     float direction;
     int noLinesWait;
+    //int anyLines;
     float throttle;
     float lowThrottle;
     int count;
+
     geometry_msgs::Twist twist;
     image_transport::Subscriber sub;
 
@@ -63,8 +65,9 @@ class VisionController: public ControllerBase
   public:
     VisionController(ros::NodeHandle &nh);
     geometry_msgs::Twist Update();
-
+    double getPriority(void);
     void imageCallback( const sensor_msgs::Image::ConstPtr& );
+    int getVisionStatus(void);
     void detectLines(void);
     void findcentre(int);
     int findcentre1(int);
@@ -83,6 +86,7 @@ class VisionController: public ControllerBase
     float calculateDirection1();
     float chiSquared(cv::Mat,cv::Mat, float, float, int, int);
     void simpleDir();
+    int anyLines;
   };
 
 }
