@@ -12,13 +12,20 @@
 #include <opencv2/core/core.hpp>
 #include <signal.h>
 
-const static std::string CV_WINDOW = "Filter Controls";
+const static std::string CONTROLS_WINDOW = "Filter Controls";
+const static std::string ORIGINAL_WINDOW = "Oringinal";
+const static std::string THRESHOLD_WINDOW = "Threshold";
 
 using namespace cv;
-	VideoCapture cap(0);
+
+VideoCapture cap(0);
+int thresh = 100;
+int max_thresh = 255;
+RNG rng(12345);
+
 
 void onShutdown(int sig){
-	destroyWindow(CV_WINDOW);
+	destroyWindow(CONTROLS_WINDOW);
 	cap.release();
 	ROS_INFO("All objects should have been released, proper shutdown complete");
 }
@@ -32,7 +39,10 @@ int main( int argc, char** argv ){
 		return -1;
     }
 
-    namedWindow(CV_WINDOW, CV_WINDOW_AUTOSIZE); //create a window called CV_WINDOW
+    namedWindow(CONTROLS_WINDOW, CV_WINDOW_AUTOSIZE); //create a window called CONTROLS_WINDOW
+    namedWindow(ORIGINAL_WINDOW, CV_WINDOW_AUTOSIZE); //create a window called CONTROLS_WINDOW
+    namedWindow(THRESHOLD_WINDOW, CV_WINDOW_AUTOSIZE); //create a window called CONTROLS_WINDOW
+
 
 	int iLowH = 170;
 	int iHighH = 179;
@@ -43,15 +53,15 @@ int main( int argc, char** argv ){
 	int iLowV = 60;
 	int iHighV = 255;
 
-	//Create trackbars in CV_WINDOW window
-	createTrackbar("LowH", CV_WINDOW, &iLowH, 179); //Hue (0 - 179)
-	createTrackbar("HighH", CV_WINDOW, &iHighH, 179);
+	//Create trackbars in CONTROLS_WINDOW window
+	createTrackbar("LowH", CONTROLS_WINDOW, &iLowH, 179); //Hue (0 - 179)
+	createTrackbar("HighH", CONTROLS_WINDOW, &iHighH, 179);
 
-	createTrackbar("LowS", CV_WINDOW, &iLowS, 255); //Saturation (0 - 255)
-	createTrackbar("HighS", CV_WINDOW, &iHighS, 255);
+	createTrackbar("LowS", CONTROLS_WINDOW, &iLowS, 255); //Saturation (0 - 255)
+	createTrackbar("HighS", CONTROLS_WINDOW, &iHighS, 255);
 
-	createTrackbar("LowV", CV_WINDOW, &iLowV, 255);//Value (0 - 255)
-	createTrackbar("HighV", CV_WINDOW, &iHighV, 255);
+	createTrackbar("LowV", CONTROLS_WINDOW, &iLowV, 255);//Value (0 - 255)
+	createTrackbar("HighV", CONTROLS_WINDOW, &iHighV, 255);
 
 	int iLastX = -1; 
 	int iLastY = -1;
@@ -74,7 +84,6 @@ int main( int argc, char** argv ){
 		}
 
 		Mat imgHSV;
-
 		cvtColor(imgOriginal, imgHSV, COLOR_BGR2HSV); //Convert the captured frame from BGR to HSV
 		Mat imgThresholded;
 		inRange(imgHSV, Scalar(iLowH, iLowS, iLowV), Scalar(iHighH, iHighS, iHighV), imgThresholded); //Threshold the image  
@@ -86,33 +95,10 @@ int main( int argc, char** argv ){
 		//morphological closing (removes small holes from the foreground)
 		dilate( imgThresholded, imgThresholded, getStructuringElement(MORPH_ELLIPSE, Size(5, 5)) ); 
 		erode(imgThresholded, imgThresholded, getStructuringElement(MORPH_ELLIPSE, Size(5, 5)) );
+	
+		imshow(ORIGINAL_WINDOW, imgOriginal); //show the original image
+		imshow(THRESHOLD_WINDOW, imgThresholded); //show the original image
 
-		//Calculate the moments of the thresholded image
-		Moments oMoments = moments(imgThresholded);
-
-		double dM01 = oMoments.m01;
-		double dM10 = oMoments.m10;
-		double dArea = oMoments.m00;
-
-		// if the area <= 10000, I consider that the there are no object in the image and it's because of the noise, the area is not zero 
-		if (dArea > 10000){
-		 	//calculate the position of the ball
-		 	int posX = dM10 / dArea;
-		 	int posY = dM01 / dArea;        
-		        
-			if (iLastX >= 0 && iLastY >= 0 && posX >= 0 && posY >= 0){
-				//Draw a red line from the previous point to the current Point
-				line(imgLines, Point(posX, posY), Point(iLastX, iLastY), Scalar(0,0,255), 2);
-			}
-			
-			iLastX = posX;
-			iLastY = posY;
-		}
-
-		imshow("Thresholded Image", imgThresholded); //show the thresholded image
-		
-		imgOriginal = imgOriginal + imgLines;
-		//imshow("Original", imgOriginal); //show the original image
 		if(waitKey(30) == 27){
 			ROS_INFO("SHUTING DOWN PROGRAM NOW!");
 			cap.release();
