@@ -24,12 +24,13 @@ namespace ai
     client = nh.serviceClient<sb_gps::Gps_Service>(GPS_SERV_TOPIC);
     // Initialize variables
     msg_flag = false;
+		rest = false;
     d = 0;
     theta = 0;
     prev_move = 0;
     avg_count = 0;
-    TargetWaypoint.lon = 42.67823	;
-	  TargetWaypoint.lat = -83.19487;
+    TargetWaypoint.lon = 42.67797; //42.67797  -83.19537
+	  TargetWaypoint.lat = -83.19537;
 	  buffWaypoint.lat = 0.0;	
 		calibration.lon = 49.26231834;
 		calibration.lat = -123.24871396; //The point we are calibrating on
@@ -51,7 +52,7 @@ namespace ai
 	  }
 	  else { cout << "\033[1;31m" << "Service Failed" << "\033[0m" << endl; }
 	*/
-				usleep (250000);
+
 		    GpsController::calcwaypoint();
 				if (avgWaypoint.lon == 0.0 || avgWaypoint.lat == 0.0){
 					cout << "current coord are zero"<<endl;
@@ -70,7 +71,13 @@ namespace ai
 			  gps_pub.publish(pub_data); //a out 
 				coord_pub.publish(CurrentWaypoint);
 			  next_move = NextMoveLogic(pub_data.distance,pub_data.angle);
+				if (rest){
+				twist_msg = GetTwistMsg(0);
+				usleep(500000);
+				}
+				else
 			  twist_msg = GetTwistMsg(next_move);
+				rest = !rest;
 				cout << twist_msg << endl;
 			  return twist_msg;}
 				//Published Data
@@ -98,8 +105,9 @@ namespace ai
   {
   //double lon = 49.262368;
   //double lat = -123.248591;
-  offWaypoint.lon = 42.406891312 - 42.67823;
-  offWaypoint.lat = (-83.11692477) - (-83.19487);
+
+  offWaypoint.lon = 42.406951328 - 42.67821;
+  offWaypoint.lat = (-83.11730679) - ( -83.19546);
   }
 
 
@@ -167,18 +175,18 @@ namespace ai
 	  cout << "Arrived at waypoint" << endl;
 		  return 0;}
 	  else{
-		  if (angle > -5){
+		  if (angle < -11){
 			  cout << "turn right" << endl;
-			  return 4; 
+			  return -15; 
 			  }
-		  else if (angle < 5){
-			  cout << "turn left" << endl;	
-			  return -4;
+		  else if (angle > 11){
+			  cout << "turn left" << endl;
+			  return 15	;
 			  }
 		  else{
 			  if (distance > 100){
 				  cout << "forward quickly" << endl;
-				  return 40;
+				  return 9000;
 				if (distance < 0){
 					cout << "Distance was not calculated" << distance << endl;
 					return 0;
@@ -186,7 +194,7 @@ namespace ai
 			  }
 			  else if (distance < 100){
 				  cout << "forward slowly" << endl;
-				  return 40;
+				  return 9000;
 			  }
 			  else 
 				  cout << "Error in NextMoveLogic: " << distance << endl;
@@ -209,14 +217,15 @@ namespace ai
 	  if (next_move == 0){
 	  return twist;
 	  }
-	  else if (next_move < 10){
-		twist.linear.y = 0.2;
-	  twist.angular.z = (double)next_move/10;
+	  else if (next_move < 100){
+		twist.linear.y = 0.5;
+	  twist.angular.z = (double)next_move/100;
 	  return twist;
 	  }
-	  else if (next_move > 10){
-	  twist.linear.y = (double)next_move/100;
-	  return twist;
+	  else if (next_move > 99){
+	  twist.linear.y = (double)next_move/10000;
+	//twist.linear.y = 0.0;	  
+		return twist;
 	  }
 	
   }
@@ -239,14 +248,21 @@ namespace ai
 	}	
 
   int GpsController::CreateAngle(void){
-		double dx = (TargetWaypoint.lon - avgWaypoint.lon)*111302.62;
-		double dy = (TargetWaypoint.lat - avgWaypoint.lat)*110574.61;
+		double dx = (avgWaypoint.lon - TargetWaypoint.lon)*111302.62;
+		double dy = ( avgWaypoint.lat - 	TargetWaypoint.lat)*110574.61;
 		int GeoNorth;
 		int quad; 
-		int offset = 0;
+		int offset = 30;
 		//1.converting magnetic north to geo north 
 		theta = 0;
 		GeoNorth = angleCompass;
+		/*for (int i = 0; i < 10; i++){
+			if (angleCompass < GeoNorth)
+					GeoNorth = angleCompass;
+		}*/
+		GeoNorth -= offset;
+			if (GeoNorth < -180 && GeoNorth > -270){
+				GeoNorth +=360;}
 		cout << "Angle: " << GeoNorth;
 		//GeoNorth -= MAG;
 		GeoNorth -= 90;
@@ -259,7 +275,7 @@ namespace ai
 		else if (dx < 0 && dy < 0) quad = 3; 
 		else quad = 4; 
 
-		GeoNorth += offset;
+		//GeoNorth += offset;
 		if (quad == 1){
 		theta = -atan(dx/dy)*180/PI;	
 		}
@@ -279,7 +295,7 @@ namespace ai
 				if (GeoNorth < theta ) 
 						theta = fabs(GeoNorth - theta);
 				else 
-						theta = theta - GeoNorth; 				
+						theta = -(GeoNorth - theta); 				
 				} 
 		else if (GeoNorth > 0.0 && theta >0.0){
 				if (GeoNorth < theta) 
@@ -290,10 +306,12 @@ namespace ai
 		else {// when GeoNorth > 0.0 && theta < 0.0
 				theta = -fabs(GeoNorth + fabs(theta));
 	}
-
-		if (theta < -180 && theta > -270){
+		theta -= 40;	
+		if (theta < -180){
 				theta +=360;
 		} 
+		if (theta > 180) {theta -= 360;}
+
 		cout << " Relative to Robot Direction is: " << theta << endl;;
 		return theta;
   }

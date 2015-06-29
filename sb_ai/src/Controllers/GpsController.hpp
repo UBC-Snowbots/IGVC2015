@@ -51,7 +51,7 @@ namespace ai
     ros::ServiceClient client;
 		sb_gps::Gps_Service srv;
 		ros::Subscriber jaus;    
-
+		bool rest;
     void StartGps();
     bool CheckGoal();
     int NextMoveLogic(double distance, int angle);
