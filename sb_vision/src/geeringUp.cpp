@@ -5,6 +5,7 @@
 	to adjust the trackbar to find the right colors of filering.
 
 	Author: Simon Jinaphant
+	Future Reference: http://opencv-srf.blogspot.ca/2010/09/object-detection-using-color-seperation.html
 */
 
 #include <ros/ros.h>
