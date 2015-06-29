@@ -37,12 +37,10 @@ static const string VISION_NODE_NAME = "vision";
 //static const string PUBLISH_TOPIC = "image";
 const int MSG_QUEUE_SIZE = 20;
 
-//VideoCapture cap1(0);
-
-
+VideoCapture cap1(1);
 //VideoCapture cap1("/home/jechli/Documents/Snowbots2015/src/IGVC2015/sb_vision/src/Videos/course.mov"); //For Jen
 
-VideoCapture cap1("/home/mecanum/Pictures/croptwo.mov"); //CHANGE THIS 
+//VideoCapture cap1("/home/mecanum/Pictures/croptwo.mov"); //CHANGE THIS 
 
 //VideoCapture cap1("/home/mecanum/Videos/sample-course.mp4");
 
@@ -232,7 +230,7 @@ int main(int argc, char **argv)
             msg = cv_bridge::CvImage(std_msgs::Header(), "mono8", dst).toImageMsg();
             pub.publish(msg);
             ROS_INFO("Vision published a bird image");
-            cv::waitKey(0);
+            cv::waitKey(1);
             }
        else{
 			ROS_WARN("Image was empty");

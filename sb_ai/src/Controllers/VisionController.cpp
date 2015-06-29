@@ -24,13 +24,13 @@ VisionController::VisionController(ros::NodeHandle& nh):
 	dy(0),
 	steeringOut(0),
 	steering(0),
-	steeringIncrement(0.1), //TODO: is this steering too strong?
-	lowsteeringIncrement(0.1),
+	steeringIncrement(0.15), //TODO: is this steering too strong?
+	lowsteeringIncrement(0.15),
 	priority(0),
 	direction(0),
 	noLinesWait(0),
-	throttle(0.5), // TODO: is this throttle too strong?
-	lowThrottle(0.5),
+	throttle(0.7), // TODO: is this throttle too strong?
+	lowThrottle(0.7),
 	count(0)
 {
 
@@ -91,9 +91,9 @@ void VisionController::getDirection(void) {
 	int const startRow = image.rows / 2 + distanceBetweenRows*4; //TODO: adjust for camera angle
 	int row = startRow;
 */
-	int rows2Check = 100;
-	int minConstraint = 30; // need this many, or more point to define a line
-	int distanceBetweenRows = -image.rows / rows2Check;
+	int rows2Check = 50;
+	int minConstraint = 20; // need this many, or more point to define a line
+	int distanceBetweenRows = -(image.rows/2) / rows2Check;
 	int const startRow = 0;//image.rows/3;//image.rows/2+distanceBetweenRows*19; //TODO: adjust for camera angle
 	//int const startRow = distanceBetweenRows*19; 	
 	int row = startRow;
@@ -111,7 +111,7 @@ void VisionController::getDirection(void) {
 		transitions[i] = countLines(row, 1);
 		row = row - distanceBetweenRows;
 	}
-	//cout << "Transitions"<<transitions <<endl;
+	////cout << "Transitions"<<transitions <<endl;
 	row = startRow;
 
 	/* Categorize each transition
@@ -129,9 +129,9 @@ void VisionController::getDirection(void) {
 		Point centre;
 
 		if (transitions[i] == 0) {
-			//cout << "Error: No lines detected at row" << i << endl;
+			////cout << "Error: No lines detected at row" << i << endl;
 		} else if (transitions[i] > 4) {
-			//cout << "Error: More than 2 lines detected at row" << i << endl; // consider adjusting thresholding values here
+			////cout << "Error: More than 2 lines detected at row" << i << endl; // consider adjusting thresholding values here
 		} else {
 			for (int f = 0; f < image_thresholded.cols; f++) {
 				//lastL = L;
@@ -139,14 +139,14 @@ void VisionController::getDirection(void) {
 				//if (lastL && !lastR)
 				currentValue = image_thresholded.at<uchar>(row, f) % 2;
 				if (currentValue != lastValue) {
-					//cout << "Transition at x = " << f << ", y = " << row	<< endl;
+					////cout << "Transition at x = " << f << ", y = " << row	<< endl;
 					centre.x = f;
 					centre.y = row;
-					//cout << "Point at = " << centre << endl;
+					////cout << "Point at = " << centre << endl;
 
 					//circle(image_direction, centre, 20, CV_RGB(250, 100, 255),
 					//		1, 8, 0);
-					//cout << "Current Value: " << currentValue << " Last Value"
+					////cout << "Current Value: " << currentValue << " Last Value"
 					//		<< lastValue << endl;
 
 					//Here comes the fun!!!! Value of black is 1 and value of white is 0...
@@ -221,7 +221,7 @@ void VisionController::getDirection(void) {
 				lastValue = currentValue;
 			}
 
-			//cout<<"Left = " << left << "Row: " << row << endl;
+			////cout<<"Left = " << left << "Row: " << row << endl;
 
 		}
 		drawLine(row);
@@ -266,25 +266,25 @@ void VisionController::getDirection(void) {
 		}
 	}
 
-	//cout << "X0 checked" << Xchecked0 << endl;
-	//cout << "Y0 checked" << Ychecked0 << endl;
+	////cout << "X0 checked" << Xchecked0 << endl;
+	////cout << "Y0 checked" << Ychecked0 << endl;
 	if (X0Count >= minConstraint) {
 		solve(Xchecked0, Ychecked0, Bchecked0, DECOMP_QR);
 
-		//cout << "B0 checked = " << endl << Bchecked0 << endl;
+		////cout << "B0 checked = " << endl << Bchecked0 << endl;
 
 		// Next we need to calculate how much we want to shift by: using the line equation obtained in matrix B we can calculate the
 		// y-intercept
 		slope0 = Bchecked0.at<float>(0, 0);
 		yIntercept0 = Bchecked0.at<float>(1, 0);
-		//cout << "slope0 = " << slope0 << endl;
-		//cout << "yIntercept0 = " << yIntercept0 << endl;
+		////cout << "slope0 = " << slope0 << endl;
+		////cout << "yIntercept0 = " << yIntercept0 << endl;
 
 		xIntercept0 = -yIntercept0 / slope0;
-		cout << "xIntercept0 = " << xIntercept0 << endl;
+		//cout << "xIntercept0 = " << xIntercept0 << endl;
 
 		if(yIntercept0 != 0)chiSquared0 = chiSquared(Xchecked0,Ychecked0, yIntercept0, slope0, X0Count,0);
-        //cout<<"chiSquared0:"<<chiSquared0<<endl;
+        ////cout<<"chiSquared0:"<<chiSquared0<<endl;
 		//if ((yIntercept0 != 0) && (chiSquared0 < CHISQUAREDTHRESH)){
 			//Draw Line
 		if ((yIntercept0 != 0)&& (chiSquared0 > kChiLower) &&(chiSquared0 < kChiHigher )){
@@ -314,24 +314,24 @@ void VisionController::getDirection(void) {
 			}
 		}
 
-		//cout << "X1 checked" << Xchecked1 << endl;
-		//cout << "Y1 checked" << Ychecked1 << endl;
+		////cout << "X1 checked" << Xchecked1 << endl;
+		////cout << "Y1 checked" << Ychecked1 << endl;
 		if (X1Count >= minConstraint) {
 			solve(Xchecked1, Ychecked1, Bchecked1, DECOMP_QR);
 
-		//	cout << "B1 checked = " << endl << Bchecked1 << endl;
+		//	//cout << "B1 checked = " << endl << Bchecked1 << endl;
 			// Next we need to calculate how much we want to shift by: using the line equation obtained in matrix B we can calculate the
 			// y-intercept
 			slope1 = Bchecked1.at<float>(0, 0);
 			yIntercept1 = Bchecked1.at<float>(1, 0);
-		//	cout << "slope1 = " << slope1 << endl;
-		//	cout << "yIntercept1 = " << yIntercept1 << endl;
+		//	//cout << "slope1 = " << slope1 << endl;
+		//	//cout << "yIntercept1 = " << yIntercept1 << endl;
 
 			xIntercept1 = -yIntercept1 / slope1;
-			cout << "xIntercept1 = " << xIntercept1 << endl;
+			//cout << "xIntercept1 = " << xIntercept1 << endl;
 
 		if(yIntercept1 != 0)chiSquared1 = chiSquared(Xchecked1,Ychecked1, yIntercept1, slope1, X1Count,1);
-        //cout<<"chiSquared1:"<<chiSquared1<<endl;
+        ////cout<<"chiSquared1:"<<chiSquared1<<endl;
 		//	if ((yIntercept1 != 0) && (chiSquared1 < CHISQUAREDTHRESH)) {
 			if ((yIntercept1 != 0)&& (chiSquared1 > kChiLower) &&(chiSquared1 < kChiHigher )){
 			//if(yIntercept1 != 0){
@@ -360,27 +360,27 @@ void VisionController::getDirection(void) {
 			}
 		}
 
-		//cout << "X2 checked" << Xchecked2 << endl;
-		//cout << "Y2 checked" << Ychecked2 << endl;
+		////cout << "X2 checked" << Xchecked2 << endl;
+		////cout << "Y2 checked" << Ychecked2 << endl;
 
 		if (X2Count >= minConstraint) {
 			solve(Xchecked2, Ychecked2, Bchecked2, DECOMP_QR);
 
-		//	cout << "B2 checked = " << endl << Bchecked2 << endl;
+		//	//cout << "B2 checked = " << endl << Bchecked2 << endl;
 			//want to stream line this by putting points directly into Mat, but for now just going to get something that works
 
 			// Next we need to calculate how much we want to shift by: using the line equation obtained in matrix B we can calculate the
 			// y-intercept
 			slope2 = Bchecked2.at<float>(0, 0);
 			yIntercept2 = Bchecked2.at<float>(1, 0);
-		//	cout << "slope2 = " << slope2 << endl;
-		//	cout << "yIntercept2 = " << yIntercept2 << endl;
+		//	//cout << "slope2 = " << slope2 << endl;
+		//	//cout << "yIntercept2 = " << yIntercept2 << endl;
 
 			xIntercept2 = -yIntercept2 / slope2;
-			cout << "xIntercept2 = " << xIntercept2 << endl;
+			//cout << "xIntercept2 = " << xIntercept2 << endl;
 
 			if(yIntercept2 != 0)chiSquared2 = chiSquared(Xchecked2,Ychecked2, yIntercept2, slope2, X2Count,2);
-			//cout<<"chiSquared2:"<<chiSquared2<<endl;
+			////cout<<"chiSquared2:"<<chiSquared2<<endl;
 			//if ((yIntercept2 != 0)&&(chiSquared2 < CHISQUAREDTHRESH)) {
 			//if(yIntercept2 != 0){
 			if ((yIntercept2 != 0)&& (chiSquared2 > kChiLower) &&(chiSquared2 < kChiHigher )){
@@ -411,22 +411,22 @@ void VisionController::getDirection(void) {
 		}
 
 		//want to stream line this by putting points directly into Mat, but for now just going to get something that works
-		//cout << "X3 checked" << Xchecked3 << endl;
-		//cout << "Y3 checked" << Ychecked3 << endl;
+		////cout << "X3 checked" << Xchecked3 << endl;
+		////cout << "Y3 checked" << Ychecked3 << endl;
 		if (X3Count >= minConstraint) {
 			solve(Xchecked3, Ychecked3, Bchecked3, DECOMP_QR);
-		//	cout << "B3 checked = " << endl << Bchecked3 << endl;
+		//	//cout << "B3 checked = " << endl << Bchecked3 << endl;
 
 			// Next we need to calculate how much we want to shift by: using the line equation obtained in matrix B we can calculate the
 			// y-intercept
 			slope3 = Bchecked3.at<float>(0, 0);
 			yIntercept3 = Bchecked3.at<float>(1, 0);
-		//	cout << "slope3 = " << slope3 << endl;
-		//	cout << "yIntercept3 = " << yIntercept3 << endl;
+		//	//cout << "slope3 = " << slope3 << endl;
+		//	//cout << "yIntercept3 = " << yIntercept3 << endl;
 			xIntercept3 = -yIntercept3 / slope3;
-			cout << "xIntercept3 = " << xIntercept3 << endl;
+			//cout << "xIntercept3 = " << xIntercept3 << endl;
 			if(yIntercept3 != 0)chiSquared3 = chiSquared(Xchecked3,Ychecked3, yIntercept3, slope3, X3Count,3);
-		    //cout<<"chiSquared3:"<<chiSquared3<<endl;
+		    ////cout<<"chiSquared3:"<<chiSquared3<<endl;
 			if ((yIntercept3 != 0)&& (chiSquared3 > kChiLower) &&(chiSquared3 < kChiHigher )) {
 		//	if(yIntercept3 != 0){
 				//Draw Line
@@ -452,14 +452,14 @@ void VisionController::getDirection(void) {
 			Bchecked3.release();
 
 
-			cout << "Slope 0:"<< slope0<<endl;
-			cout << "Slope 1:"<< slope1<<endl;
-			cout << "Slope 2:"<< slope2<<endl;
-			cout << "Slope 3:"<< slope3<<endl;
-			cout << "xIntercept0: "<< xIntercept0 <<endl;
-            cout << "xIntercept1: "<< xIntercept1 <<endl;
-            cout << "xIntercept2: "<< xIntercept2 <<endl;
-            cout << "xIntercept3: "<< xIntercept3 <<endl;
+			//cout << "Slope 0:"<< slope0<<endl;
+			//cout << "Slope 1:"<< slope1<<endl;
+			//cout << "Slope 2:"<< slope2<<endl;
+			//cout << "Slope 3:"<< slope3<<endl;
+			//cout << "xIntercept0: "<< xIntercept0 <<endl;
+            //cout << "xIntercept1: "<< xIntercept1 <<endl;
+            //cout << "xIntercept2: "<< xIntercept2 <<endl;
+            //cout << "xIntercept3: "<< xIntercept3 <<endl;
 		// Crikey!
 		double minSlope = 0.0001;
 		bool LoL = (slope0 != 0.0);//((slope0 < -minSlope)||(slope0 > minSlope )); // these values we chosen to reduce errors
@@ -472,11 +472,11 @@ void VisionController::getDirection(void) {
 		if (LoL && RoL) L = 1;
 		if (LoR && RoR) R = 1;
 
-        cout<<"Lines detected"<<endl;
-        if(LoL) cout<<"Left of Left"<<endl;
-        if(RoL) cout <<"Right of Left"<<endl;
-        if(LoR) cout << "Left of Right" <<endl;
-        if(RoR) cout <<"Right of Right" <<endl;
+        //cout<<"Lines detected"<<endl;
+        //if(LoL) //cout<<"Left of Left"<<endl;
+        //if(RoL) //cout <<"Right of Left"<<endl;
+        //if(LoR) //cout << "Left of Right" <<endl;
+        //if(RoR) //cout <<"Right of Right" <<endl;
         /*
 		// Perform HitTest if hit set to 1 & move away
 		int robotPosy = image_thresholded.cols + 30; //TODO: alter this parameter
@@ -485,29 +485,29 @@ void VisionController::getDirection(void) {
 			priority = 1;
 			throttle = lowThrottle;
 			steering = lowsteeringIncrement;
-			cout<<"GOING LEFT"<<endl;
+			//cout<<"GOING LEFT"<<endl;
 		}
 		else if (RoL && ((robotPosy - yIntercept1)/ slope1) > 1/3*image_thresholded.cols){
 			priority = 1;
 			throttle = lowThrottle;
 			steering = lowsteeringIncrement;
-			cout<<"GOING LEFT"<<endl;
+			//cout<<"GOING LEFT"<<endl;
 		}
 		else if (LoR && ((robotPosy - yIntercept2)/slope2) < 2/3*image_thresholded.cols){
 			priority = 1;
 			throttle = lowThrottle;
 			steering = -lowsteeringIncrement;
-			cout<<"GOING RIGHT"<<endl;
+			//cout<<"GOING RIGHT"<<endl;
 		}
 		else if (RoR && ((robotPosy - yIntercept3)/slope3) < 2/3*image_thresholded.cols){
 			priority = 1;
 			throttle = lowThrottle;
 			steering = -lowsteeringIncrement;
-			cout<<"GOING RIGHT"<<endl;
+			//cout<<"GOING RIGHT"<<endl;
 		}
 		else if (!LoL&&!RoL&&!LoR&&!RoR)
 		{
-			cout<<"NO LINES DETECTED, GOING STRAIGHT"<<endl;
+			//cout<<"NO LINES DETECTED, GOING STRAIGHT"<<endl;
 			noLinesWait++;
 			throttle = lowThrottle;
 			//steering = steering *(-1); // added this in now
@@ -520,8 +520,8 @@ void VisionController::getDirection(void) {
 			//}
 		}
 		*/
-		//if (priority == 1) {cout<<" ABOUT TO HIT LINE" << endl;return;}
-		//if (priority == -1) {cout<<"NO LINES DETECTED FOR EXTENDED PEROID SWITCHING TO GPS" << endl; return;}
+		//if (priority == 1) {//cout<<" ABOUT TO HIT LINE" << endl;return;}
+		//if (priority == -1) {//cout<<"NO LINES DETECTED FOR EXTENDED PEROID SWITCHING TO GPS" << endl; return;}
 		// Otherwise perform direction test and move
 
 		double leftSlope;
@@ -599,7 +599,7 @@ void VisionController::getDirection(void) {
 
        	if ((L && R) ||((LoL || RoL) && (LoR || RoR)))
 		{
-			cout<<"Two lines detected"<<endl;
+			//cout<<"Two lines detected"<<endl;
 			noLinesWait=0;
 			//direction = (leftSlope + rightSlope)/2;
 			//TODO: calculate direction
@@ -609,24 +609,24 @@ void VisionController::getDirection(void) {
 		else {
 		if (L || LoL || RoL)
 		{
-	 		cout<<"One line on left"<<endl;
+	 		//cout<<"One line on left"<<endl;
 	 		noLinesWait=0;
             //TODO:Calculate direction 
             if((left_y_intercept>(image.cols*1.0/4)) && (leftSlope<0))//changed > to < leftslope 
-            	direction = - left_y_intercept + image.cols/2;
+            	direction = -1;//*(- left_y_intercept + image.cols/2);
             else direction = 0;
 		}
 	    if(R ||LoR||RoR)
 	    {
-	    	cout<<"One line on right"<<endl;
+	    	//cout<<"One line on right"<<endl;
 	    	noLinesWait=0;
 	    	if((right_y_intercept<(image.cols*3.0/4)) && (rightSlope>0)) 
-            	direction = - right_y_intercept + image.cols/2;
+            	direction = 1;//*(- right_y_intercept + image.cols/2);
             else direction = 0;
 		}
 		else if (!LoL && !RoL && !LoR && !RoR)
         {
-        	cout<<"No lines detected"<<endl;
+        	//cout<<"No lines detected"<<endl;
 			direction = 0;
 			steering = 0;
 			noLinesWait++;
@@ -636,7 +636,7 @@ void VisionController::getDirection(void) {
 
         if(noLinesWait > 15) anyLines = 0;
         //New steering function
-        cout << "direction:" << direction<<endl;
+        //cout << "direction:" << direction<<endl;
 
         // Steer according to direction 
 		if ((direction > 0)&&(direction <10))
@@ -660,14 +660,15 @@ void VisionController::getDirection(void) {
 		if (steering < -1)
 			steering = -1;
         
-        cout<<"steering:"<<steering<< endl;
-		steeringOut = steering;
-		if (steering < 0)cout << "HEADING RIGHT" << endl;
-		if (steering > 0)cout << "HEADING LEFT" << endl;
-		if (steering == 0)cout << "HEADING STRAIGHT" << endl;
+        //cout<<"steering:"<<steering<< endl;
+        if(steering>0)steeringOut = steering/2;
+        if(steering<0)steeringOut = steering;
+		//if (steering < 0)//cout << "HEADING RIGHT" << endl;
+		//if (steering > 0)//cout << "HEADING LEFT" << endl;
+		//if (steering == 0)//cout << "HEADING STRAIGHT" << endl;
 
-		cout << "Steering = " << steeringOut << endl;
-		cout << "Throttle = " << throttle <<endl;
+		//cout << "Steering = " << steeringOut << endl;
+		//cout << "Throttle = " << throttle <<endl;
 
 	}
 	/*
@@ -703,16 +704,16 @@ void VisionController::getDirection(void) {
 	 transitions = transitions/iterations; //may have rounding error here
 
 	 int lines = (transitions+1)/2*2;
-	 cout<< "Lines: " << lines << endl;
+	 //cout<< "Lines: " << lines << endl;
 
-	 if (transitions == 0)cout<< "Error: 0 lines detected, keep going in same direction"<<endl;
+	 if (transitions == 0)//cout<< "Error: 0 lines detected, keep going in same direction"<<endl;
 	 else if (transitions == 1);
 	 else if (transitions == 2);
 	 else if (transitions == 3);
 	 else if (transitions == 4);
-	 else if (transitions >= 5)cout<< "Error: Noise, more than 2 lines detected"<<endl;
+	 else if (transitions >= 5)//cout<< "Error: Noise, more than 2 lines detected"<<endl;
 
-	 cout<<"Direction: "<<direction<<endl;*/
+	 //cout<<"Direction: "<<direction<<endl;*/
 
 	void VisionController::detectLines(void) {
 		ROS_INFO("detectLines started");
@@ -732,7 +733,7 @@ void VisionController::getDirection(void) {
 			if (numLines == 0)
 				ROS_INFO("Error: No lines visible"); //direction will stay as before
 			if (numLines >= 3)
-				cout << "Error: Noise, more than 3 lines detected" << endl; //direction will stay as before
+				//cout << "Error: Noise, more than 3 lines detected" << endl; //direction will stay as before
 			if (numLines == 2) {
 				x = findcentre2(row); // if we detect two lines find the middle of the lane
 				y = row;
@@ -748,7 +749,7 @@ void VisionController::getDirection(void) {
 			if (i == 1) {
 				dx = x - dx;
 				dy = dy - y;
-				cout << "Rise/Run: " << dy << "/" << dx << endl;
+				//cout << "Rise/Run: " << dy << "/" << dx << endl;
 			}
 
 			row = row - betweenRow;
@@ -881,7 +882,7 @@ void VisionController::getDirection(void) {
 		int average;
 		for (int i = 0; i < image_thresholded.cols; i++) {
 			Mit = (image_thresholded.at<uchar>(row, i)) % 2; // had problems with data type of binary image. Modulo works to get either 1 or 0
-			cout << Mit << endl;
+			//cout << Mit << endl;
 			if (Mit > 0) {
 				//Highlight area where circle is detected
 				Point centre;
@@ -916,7 +917,7 @@ void VisionController::getDirection(void) {
 					countWhite = i;
 				else if (transition == 1) {
 					centreWhite1 = (countWhite + i) / 2;
-					cout << "centreWhite1: " << centreWhite1 << endl;
+					//cout << "centreWhite1: " << centreWhite1 << endl;
 					countWhite = 0;
 				}
 				transition++;
@@ -927,7 +928,7 @@ void VisionController::getDirection(void) {
 			centreLane = (centreWhite1) / 2;
 		if (centreWhite1 < image_thresholded.cols / 2)
 			centreLane = (centreWhite1 + image_thresholded.cols) / 2;
-		cout << "CentreLane:" << centreLane << endl;
+		//cout << "CentreLane:" << centreLane << endl;
 		//Put large dot in average of white lines
 		Point centre;
 		centre.x = centreLane;
@@ -969,9 +970,9 @@ void VisionController::getDirection(void) {
 			lastValue = Mit;
 		}
 		centreLane = (centreWhite1 + centreWhite2) / 2;
-		cout << "centreWhite1: " << centreWhite1 << endl;
-		cout << "centreWhite2: " << centreWhite2 << endl;
-		cout << "CentreLane:" << centreLane << endl;
+		//cout << "centreWhite1: " << centreWhite1 << endl;
+		//cout << "centreWhite2: " << centreWhite2 << endl;
+		//cout << "CentreLane:" << centreLane << endl;
 		//Put large dot in average of white lines
 		Point centre;
 		centre.x = centreLane;
@@ -994,8 +995,8 @@ void VisionController::getDirection(void) {
 			lastValue = Mit;
 		}
 		lineCount = ceil(transitionCount / 2.0);
-		//cout << "Number of Transitions: " << transitionCount << endl;
-		//cout << "Number of Lines: " << lineCount << endl;
+		////cout << "Number of Transitions: " << transitionCount << endl;
+		////cout << "Number of Lines: " << lineCount << endl;
 		if (mode == 0)
 			return lineCount;
 		if (mode == 1)
@@ -1087,7 +1088,7 @@ void VisionController::getDirection(void) {
 		Mat inGreenRange;
 		Mat testRGB;
 		//void inRange(InputArray src, InputArray lowerb, InputArray upperb, OutputArray dst)
-		//cout<<image_H<<endl;
+		////cout<<image_H<<endl;
 
 		inRange(image_H, lowerBound,upperBound,image_thresholded);
 
@@ -1260,7 +1261,7 @@ float VisionController::chiSquared(Mat Xchecked1,Mat Ychecked1, float yIntercept
 			 }
 			 float sigma = deltax/X1Count;
 			 chisquared = deltax/(X1Count * pow(sigma,2));
-			 cout << "chisquared"<<num<<":" <<  1/chisquared <<endl;
+			 //cout << "chisquared"<<num<<":" <<  1/chisquared <<endl;
 			 return 1/chisquared;
 }
 

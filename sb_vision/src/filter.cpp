@@ -29,7 +29,7 @@ filter::filter():
 
 void filter::testPrint(void)
 {
-	std::cout << "Filter test print \n" << std::endl;
+	//std:://cout << "Filter test print \n" << std::endl;
 }
 
 cv::Mat filter::getUpdate(cv::Mat inputImage, int mapping) 
@@ -51,7 +51,7 @@ cv::Mat filter::getUpdate(cv::Mat inputImage, int mapping)
 	image_S = channels[1];
 	image_V = channels[2];
 
-    cout<<"filter split image into HSV"<<endl;
+    //cout<<"filter split image into HSV"<<endl;
 
 	split(imageBlur2, channels_RGB);
 
@@ -61,7 +61,7 @@ cv::Mat filter::getUpdate(cv::Mat inputImage, int mapping)
 	image_B = channels_RGB[2];
 
 	
-    cout<<"filter split image into RGB"<<endl;
+    //cout<<"filter split image into RGB"<<endl;
     
     inRange(image_H, 0,10,image_H);
     inRange(image_S, 170,255,image_S);
@@ -70,9 +70,9 @@ cv::Mat filter::getUpdate(cv::Mat inputImage, int mapping)
     inRange(image_R, kLowerBound,kUpperBound,image_R);
     //inRange(image_G, kLowerBound,kUpperBound,image_G);
     //inRange(image_G, 170,255,image_G); //cloudy weather
-    inRange(image_G, 200,255,image_G); //sample
+    //inRange(image_G, 190,255,image_G); //sample
     //inRange(image_G,0,200,image_G);
-    //inRange(image_G, 230,255,image_G); //sunny weather
+    inRange(image_G, 230,255,image_G); //sunny weather
     inRange(image_B, 230,255,image_B);
 
 	//cv::medianBlur(imageGrey, imageBlur2, kBlur);
@@ -145,8 +145,8 @@ cv::Mat filter::getUpdate(cv::Mat inputImage, int mapping)
 
 void filter::displayImages(cv::Mat inputImage)
 {
-	    std::cout<<"size of input image"<<inputImage.rows<<","<<inputImage.cols<<endl;
-        std::cout<<"size of input outputImage"<<outputImage.rows<<","<<outputImage.cols<<endl;
+	    //std:://cout<<"size of input image"<<inputImage.rows<<","<<inputImage.cols<<endl;
+        //std:://cout<<"size of input outputImage"<<outputImage.rows<<","<<outputImage.cols<<endl;
 	    
 	    //Display Input Image
 	    cv::namedWindow("Display Image", CV_WINDOW_NORMAL);
