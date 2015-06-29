@@ -64,22 +64,26 @@ cv::Mat filter::getUpdate(cv::Mat inputImage, int mapping)
     cout<<"filter split image into RGB"<<endl;
     
     inRange(image_H, 0,10,image_H);
-    inRange(image_S, 150,255,image_S);
+    inRange(image_S, 170,255,image_S);
     inRange(image_V, kLowerBound,kUpperBound,image_V);
 
     inRange(image_R, kLowerBound,kUpperBound,image_R);
-    inRange(image_G, kLowerBound,kUpperBound,image_G);
+    //inRange(image_G, kLowerBound,kUpperBound,image_G);
+    //inRange(image_G, 170,255,image_G); //cloudy weather
+    inRange(image_G, 200,255,image_G); //sample
+    //inRange(image_G,0,200,image_G);
+    //inRange(image_G, 230,255,image_G); //sunny weather
     inRange(image_B, 230,255,image_B);
 
 	//cv::medianBlur(imageGrey, imageBlur2, kBlur);
 	//Extract green
 	//cv::bitwise_and(image_B,image_G,image_V );((
-	if(mapping)
-	{
-	cv::bitwise_not(image_S,image_S);
-	cv::bitwise_and(image_S,image_G,image_G);
+	//if(mapping)
+	//{
+	//cv::bitwise_not(image_S,image_S);
+	//cv::bitwise_and(image_S,image_G,image_G);
     
-    }
+    //}
     //inRange(image_V, kLowerBound,kUpperBound,imageThresholded);
 
     // Dilate
@@ -153,7 +157,7 @@ void filter::displayImages(cv::Mat inputImage)
 		cv::namedWindow("Direction", CV_WINDOW_NORMAL);
 		cvMoveWindow("Direction", 0, 300);
 		cv::imshow("Direction", outputImage);
-   
+   /*
         
         //Display direction image
 		cv::namedWindow("Image H", CV_WINDOW_NORMAL);
@@ -176,14 +180,14 @@ void filter::displayImages(cv::Mat inputImage)
 		cv::namedWindow("Image R", CV_WINDOW_NORMAL);
 		cvMoveWindow("Image R", 800, 0);
 		cv::imshow("Image R", image_R);
-   
+   */
 
         //Display direction image
 		cv::namedWindow("Image G", CV_WINDOW_NORMAL);
 		cvMoveWindow("Image G", 800, 300);
 		cv::imshow("Image G", image_G);
     
-
+/*
         //Display direction image
 		cv::namedWindow("Image B", CV_WINDOW_NORMAL);
 		cvMoveWindow("Image B", 800, 600);
@@ -204,5 +208,6 @@ void filter::displayImages(cv::Mat inputImage)
 		cv::namedWindow("Image Dilate Erode", CV_WINDOW_NORMAL);
 		cvMoveWindow("Image Dilate Erode", 1600, 300);
 		cv::imshow("Image Dilate Erode", imageBoth);
+		*/
 		
 }

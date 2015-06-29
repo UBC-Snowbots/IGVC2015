@@ -39,9 +39,11 @@ const int MSG_QUEUE_SIZE = 20;
 
 //VideoCapture cap1(0);
 
+
 //VideoCapture cap1("/home/jechli/Documents/Snowbots2015/src/IGVC2015/sb_vision/src/Videos/course.mov"); //For Jen
 
 VideoCapture cap1("/home/mecanum/Pictures/croptwo.mov"); //CHANGE THIS 
+
 //VideoCapture cap1("/home/mecanum/Videos/sample-course.mp4");
 
 VideoCapture cap2;
@@ -114,9 +116,9 @@ int main(int argc, char **argv)
         // Read in image from video camera, or other source
           //create camera status array
        //if(!cap1.isOpened())cout<<"cap1 is not opened"<<endl;
-       camera_status[0] = 0;//cap1.isOpened();//CHANGE THIS//1; //connectToCamera(cap1);//cap1.isOpened();
-       camera_status[1] = connectToCamera(cap2);
-       camera_status[2] = connectToCamera(cap3);
+       camera_status[0] = 1;//connectToCamera(cap1);//cap1.isOpened();
+       camera_status[1] = 0;//connectToCamera(cap2);//0;//cap1.isOpened();//CHANGE THIS//1; //
+       camera_status[2] = 0;//connectToCamera(cap3);
 
         if(camera_status[0]) cap1 >> image1; 
         if(camera_status[1]) cap2 >> image2;
@@ -230,7 +232,7 @@ int main(int argc, char **argv)
             msg = cv_bridge::CvImage(std_msgs::Header(), "mono8", dst).toImageMsg();
             pub.publish(msg);
             ROS_INFO("Vision published a bird image");
-            cv::waitKey(1);
+            cv::waitKey(0);
             }
        else{
 			ROS_WARN("Image was empty");
