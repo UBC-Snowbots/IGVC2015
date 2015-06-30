@@ -15,25 +15,20 @@
 
 const static std::string CONTROLS_WINDOW = "Filter Controls";
 const static std::string ORIGINAL_WINDOW = "Oringinal";
-const static std::string THRESHOLD_WINDOW = "Threshold";
 
 using namespace cv;
 
 VideoCapture cap(0);
-int thresh = 100;
-int max_thresh = 255;
-RNG rng(12345);
-
 
 void onShutdown(int sig){
 	destroyWindow(CONTROLS_WINDOW);
+	destroyWindow(ORIGINAL_WINDOW);
 	cap.release();
 	ROS_INFO("All objects should have been released, proper shutdown complete");
 }
 
 int main( int argc, char** argv ){
 	signal(SIGINT, onShutdown);
-
 
 	if(!cap.isOpened()){
 		ROS_FATAL("UNABLE TO OPEN CONNECTION TO CAMERA");
@@ -42,8 +37,6 @@ int main( int argc, char** argv ){
 
     namedWindow(CONTROLS_WINDOW, CV_WINDOW_AUTOSIZE); //create a window called CONTROLS_WINDOW
     namedWindow(ORIGINAL_WINDOW, CV_WINDOW_AUTOSIZE); //create a window called CONTROLS_WINDOW
-    namedWindow(THRESHOLD_WINDOW, CV_WINDOW_AUTOSIZE); //create a window called CONTROLS_WINDOW
-
 
 	int iLowH = 170;
 	int iHighH = 179;
@@ -64,15 +57,6 @@ int main( int argc, char** argv ){
 	createTrackbar("LowV", CONTROLS_WINDOW, &iLowV, 255);//Value (0 - 255)
 	createTrackbar("HighV", CONTROLS_WINDOW, &iHighV, 255);
 
-	int iLastX = -1; 
-	int iLastY = -1;
-
-	//Capture a temporary image from the camera
-	Mat imgTmp;
-	cap.read(imgTmp); 
-
-	//Create a black image with the size as the camera output
-	Mat imgLines = Mat::zeros( imgTmp.size(), CV_8UC3 );;
 	 
 	int errorCounter = 0;
 	while (errorCounter < 3){
@@ -89,17 +73,17 @@ int main( int argc, char** argv ){
 		Mat imgThresholded;
 		inRange(imgHSV, Scalar(iLowH, iLowS, iLowV), Scalar(iHighH, iHighS, iHighV), imgThresholded); //Threshold the image  
 	  	
-	  	//morphological opening (removes small objects from the foreground)
+	 	//morphological opening (removes small objects from the foreground)
 		erode(imgThresholded, imgThresholded, getStructuringElement(MORPH_ELLIPSE, Size(5, 5)) );
-		dilate( imgThresholded, imgThresholded, getStructuringElement(MORPH_ELLIPSE, Size(5, 5)) ); 
+		dilate(imgThresholded, imgThresholded, getStructuringElement(MORPH_ELLIPSE, Size(5, 5)) ); 
 
 		//morphological closing (removes small holes from the foreground)
-		dilate( imgThresholded, imgThresholded, getStructuringElement(MORPH_ELLIPSE, Size(5, 5)) ); 
+		dilate(imgThresholded, imgThresholded, getStructuringElement(MORPH_ELLIPSE, Size(5, 5)) ); 
 		erode(imgThresholded, imgThresholded, getStructuringElement(MORPH_ELLIPSE, Size(5, 5)) );
 	
 		imshow(ORIGINAL_WINDOW, imgOriginal); //show the original image
-		imshow(THRESHOLD_WINDOW, imgThresholded); //show the original image
-
+		imshow(CONTROLS_WINDOW, imgThresholded); //show the original image
+		
 		if(waitKey(30) == 27){
 			ROS_INFO("SHUTING DOWN PROGRAM NOW!");
 			cap.release();
