@@ -68,9 +68,8 @@ int main( int argc, char** argv ){
 	    	continue;
 		}
 
-		Mat imgHSV;
+		Mat imgHSV, imgThresholded;
 		cvtColor(imgOriginal, imgHSV, COLOR_BGR2HSV); //Convert the captured frame from BGR to HSV
-		Mat imgThresholded;
 		inRange(imgHSV, Scalar(iLowH, iLowS, iLowV), Scalar(iHighH, iHighS, iHighV), imgThresholded); //Threshold the image  
 	  	
 	 	//morphological opening (removes small objects from the foreground)
