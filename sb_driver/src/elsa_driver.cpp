@@ -159,7 +159,7 @@ int main(int argc, char** argv)
 	    th=state.compass*M_PI/180;//check units is degres what you need?
 	    vy=(state.RightVelo+state.LeftVelo)/2;
 
-	    
+	    /*
 	    //compute odometry in a typical way given the velocities of the robot
 	    double dt = (current_time - last_time).toSec();
   	double delta_x = (vx * cos(th) - vy * sin(th)) * dt;
@@ -202,7 +202,7 @@ int main(int argc, char** argv)
   	odom.twist.twist.angular.z = vth;
   	//publish the message
   	odom_pub.publish(odom);
-	    
+	    */
 	    
 	    //clear buffer (MAY NOT WORK)
 	    link.clearBuffer();

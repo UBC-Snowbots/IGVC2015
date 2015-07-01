@@ -33,9 +33,8 @@ add_dependencies(lidar_v1 sb_msgs_generate_messages_cpp)
 
 add_executable(local_lidar_map src/LocalLidarMap/LocalLidarMap.cpp)
 target_link_libraries(local_lidar_map ${catkin_LIBRARIES})
-
-#add_executable(demo_lidar src/demo_code.cpp)
-#target_link_libraries(demo_lidar ${catkin_LIBRARIES})
+add_executable(demo_lidar src/demo_code.cpp)
+target_link_libraries(demo_lidar ${catkin_LIBRARIES})
 #add_executable(lidar_force_nav src/lidar_force_nav.cpp)
 #target_link_libraries(lidar_force_nav
 #   ${catkin_LIBRARIES}
