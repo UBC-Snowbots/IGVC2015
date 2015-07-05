@@ -181,15 +181,15 @@ void move_pwm()// commands the esc
 {
   uint16_t wheels[2]; 
   //rotate side forward
-  if(rc[2].control_in < 300)//manual control
+  if(rc[2].control_in < 300)//estop
   {
-    //hal.console->printf_P(PSTR("twist"));
-    wheels[0]=1500+(twist_z-twist_y)*right_motor_cal; //double check left vs right
-    wheels[1]=1500+(twist_z+twist_y)*left_motor_cal;
-    a_led->write(0);//LED blinking
-    b_led->write(1);
+    //hal.console->printf_P(PSTR("stop"));
+    wheels[0]=1500;
+    wheels[1]=1500;
+    a_led->write(0);//LED off
+    b_led->write(0);
   }
-  else if(rc[2].control_in < 650)//autonomous
+  else if(rc[2].control_in < 650)//manual
   {
     //hal.console->printf_P(PSTR("radio"));
     wheels[0]=1500+(rc[3].control_in-rc[1].control_in)*right_motor_cal;
@@ -197,13 +197,14 @@ void move_pwm()// commands the esc
     a_led->write(1);//LED solid
     b_led->write(0);
   }
-  else//wireless e-stop
+  else//autonomous
   {
-    //hal.console->printf_P(PSTR("stop"));
-    wheels[0]=1500;
-    wheels[1]=1500;
-    a_led->write(0);//LED off
-    b_led->write(0);
+    //hal.console->printf_P(PSTR("twist"));
+    wheels[0]=1500+(twist_z-twist_y)*right_motor_cal; //double check left vs right
+    wheels[1]=1500+(twist_z+twist_y)*left_motor_cal;
+    a_led->write(0);//LED blinking
+    b_led->write(1);
+
   }
   
   //TODO: Add in compass set-up and read functions (can be "copied") from Mecanum 2
