@@ -118,7 +118,7 @@ void callback(const sensor_msgs::LaserScanConstPtr& msg_ptr)
 			car_command.steering = 0;
 		else if (y_total < 110){
 			if   (y_total < 0) car_command.steering = -0.13;
-			else car_command.steering = 0.14;}
+			else car_command.steering = 0.14;} //values are different because wheels arent same strength 
 		else if (y_total > 110){
 			if   (y_total < 0) car_command.steering = -0.13;
 			else car_command.steering = 0.14;}
