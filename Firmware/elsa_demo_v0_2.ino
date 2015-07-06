@@ -161,11 +161,11 @@ void move_pwm()// commands the esc
   //rotate side forward
   if(rc[2].control_in < 300)//manual control
   {
-    //hal.console->printf_P(PSTR("twist"));
-    wheels[0]=1500+twist_z-twist_y;//+z*(a+b)
-    wheels[1]=1500+twist_z+twist_y;
-    a_led->write(0);//LED solid
-    b_led->write(1);
+    //hal.console->printf_P(PSTR("stop"));
+    wheels[0]=1500;
+    wheels[1]=1500;
+    a_led->write(0);//LED off
+    b_led->write(0);
   }
   else if(rc[2].control_in < 650)//autonomous
   {
@@ -177,11 +177,12 @@ void move_pwm()// commands the esc
   }
   else//wireless e-stop
   {
-    //hal.console->printf_P(PSTR("stop"));
-    wheels[0]=1500;
-    wheels[1]=1500;
-    a_led->write(0);//LED off
-    b_led->write(0);
+        //hal.console->printf_P(PSTR("twist"));
+    wheels[0]=1500+twist_z-twist_y;//+z*(a+b)
+    wheels[1]=1500+twist_z+twist_y;
+    a_led->write(0);//LED solid
+    b_led->write(1);
+
   }
 
   //TODO: Add in compass set-up and read functions (can be "copied") from Mecanum 2
